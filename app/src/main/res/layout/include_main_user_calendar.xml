@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+
+    <!-- 日历栏 -->
+
+    <!--<View-->
+        <!--android:id="@+id/splite01"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:background="@android:color/darker_gray" />-->
+
+    <com.wang17.religiouscalendar.widget.UserGridView
+        android:id="@+id/userCalender"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/common_google_signin_btn_text_dark_default"
+        android:numColumns="7"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:smoothScrollbar="false"></com.wang17.religiouscalendar.widget.UserGridView>
+
+</LinearLayout>
