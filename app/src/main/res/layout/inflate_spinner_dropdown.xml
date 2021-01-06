@@ -3,7 +3,7 @@
     android:id="@android:id/text1"
     android:layout_width="match_parent"
     android:layout_height="30dp"
-    android:background="@color/common_google_signin_btn_text_light_focused"
+    android:background="@color/user_control_part_background"
     android:ellipsize="marquee"
     android:gravity="left|center_vertical"
     android:paddingLeft="10dp"

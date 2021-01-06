@@ -14,4 +14,6 @@
     <color name="error_color">#e22431</color>
     <color name="splite_line">#F2F2F2</color>
     <color name="calendar_header_color">#F2F2F2</color>
+    <color name="user_control_part_background">#FFFFFF</color>
+
 </resources>
