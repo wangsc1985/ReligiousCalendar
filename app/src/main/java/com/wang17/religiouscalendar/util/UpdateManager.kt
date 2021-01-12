@@ -1,115 +1,100 @@
-package com.wang17.religiouscalendar.util;
+package com.wang17.religiouscalendar.util
 
-import android.app.AlertDialog.Builder;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Environment;
-import android.os.Handler;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ProgressBar;
-
-import com.wang17.religiouscalendar.R;
-import com.wang17.religiouscalendar.model.AppInfo;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Environment
+import android.os.Handler
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ProgressBar
+import com.wang17.religiouscalendar.R
+import com.wang17.religiouscalendar.model.AppInfo
+import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.*
 
 /**
  * @author coolszy
  * @date 2012-4-26
  * @blog http://blog.92coding.com
  */
-
-public class UpdateManager {
-    private static AppInfo serverAppInfo;
-
+class UpdateManager(private val mContext: Context) {
     /* 保存解析的XML信息 */
-    HashMap<String, String> mHashMap;
-    /* 下载保存路径 */
-    private String mSavePath;
-    /* 记录进度条数量 */
-    private int progress;
-    /* 是否取消更新 */
-    private boolean isCancelUpdate = false;
+    var mHashMap: HashMap<String, String>? = null
 
-    private Context mContext;
+    /* 下载保存路径 */
+    private var mSavePath: String? = null
+
+    /* 记录进度条数量 */
+    private val progress = 0
+
+    /* 是否取消更新 */
+    private var isCancelUpdate = false
 
     /* 更新进度条 */
-    private ProgressBar mProgress;
-    private Dialog mDownloadDialog;
-    private Handler mbUiThreadHandler;
-
-    private String cacheDir;
-    private String cacheFile;
-    private String mongoApiKey;
-    private final int PROGRESS_MAX = 100;
-//    private String baiduAccessToken;
-
-    public UpdateManager(Context context) {
-        this.mContext = context;
-        this.mbUiThreadHandler = new Handler();
-        this.isCancelUpdate = false;
-
-        cacheDir = Environment.getExternalStorageDirectory() + "/download";
-        cacheFile = cacheDir + "/寿康宝鉴日历.apk";
-        mongoApiKey = "7s7lwu2FGxvf7ezVUWpjuR4xMGYqSok3";
-
-//        baiduAccessToken = "23.49b0c9b25b4a6431ce800c7cb3839a27.2592000.1478355666.1649802760-1641135";
-
-    }
-
-    public static boolean isUpdate() {
-        return serverAppInfo != null;
-    }
+    private var mProgress: ProgressBar? = null
+    private var mDownloadDialog: Dialog? = null
+    private val mbUiThreadHandler: Handler
+    private val cacheDir: String
+    private val cacheFile: String
+    private val mongoApiKey: String
+    private val PROGRESS_MAX = 100
 
     /**
      * 检测软件更新
      */
-    public void checkUpdate() {
+    fun checkUpdate() {
         //
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (isHaveNewVersion()) {
-                        // 显示升级确认对话框
-                        showConfirmDialog();
-                    }
-                } catch (Exception e) {
-                    Log.e("wangsc", e.getMessage());
+        Thread {
+            try {
+                if (isHaveNewVersion()) {
+                    // 显示升级确认对话框
+                    showConfirmDialog()
                 }
+            } catch (e: Exception) {
+                Log.e("wangsc", e.message!!)
             }
-        }).start();
-
+        }.start()
     }
 
-    private void showWarningDialog(String title, String message) {
-        final String t = title;
-        final String m = message;
-        mbUiThreadHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                new Builder(mContext).setTitle(t).setMessage(m).setPositiveButton("知道了", null).show();
-            }
-        });
+    private fun showWarningDialog(title: String, message: String?) {
+        mbUiThreadHandler.post { AlertDialog.Builder(mContext).setTitle(title).setMessage(message).setPositiveButton("知道了", null).show() }
     }
 
-    private void showWarningDialog(String message) {
-        showWarningDialog("", message);
+    private fun showWarningDialog(message: String?) {
+        showWarningDialog("", message)
     }
 
-    private AppInfo getAppInfoFromMongoDB() {
-        try {
+    //            String mongoUrl = "mongodb://wangsc:351489@ds053126.mlab.com:53126/app-manager";
+//            String collctionName = "app-info";
+//            //
+//            String whereKey = "PackageName";
+//            Object whereValue = "com.wang17.religiouscalendar";
+//            String orderKey = "decade";
+//            Object orderValue = 1;
+//            //
+//            MongoClientURI uri = new MongoClientURI(mongoUrl);
+//            MongoClient client = new MongoClient(uri);
+//            DB db = client.getDB(uri.getDatabase());
+//            DBCollection songs = db.getCollection(collctionName);
+//            //
+//            BasicDBObject findQuery = new BasicDBObject(whereKey, new BasicDBObject("$gte", whereValue));
+//            BasicDBObject orderBy = new BasicDBObject(orderKey, orderValue);
+//
+//            DBCursor docs = songs.find(findQuery).sort(orderBy);
+//
+//            while (docs.hasNext()) {
+//                DBObject doc = docs.next();
+//                return new AppInfo((String)doc.get("PackageName"), (int)doc.get("VersionCode"), (String)doc.get("VersionName"), (String)doc.get("LoadUrl"), (String)doc.get("AccessToken"));
+//            }
+    val appInfoFromMongoDB: AppInfo?
+        get() = try {
 
 //            String mongoUrl = "mongodb://wangsc:351489@ds053126.mlab.com:53126/app-manager";
 //            String collctionName = "app-info";
@@ -133,180 +118,139 @@ public class UpdateManager {
 //                DBObject doc = docs.next();
 //                return new AppInfo((String)doc.get("PackageName"), (int)doc.get("VersionCode"), (String)doc.get("VersionName"), (String)doc.get("LoadUrl"), (String)doc.get("AccessToken"));
 //            }
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
-    }
 
     /**
      * 检查软件是否有更新版本
      *
      * @return
      */
-    private boolean isHaveNewVersion() {
-        try {
-            serverAppInfo = this.getAppInfoFromMongoDB();
-            if (serverAppInfo != null && serverAppInfo.getVersionCode() > mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionCode) {
-                return true;
+    private fun isHaveNewVersion(): Boolean {
+        return try {
+            serverAppInfo = appInfoFromMongoDB
+            if (serverAppInfo != null && serverAppInfo!!.getVersionCode() > mContext.packageManager.getPackageInfo(mContext.packageName, 0).versionCode) {
+                true
             } else {
-                serverAppInfo = null;
-                return false;
+                serverAppInfo = null
+                false
             }
-        } catch (Exception e) {
-            Log.e("wangsc", e.getMessage());
-            return false;
+        } catch (e: Exception) {
+            Log.e("wangsc", e.message!!)
+            false
         }
     }
 
     /**
      * 显示确认软件更新对话框
      */
-    private void showConfirmDialog() {
-        mbUiThreadHandler.post(new Runnable() {
-            @Override
-            public void run() {
-
-                // 构造对话框
-                Builder builder = new Builder(mContext);
-                builder.setTitle("软件更新");
-                builder.setMessage("检测到新版本，立即更新吗？");
-                // 更新
-                builder.setPositiveButton("更新", new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        startDownload();
-                    }
-                });
-                // 稍后更新
-                builder.setNegativeButton("稍后更新", new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.show();
-//                Dialog noticeDialog = builder.create();
-//                noticeDialog.show();
+    private fun showConfirmDialog() {
+        mbUiThreadHandler.post {
+            // 构造对话框
+            val builder = AlertDialog.Builder(mContext)
+            builder.setTitle("软件更新")
+            builder.setMessage("检测到新版本，立即更新吗？")
+            // 更新
+            builder.setPositiveButton("更新") { dialog, which ->
+                dialog.dismiss()
+                startDownload()
             }
-        });
+            // 稍后更新
+            builder.setNegativeButton("稍后更新") { dialog, which -> dialog.dismiss() }
+            builder.show()
+            //                Dialog noticeDialog = builder.create();
+//                noticeDialog.show();
+        }
     }
 
-    public void startDownload() {
-
-        String permission = "";
-        boolean isLegal = true;
+    fun startDownload() {
+        var permission = ""
+        var isLegal = true
         if (!_Utils.havePermission(mContext, "android.permission.ACCESS_NETWORK_STATE")) {
-            permission += "网络状态权限\n";
-            isLegal = false;
+            permission += "网络状态权限\n"
+            isLegal = false
         }
         if (!_Utils.havePermission(mContext, "android.permission.INTERNET")) {
-            permission += "访问网络权限\n";
-            isLegal = false;
+            permission += "访问网络权限\n"
+            isLegal = false
         }
         if (!_Utils.havePermission(mContext, "android.permission.WRITE_EXTERNAL_STORAGE")) {
-            permission += "向SD卡写入数据权限\n";
-            isLegal = false;
+            permission += "向SD卡写入数据权限\n"
+            isLegal = false
         }
-//        if (!_Utils.havePermission(context, "android.permission.MOUNT_UNMOUNT_FILESYSTEMS")) {
+        //        if (!_Utils.havePermission(context, "android.permission.MOUNT_UNMOUNT_FILESYSTEMS")) {
 //            permission += "在SD卡中创建与删除文件权限\n";
 //            isLegal = false;
 //        }
         if (!isLegal) {
-            showWarningDialog(permission);
-            return;
+            showWarningDialog(permission)
+            return
         }
-
         if (!_Utils.isNetworkAvailable(mContext)) {
             //
-            showWarningDialog("请先打开网络，然后再更新。");
-            return;
+            showWarningDialog("请先打开网络，然后再更新。")
+            return
         }
         if (!_Utils.isWiFiActive(mContext)) {
             //
-            mbUiThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    new Builder(mContext).setMessage("确认要使用移动网络下载软件吗？")
-                            .setPositiveButton("确定", new OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                    showDownloadDialog();
-                                }
-                            })
-                            .setNegativeButton("取消", new OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            }).show();
-                }
-            });
-            return;
+            mbUiThreadHandler.post {
+                AlertDialog.Builder(mContext).setMessage("确认要使用移动网络下载软件吗？")
+                        .setPositiveButton("确定") { dialog, which ->
+                            dialog.dismiss()
+                            showDownloadDialog()
+                        }
+                        .setNegativeButton("取消") { dialog, which -> dialog.dismiss() }.show()
+            }
+            return
         }
-
-        showDownloadDialog();
-
+        showDownloadDialog()
     }
 
     /**
      * 显示软件下载对话框
      */
-    private void showDownloadDialog() {
-        mbUiThreadHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                // 构造软件下载对话框
-                Builder builder = new Builder(mContext);
-                builder.setTitle("正在升级");
-                // 给下载对话框增加进度条
-                final LayoutInflater inflater = LayoutInflater.from(mContext);
-                View v = inflater.inflate(R.layout.softupdate_progress, null);
-                mProgress = (ProgressBar) v.findViewById(R.id.update_progress);
-                builder.setView(v);
-                builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        Log.i("wangsc", "Download Dialog is Cancel...");
-                        isCancelUpdate = true;
-                    }
-                });
-                // 取消更新
-                builder.setNegativeButton("取消升级", new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        isCancelUpdate = true;
-                    }
-                });
-                mDownloadDialog = builder.create();
-                mDownloadDialog.show();
-                // 下载文件
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            loadFromBaiduPCS();
-                        } catch (Exception e) {
-                            showWarningDialog(e.getMessage());
-                        }
-                        // 取消下载对话框显示
-                        mDownloadDialog.dismiss();
-                    }
-                }).start();
+    private fun showDownloadDialog() {
+        mbUiThreadHandler.post {
+            // 构造软件下载对话框
+            val builder = AlertDialog.Builder(mContext)
+            builder.setTitle("正在升级")
+            // 给下载对话框增加进度条
+            val inflater = LayoutInflater.from(mContext)
+            val v = inflater.inflate(R.layout.softupdate_progress, null)
+            mProgress = v.findViewById<View>(R.id.update_progress) as ProgressBar
+            builder.setView(v)
+            builder.setOnCancelListener {
+                Log.i("wangsc", "Download Dialog is Cancel...")
+                isCancelUpdate = true
             }
-        });
+            // 取消更新
+            builder.setNegativeButton("取消升级") { dialog, which ->
+                dialog.dismiss()
+                isCancelUpdate = true
+            }
+            mDownloadDialog = builder.create()
+            mDownloadDialog!!.show()
+            // 下载文件
+            Thread {
+                try {
+                    loadFromBaiduPCS()
+                } catch (e: Exception) {
+                    showWarningDialog(e.message)
+                }
+                // 取消下载对话框显示
+                mDownloadDialog!!.dismiss()
+            }.start()
+        }
     }
 
-    private void loadFromBaiduPCS() throws Exception {
-
-        mProgress.setMax(PROGRESS_MAX);
-        File file = new File(cacheDir);
-        if (!file.exists())
-            file.mkdir();
+    @Throws(Exception::class)
+    private fun loadFromBaiduPCS() {
+        mProgress!!.max = PROGRESS_MAX
+        val file = File(cacheDir)
+        if (!file.exists()) file.mkdir()
 
 //        BaiduPCSClient api = new BaiduPCSClient();
 //        api.setAccessToken(serverAppInfo.getAccessToken()); //mbOauth为使用Oauth得到的access_token
@@ -329,83 +273,87 @@ public class UpdateManager {
 //                });
 //            }
 //        });
-
-        mProgress.setProgress(0);
+        mProgress!!.progress = 0
     }
 
-    private void loadFromNet() throws Exception {
+    @Throws(Exception::class)
+    private fun loadFromNet() {
         // 判断SD卡是否存在，并且是否具有读写权限
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
             // 获得存储卡的路径
-            String sdpath = Environment.getExternalStorageDirectory() + "/";
-            mSavePath = sdpath + "download";
-            URL url = new URL(mHashMap.get("url"));
+            val sdpath = Environment.getExternalStorageDirectory().toString() + "/"
+            mSavePath = sdpath + "download"
+            val url = URL(mHashMap!!["url"])
             // 创建连接
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.connect();
+            val conn = url.openConnection() as HttpURLConnection
+            conn.connect()
             // 获取文件大小
-            int length = conn.getContentLength();
+            val length = conn.contentLength
             // 创建输入流
-            InputStream is = conn.getInputStream();
-
-            File file = new File(mSavePath);
+            val `is` = conn.inputStream
+            val file = File(mSavePath)
             // 判断文件目录是否存在
             if (!file.exists()) {
-                file.mkdir();
+                file.mkdir()
             }
-            File apkFile = new File(mSavePath, mHashMap.get("name"));
-            FileOutputStream fos = new FileOutputStream(apkFile);
-            int count = 0;
+            val apkFile = File(mSavePath, mHashMap!!["name"])
+            val fos = FileOutputStream(apkFile)
+            var count = 0
             // 缓存
-            byte buf[] = new byte[1024];
+            val buf = ByteArray(1024)
             // 写入到文件中
             do {
-                int numread = is.read(buf);
-                count += numread;
-
-                final int value = (int) (((float) count / length) * PROGRESS_MAX);
+                val numread = `is`.read(buf)
+                count += numread
+                val value = (count.toFloat() / length * PROGRESS_MAX).toInt()
                 // 计算进度条位置
-                mbUiThreadHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mProgress.setProgress(value);
-                    }
-                });
+                mbUiThreadHandler.post { mProgress!!.progress = value }
 
                 // 更新进度
 //                    mHandler.sendEmptyMessage(DOWNLOAD);
                 if (numread <= 0) {
                     // 下载完成
-                    mbUiThreadHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            installApk();
-                        }
-                    });
-                    break;
+                    mbUiThreadHandler.post { installApk() }
+                    break
                 }
                 // 写入文件
-                fos.write(buf, 0, numread);
-            } while (!isCancelUpdate);// 点击取消就停止下载.
-            fos.close();
-            is.close();
+                fos.write(buf, 0, numread)
+            } while (!isCancelUpdate) // 点击取消就停止下载.
+            fos.close()
+            `is`.close()
         }
         // 取消下载对话框显示
-        mDownloadDialog.dismiss();
+        mDownloadDialog!!.dismiss()
     }
 
     /**
      * 安装APK文件
      */
-    private void installApk() {
-        File apkfile = new File(cacheFile);
+    private fun installApk() {
+        val apkfile = File(cacheFile)
         if (!apkfile.exists()) {
-            return;
+            return
         }
         // 通过Intent安装APK文件
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setDataAndType(Uri.parse("file://" + apkfile.toString()), "application/vnd.android.package-archive");
-        mContext.startActivity(i);
+        val i = Intent(Intent.ACTION_VIEW)
+        i.setDataAndType(Uri.parse("file://$apkfile"), "application/vnd.android.package-archive")
+        mContext.startActivity(i)
+    }
+
+    companion object {
+        private var serverAppInfo: AppInfo? = null
+        val isUpdate: Boolean
+            get() = serverAppInfo != null
+    }
+
+    //    private String baiduAccessToken;
+    init {
+        mbUiThreadHandler = Handler()
+        isCancelUpdate = false
+        cacheDir = Environment.getExternalStorageDirectory().toString() + "/download"
+        cacheFile = "$cacheDir/寿康宝鉴日历.apk"
+        mongoApiKey = "7s7lwu2FGxvf7ezVUWpjuR4xMGYqSok3"
+
+//        baiduAccessToken = "23.49b0c9b25b4a6431ce800c7cb3839a27.2592000.1478355666.1649802760-1641135";
     }
 }
-

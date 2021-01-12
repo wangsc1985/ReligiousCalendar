@@ -1,11 +1,11 @@
-package com.wang17.religiouscalendar.util;
+package com.wang17.religiouscalendar.util
 
-import java.util.Calendar;
+import java.util.*
 
 /**
  * Created by 阿弥陀佛 on 2015/6/23.
  */
-public class CalendarHelper {
+object CalendarHelper {
     /**
      * 比较两个时间是否在同一天。
      * 注：只比较年、月、日是否相同，忽略时、分、秒、毫秒、微妙。
@@ -14,12 +14,11 @@ public class CalendarHelper {
      * @param calendar2
      * @return
      */
-    public static boolean isSameDate(Calendar calendar1, Calendar calendar2) {
-        if (calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) && calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH)
-                && calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH)) {
-            return true;
+    fun isSameDate(calendar1: Calendar, calendar2: Calendar): Boolean {
+        return if (calendar1[Calendar.YEAR] == calendar2[Calendar.YEAR] && calendar1[Calendar.MONTH] == calendar2[Calendar.MONTH] && calendar1[Calendar.DAY_OF_MONTH] == calendar2[Calendar.DAY_OF_MONTH]) {
+            true
         } else {
-            return false;
+            false
         }
     }
 
@@ -30,12 +29,12 @@ public class CalendarHelper {
      * @param calendar2
      * @return
      */
-    public static long spanTotalDays(Calendar calendar1, Calendar calendar2) {
-        return (calendar1.getTimeInMillis() - calendar2.getTimeInMillis()) / 1000 / 60 / 60 / 24;
+    fun spanTotalDays(calendar1: Calendar?, calendar2: Calendar?): Long {
+        return (calendar1!!.timeInMillis - calendar2!!.timeInMillis) / 1000 / 60 / 60 / 24
     }
 
-    public static long spanTotalHours(Calendar calendar1, Calendar calendar2) {
-        return (calendar1.getTimeInMillis() - calendar2.getTimeInMillis()) / 1000 / 60 / 60;
+    fun spanTotalHours(calendar1: Calendar?, calendar2: Calendar?): Long {
+        return (calendar1!!.timeInMillis - calendar2!!.timeInMillis) / 1000 / 60 / 60
     }
 
     /**
@@ -43,12 +42,12 @@ public class CalendarHelper {
      * @param calendar
      * @return
      */
-    public static Calendar getDate(Calendar calendar) {
-        Calendar cal = (Calendar)calendar.clone();
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal;
+    fun getDate(calendar: Calendar): Calendar {
+        val cal = calendar.clone() as Calendar
+        cal[Calendar.HOUR_OF_DAY] = 0
+        cal[Calendar.MINUTE] = 0
+        cal[Calendar.SECOND] = 0
+        cal[Calendar.MILLISECOND] = 0
+        return cal
     }
 }

@@ -1,47 +1,32 @@
-package com.wang17.religiouscalendar.util;
+package com.wang17.religiouscalendar.util
 
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.view.View;
-
-import java.util.List;
+import android.support.v4.view.PagerAdapter
+import android.support.v4.view.ViewPager
+import android.view.View
 
 /**
  * Created by 阿弥陀佛 on 2016/10/4.
  */
-public class ViewPagerAdapter extends PagerAdapter {
-
-    //界面列表
-    private List<View> views;
-    public ViewPagerAdapter (List<View> views){
-        this.views = views;
-    }
-
+class ViewPagerAdapter(  //界面列表
+        private val views: List<View>?) : PagerAdapter() {
     //销毁arg1位置的界面
-    @Override
-    public void destroyItem(View arg0, int arg1, Object arg2) {
-        ((ViewPager) arg0).removeView(views.get(arg1));
+    override fun destroyItem(arg0: View, arg1: Int, arg2: Any) {
+        (arg0 as ViewPager).removeView(views!![arg1])
     }
 
     //获得当前界面数
-    @Override
-    public int getCount() {
-        if (views != null) {
-            return views.size();
-        }
-        return 0;
+    override fun getCount(): Int {
+        return views?.size ?: 0
     }
 
     //初始化arg1位置的界面
-    @Override
-    public Object instantiateItem(View arg0, int arg1) {
-        ((ViewPager) arg0).addView(views.get(arg1), 0);
-        return views.get(arg1);
+    override fun instantiateItem(arg0: View, arg1: Int): Any {
+        (arg0 as ViewPager).addView(views!![arg1], 0)
+        return views[arg1]
     }
 
     //判断是否由对象生成界面
-    @Override
-    public boolean isViewFromObject(View arg0, Object arg1) {
-        return (arg0 == arg1);
+    override fun isViewFromObject(arg0: View, arg1: Any): Boolean {
+        return arg0 === arg1
     }
 }

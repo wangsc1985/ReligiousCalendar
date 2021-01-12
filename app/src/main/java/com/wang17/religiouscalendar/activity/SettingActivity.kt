@@ -1,301 +1,212 @@
-package com.wang17.religiouscalendar.activity;
+package com.wang17.religiouscalendar.activity
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.NumberPicker;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
+import android.os.Bundle
+import android.os.Handler
+import android.support.design.widget.Snackbar
+import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import android.widget.AdapterView.OnItemSelectedListener
+import com.wang17.religiouscalendar.R
+import com.wang17.religiouscalendar.emnu.MDrelation
+import com.wang17.religiouscalendar.emnu.MDtype
+import com.wang17.religiouscalendar.emnu.Zodiac
+import com.wang17.religiouscalendar.fragment.ActionBarFragment
+import com.wang17.religiouscalendar.fragment.ActionBarFragment.OnActionFragmentBackListener
+import com.wang17.religiouscalendar.model.*
+import com.wang17.religiouscalendar.util._Session
+import com.wang17.religiouscalendar.util._String
+import com.wang17.religiouscalendar.util._Utils
+import kotlinx.android.synthetic.main.include_setting_part1.*
+import kotlinx.android.synthetic.main.include_setting_part2.*
+import kotlinx.android.synthetic.main.include_setting_part3.*
+import kotlinx.android.synthetic.main.include_setting_part4.*
+import kotlinx.android.synthetic.main.include_setting_part5.*
+import kotlinx.android.synthetic.main.include_setting_part7.*
+import java.util.*
 
-import com.wang17.religiouscalendar.R;
-import com.wang17.religiouscalendar.emnu.MDrelation;
-import com.wang17.religiouscalendar.emnu.MDtype;
-import com.wang17.religiouscalendar.emnu.Zodiac;
-import com.wang17.religiouscalendar.fragment.ActionBarFragment;
-import com.wang17.religiouscalendar.fragment.ActionBarFragment.OnActionFragmentBackListener;
-import com.wang17.religiouscalendar.util._Utils;
-import com.wang17.religiouscalendar.util._Session;
-import com.wang17.religiouscalendar.util._String;
-import com.wang17.religiouscalendar.model.DataContext;
-import com.wang17.religiouscalendar.model.DateTime;
-import com.wang17.religiouscalendar.model.LunarDate;
-import com.wang17.religiouscalendar.model.MemorialDay;
-import com.wang17.religiouscalendar.model.Setting;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-
-public class SettingActivity extends AppCompatActivity implements OnActionFragmentBackListener {
-
-    private LinearLayout layoutBirthday;
-    private Spinner spinner_zodiac1, spinner_zodiac2, spinner_mdtype, spinner_mdrelation, spinner_month, spinner_day, spinner_welcome, spinner_duration;
-    private Button btn_addMD, btnWay, btnBirthday, btnTarget;
-    private CheckBox checkBox_szr, checkBox_lzr, checkBox_gyz, checkBox_weekend_first;
-    private ImageButton btnRecordStatus;
-
-    public static boolean isCalenderChanged, isRecordSetChanged;
-    private DataContext dataContext;
-    private MDlistdAdapter mdListAdapter;
-    private List<HashMap<String, String>> mdListItems;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Log.i("wangsc", "SettingActivity is loading ...");
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_setting);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_action, ActionBarFragment.newInstance()).commit();
-
+class SettingActivity : AppCompatActivity(), OnActionFragmentBackListener {
+    private lateinit var dataContext: DataContext
+    private lateinit var mdListAdapter: MDlistdAdapter
+    private lateinit var mdListItems: MutableList<HashMap<String, String>>
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Log.i("wangsc", "SettingActivity is loading ...")
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_setting)
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_action, ActionBarFragment.newInstance()).commit()
         try {
-            spinner_zodiac1 = (Spinner) findViewById(R.id.spinner_zodiac1);
-            spinner_zodiac2 = (Spinner) findViewById(R.id.spinner_zodiac2);
-            spinner_mdtype = (Spinner) findViewById(R.id.spinner_mdtype);
-            spinner_mdrelation = (Spinner) findViewById(R.id.spinner_mdrelation);
-            spinner_month = (Spinner) findViewById(R.id.spinner_month);
-            spinner_day = (Spinner) findViewById(R.id.spinner_day);
-            spinner_welcome = (Spinner) findViewById(R.id.spinner_welcome);
-            spinner_duration = (Spinner) findViewById(R.id.spinner_duration);
-
-            btn_addMD = (Button) findViewById(R.id.button_addMD);
-
-            checkBox_szr = (CheckBox) findViewById(R.id.checkBox_szr);
-            checkBox_lzr = (CheckBox) findViewById(R.id.checkBox_lzr);
-            checkBox_gyz = (CheckBox) findViewById(R.id.checkBox_gyz);
-            checkBox_weekend_first = (CheckBox) findViewById(R.id.checkBox_weekend_first);
-
-            layoutBirthday = (LinearLayout) findViewById(R.id.layout_birthday);
-//            layoutOpened = (LinearLayout) findViewById(R.id.layout_opened);
-
-            btnRecordStatus = (ImageButton) findViewById(R.id.button_recordStatus);
-//            btnWay = (Button) findViewById(R.id.button_targetWay);
-            btnBirthday = (Button) findViewById(R.id.button_birthday);
-            btnTarget = (Button) findViewById(R.id.button_customTarget);
-
-            this.initializeFields();
-            this.initializeEvents();
-            Log.i("wangsc", "SettingActivity have loaded ...");
-        } catch (Exception ex) {
-            _Utils.printExceptionSycn(SettingActivity.this, uiHandler, ex);
+            initializeFields()
+            initializeEvents()
+            Log.i("wangsc", "SettingActivity have loaded ...")
+        } catch (ex: Exception) {
+            _Utils.printExceptionSycn(this@SettingActivity, uiHandler, ex)
         }
     }
 
-    private void initializeFields() {
+    private fun initializeFields() {
         try {
-            dataContext = new DataContext(SettingActivity.this);
-            isCalenderChanged = false;
-            isRecordSetChanged = false;
+            dataContext = DataContext(this@SettingActivity)
+            isCalenderChanged = false
+            isRecordSetChanged = false
 
 //        if (UpdateManager.isUpdate())
 //            textView_update.setVisibility(View.VISIBLE);
-
-
-            if (Boolean.parseBoolean(dataContext.getSetting(Setting.KEYS.recordIsOpened, false).getValue()) == true) {
-                btnRecordStatus.setImageResource(R.mipmap.on);
+            if (dataContext.getSetting(Setting.KEYS.recordIsOpened, false).getBoolean() == true) {
+                button_recordStatus.setImageResource(R.mipmap.on)
             } else {
-                btnRecordStatus.setImageResource(R.mipmap.off);
+                button_recordStatus.setImageResource(R.mipmap.off)
             }
-
-            autoWayDataInit();
-
+            autoWayDataInit()
             /**
              * 开关记录
              */
-            btnRecordStatus.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (dataContext.getSetting(Setting.KEYS.recordIsOpened, false).getBoolean() == false) {
-                        if (dataContext.getSetting(Setting.KEYS.birthday) == null) {
-                            showBirthdayDialog(SettingActivity.this, "请先设定生日", new CallBack() {
-                                @Override
-                                public void execute() {
-                                    btnRecordStatus.setImageResource(R.mipmap.on);
-                                    dataContext.editSetting(Setting.KEYS.recordIsOpened, true);
-                                }
-                            });
-                        } else {
-                            btnRecordStatus.setImageResource(R.mipmap.on);
-                            dataContext.editSetting(Setting.KEYS.recordIsOpened, true);
-                        }
+            button_recordStatus.setOnClickListener {
+                if (dataContext.getSetting(Setting.KEYS.recordIsOpened, false).getBoolean() == false) {
+                    if (dataContext.getSetting(Setting.KEYS.birthday) == null) {
+                        showBirthdayDialog(this@SettingActivity, "请先设定生日", object : CallBack {
+                            override fun execute() {
+                                button_recordStatus.setImageResource(R.mipmap.on)
+                                dataContext.editSetting(Setting.KEYS.recordIsOpened, true)
+                            }
+                        })
                     } else {
-                        btnRecordStatus.setImageResource(R.mipmap.off);
-                        dataContext.editSetting(Setting.KEYS.recordIsOpened, false);
+                        button_recordStatus.setImageResource(R.mipmap.on)
+                        dataContext.editSetting(Setting.KEYS.recordIsOpened, true)
                     }
-                    isRecordSetChanged = true;
+                } else {
+                    button_recordStatus.setImageResource(R.mipmap.off)
+                    dataContext.editSetting(Setting.KEYS.recordIsOpened, false)
                 }
-            });
-
+                isRecordSetChanged = true
+            }
             /**
              * 设置生日按钮
              */
-            btnBirthday.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (dataContext.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == true)
-                        showBirthdayDialog(SettingActivity.this, "设定生日", null);
-                }
-            });
-
+            button_birthday.setOnClickListener { if (dataContext.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == true) showBirthdayDialog(this@SettingActivity, "设定生日", null) }
             /**
              * 十斋日、六斋日、观音斋
              */
-            Setting szr = dataContext.getSetting(Setting.KEYS.szr, false);
-            checkBox_szr.setChecked(Boolean.parseBoolean(szr.getValue()));
-            Setting lzr = dataContext.getSetting(Setting.KEYS.lzr, false);
-            checkBox_lzr.setChecked(Boolean.parseBoolean(lzr.getValue()));
-            Setting gyz = dataContext.getSetting(Setting.KEYS.gyz, false);
-            checkBox_gyz.setChecked(Boolean.parseBoolean(gyz.getValue()));
-            checkBox_weekend_first.setChecked(dataContext.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean());
-
-
+            val szr = dataContext.getSetting(Setting.KEYS.szr, false)
+            checkBox_szr.isChecked = szr.getBoolean()
+            val lzr = dataContext.getSetting(Setting.KEYS.lzr, false)
+            checkBox_lzr.isChecked = lzr.getBoolean()
+            val gyz = dataContext.getSetting(Setting.KEYS.gyz, false)
+            checkBox_gyz.isChecked = gyz.getBoolean()
+            checkBox_weekend_first.isChecked = dataContext.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean()
             /**
              * 太岁日
              */
-            this.initializeZodiac(spinner_zodiac1);
-            this.initializeZodiac(spinner_zodiac2);
-            Setting zodiac1 = dataContext.getSetting(Setting.KEYS.zodiac1);
-            Setting zodiac2 = dataContext.getSetting(Setting.KEYS.zodiac2);
+            initializeZodiac(spinner_zodiac1)
+            initializeZodiac(spinner_zodiac2)
+            val zodiac1 = dataContext.getSetting(Setting.KEYS.zodiac1)
+            val zodiac2 = dataContext.getSetting(Setting.KEYS.zodiac2)
             if (zodiac1 != null) {
-                spinner_zodiac1.setSelection(Zodiac.fromString(zodiac1.getValue()).toInt(), true);
+                spinner_zodiac1.setSelection(zodiac1.getInt(), true)
             }
             if (zodiac2 != null) {
-                spinner_zodiac2.setSelection(Zodiac.fromString(zodiac2.getValue()).toInt(), true);
+                spinner_zodiac2.setSelection(zodiac2.getInt(), true)
             }
-
             /**
              * 纪念日
              */
-            List<String> list = new ArrayList<String>();
-            for (int i = 0; i < MDtype.count(); i++) {
-                list.add(MDtype.fromInt(i).toString());
+            val list: MutableList<String> = ArrayList()
+            for (i in 0 until MDtype.count()) {
+                list.add(MDtype.fromInt(i).toString())
             }
-            this.fillSpinner(spinner_mdtype, list);
-            List<String> list2 = new ArrayList<String>();
-            for (int i = 0; i < MDrelation.count(); i++) {
-                list2.add(MDrelation.fromInt(i).toString());
+            fillSpinner(spinner_mdtype, list)
+            val list2: MutableList<String> = ArrayList()
+            for (i in 0 until MDrelation.count()) {
+                list2.add(MDrelation.fromInt(i).toString())
             }
-            this.fillSpinner(spinner_mdrelation, list2);
-
-            this.initializeLunarMonth(spinner_month);
-            this.initializeLunarDay(spinner_day);
-
-            List<MemorialDay> memorialDays = dataContext.getMemorialDays();
-            mdListItems = new ArrayList<HashMap<String, String>>();
-            for (MemorialDay md : memorialDays) {
-                this.addListItem(md);
+            fillSpinner(spinner_mdrelation, list2)
+            initializeLunarMonth(spinner_month)
+            initializeLunarDay(spinner_day)
+            val memorialDays = dataContext.getMemorialDays()
+            mdListItems = ArrayList()
+            for (md in memorialDays) {
+                addListItem(md)
             }
-            refreshMdList();
-
+            refreshMdList()
             /**
              * 欢迎界面
              */
-            this.initializeWelcome();
-            spinner_welcome.setSelection(Integer.parseInt(dataContext.getSetting(Setting.KEYS.welcome, 0).getValue()), true);
-
-            this.initializeDuration();
-            spinner_duration.setSelection(Integer.parseInt(dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getValue()), true);
-
-        } catch (Exception e) {
-            _Utils.printExceptionSycn(this, uiHandler, e);
+            initializeWelcome()
+            spinner_welcome.setSelection(dataContext.getSetting(Setting.KEYS.welcome, 0).getInt(), true)
+            initializeDuration()
+            spinner_duration.setSelection(dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getInt(), true)
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this, uiHandler, e)
         }
-//        mdListAdapter = new MDlistdAdapter();
+        //        mdListAdapter = new MDlistdAdapter();
 //        listViewMD.setAdapter(mdListAdapter);
     }
 
-    private void autoWayDataInit() {
+    private fun autoWayDataInit() {
         try {
-            Setting settingBirthday = dataContext.getSetting(Setting.KEYS.birthday);
+            val settingBirthday = dataContext.getSetting(Setting.KEYS.birthday)
             if (settingBirthday != null) {
-                DateTime birthday = settingBirthday.getDateTime();
-                btnBirthday.setText(birthday.toShortDateString());
-                btnTarget.setText(DateTime.toSpanString(_Utils.getTargetInMillis(birthday), 4, 3));
+                val birthday = settingBirthday.getDateTime()
+                button_birthday.text = birthday.toShortDateString()
+                button_customTarget.text = DateTime.toSpanString(_Utils.getTargetInMillis(birthday), 4, 3)
             } else {
-                btnBirthday.setText("设定生日");
+                button_birthday.text = "设定生日"
             }
-        } catch (Exception e) {
-            _Utils.printException(this, e);
+        } catch (e: Exception) {
+            _Utils.printException(this, e)
         }
     }
 
-    private void addListItem(MemorialDay md) {
-        HashMap<String, String> map = new HashMap<String, String>();
-        map.put("id", md.getId().toString());
-        map.put("relation", md.getRelation().toString());
-        map.put("type", md.getType().toString());
-        map.put("lunarDate", md.getLunarDate().toString());
-        mdListItems.add(map);
+    private fun addListItem(md: MemorialDay) {
+        val map = HashMap<String, String>()
+        map["id"] = md.id.toString()
+        map["relation"] = md.relation.toString()
+        map["type"] = md.type.toString()
+        map["lunarDate"] = md.lunarDate.toString()
+        mdListItems.add(map)
     }
 
-    private void refreshMdList() {
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mdList);
-        linearLayout.removeAllViews();
-        for (int position = 0; position < mdListItems.size(); position++) {
-            final int index = position;
-            View convertView = View.inflate(SettingActivity.this, R.layout.inflate_md_list_item, null);
-            HashMap<String, String> map = mdListItems.get(position);
-            TextView textViewRelation = (TextView) convertView.findViewById(R.id.textView_relation);
-            TextView textViewType = (TextView) convertView.findViewById(R.id.textView_type);
-            TextView textViewLunarDate = (TextView) convertView.findViewById(R.id.textView_lunarDate);
-            LinearLayout btnDel = (LinearLayout) convertView.findViewById(R.id.linear_delete);
-            final String relation = map.get("relation");
-            final String type = map.get("type");
-            String lunarDate = map.get("lunarDate");
-            textViewRelation.setText(relation);
-            textViewType.setText(type);
-            textViewLunarDate.setText(lunarDate);
-            btnDel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingActivity.this);
-                    builder.setTitle("删除确认");
-                    builder.setMessage(_String.concat("是否要删除【", relation, "\t", type, "】?"));
-                    builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dataContext.deleteMemorialDay(UUID.fromString(mdListItems.get(index).get("id")));
-                            mdListItems.remove(index);
-                            refreshMdList();
-                            isCalenderChanged = true;
-                            dialog.cancel();
-                            snackbar("删除成功");
-                        }
-                    });
-                    builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    builder.create().show();
+    private fun refreshMdList() {
+        val linearLayout = findViewById(R.id.mdList) as LinearLayout
+        linearLayout.removeAllViews()
+        for (position in mdListItems.indices) {
+            val convertView = View.inflate(this@SettingActivity, R.layout.inflate_md_list_item, null)
+            val map = mdListItems[position]
+            val textViewRelation = convertView.findViewById<View>(R.id.textView_relation) as TextView
+            val textViewType = convertView.findViewById<View>(R.id.textView_type) as TextView
+            val textViewLunarDate = convertView.findViewById<View>(R.id.textView_lunarDate) as TextView
+            val btnDel = convertView.findViewById<View>(R.id.linear_delete) as LinearLayout
+            val relation = map["relation"]
+            val type = map["type"]
+            val lunarDate = map["lunarDate"]
+            textViewRelation.text = relation
+            textViewType.text = type
+            textViewLunarDate.text = lunarDate
+            btnDel.setOnClickListener {
+                val builder = AlertDialog.Builder(this@SettingActivity)
+                builder.setTitle("删除确认")
+                builder.setMessage(_String.concat("是否要删除【", relation, "\t", type, "】?"))
+                builder.setPositiveButton("确认") { dialog, which ->
+                    dataContext.deleteMemorialDay(UUID.fromString(mdListItems[position]["id"]))
+                    mdListItems.removeAt(position)
+                    refreshMdList()
+                    isCalenderChanged = true
+                    dialog.cancel()
+                    snackbar("删除成功")
                 }
-            });
-            linearLayout.addView(convertView, 0);
+                builder.setNegativeButton("取消") { dialog, which -> dialog.cancel() }
+                builder.create().show()
+            }
+            linearLayout.addView(convertView, 0)
         }
     }
 
-    private Handler uiHandler = new Handler();
-
-    private void initializeEvents() {
+    private val uiHandler = Handler()
+    private fun initializeEvents() {
 //        textView_update.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -303,387 +214,314 @@ public class SettingActivity extends AppCompatActivity implements OnActionFragme
 //                manager.startDownload();
 //            }
 //        });
-        checkBox_weekend_first.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (buttonView.isPressed()) {
-                        dataContext.editSetting(Setting.KEYS.is_weekend_first, isChecked);
-                        isCalenderChanged = true;
-                        snackbarSaved();
-                    }
-                }
-            });
-        checkBox_szr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (buttonView.isPressed()) {
-                    dataContext.editSetting(Setting.KEYS.szr, isChecked);
-                    isCalenderChanged = true;
-                    snackbarSaved();
-                }
+        checkBox_weekend_first.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (buttonView.isPressed) {
+                dataContext.editSetting(Setting.KEYS.is_weekend_first, isChecked)
+                isCalenderChanged = true
+                snackbarSaved()
             }
-        });
-        checkBox_lzr.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (buttonView.isPressed()) {
-                    dataContext.editSetting(Setting.KEYS.lzr, isChecked);
-                    isCalenderChanged = true;
-                    snackbarSaved();
-                }
+        }
+        checkBox_szr.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (buttonView.isPressed) {
+                dataContext.editSetting(Setting.KEYS.szr, isChecked)
+                isCalenderChanged = true
+                snackbarSaved()
             }
-        });
-        checkBox_gyz.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (buttonView.isPressed()) {
-                    dataContext.editSetting(Setting.KEYS.gyz, isChecked);
-                    isCalenderChanged = true;
-                    snackbarSaved();
-                }
+        }
+        checkBox_lzr.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (buttonView.isPressed) {
+                dataContext.editSetting(Setting.KEYS.lzr, isChecked)
+                isCalenderChanged = true
+                snackbarSaved()
             }
-        });
-        btn_addMD.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    MemorialDay md = new MemorialDay();
-                    String relation = spinner_mdrelation.getSelectedItem().toString();
-                    String type = spinner_mdtype.getSelectedItem().toString();
-                    String month = spinner_month.getSelectedItem().toString();
-                    String day = spinner_day.getSelectedItem().toString();
-                    md.setRelation(MDrelation.fromString(relation));
-                    md.setType(MDtype.fromString(type));
-                    md.setLunarDate(new LunarDate(month, day));
-                    dataContext.addMemorialDay(md);
+        }
+        checkBox_gyz.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (buttonView.isPressed) {
+                dataContext.editSetting(Setting.KEYS.gyz, isChecked)
+                isCalenderChanged = true
+                snackbarSaved()
+            }
+        }
+        button_addMD.setOnClickListener {
+            try {
+                val relation = spinner_mdrelation.selectedItem.toString()
+                val type = spinner_mdtype.selectedItem.toString()
+                val month = spinner_month.selectedItem.toString()
+                val day = spinner_day.selectedItem.toString()
+                val md = MemorialDay(MDtype.fromString(type),MDrelation.fromString(relation),LunarDate(month, day))
+                dataContext.addMemorialDay(md)
 
-                    //
-                    SettingActivity.this.addListItem(md);
-                    refreshMdList();
-                    isCalenderChanged = true;
-                    snackbar("添加成功");
-                } catch (Exception ex) {
-                    _Utils.printExceptionSycn(SettingActivity.this, uiHandler, ex);
-                }
+                //
+                addListItem(md)
+                refreshMdList()
+                isCalenderChanged = true
+                snackbar("添加成功")
+            } catch (ex: Exception) {
+                _Utils.printExceptionSycn(this@SettingActivity, uiHandler, ex)
             }
-        });
-        spinner_zodiac1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Setting setting = dataContext.getSetting(Setting.KEYS.zodiac1);
-                String zodiac = spinner_zodiac1.getItemAtPosition(position).toString();
+        }
+        spinner_zodiac1.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+                val setting = dataContext.getSetting(Setting.KEYS.zodiac1)
+                val zodiac = spinner_zodiac1.getItemAtPosition(position).toString()
                 if (setting != null) {
-                    if (!setting.getValue().equals(zodiac)) {
-                        dataContext.editSetting(Setting.KEYS.zodiac1, zodiac);
-                        isCalenderChanged = true;
-                        snackbarSaved();
+                    if (setting.value != zodiac) {
+                        dataContext.editSetting(Setting.KEYS.zodiac1, zodiac)
+                        isCalenderChanged = true
+                        snackbarSaved()
                     }
                 } else {
-                    dataContext.editSetting(Setting.KEYS.zodiac1, zodiac);
-                    isCalenderChanged = true;
-                    snackbarSaved();
+                    dataContext.editSetting(Setting.KEYS.zodiac1, zodiac)
+                    isCalenderChanged = true
+                    snackbarSaved()
                 }
             }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        spinner_zodiac2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Setting setting = dataContext.getSetting(Setting.KEYS.zodiac2);
-                String zodiac = spinner_zodiac2.getItemAtPosition(position).toString();
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+        spinner_zodiac2.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+                val setting = dataContext.getSetting(Setting.KEYS.zodiac2)
+                val zodiac = spinner_zodiac2.getItemAtPosition(position).toString()
                 if (setting != null) {
-                    if (!setting.getValue().equals(zodiac)) {
-                        dataContext.editSetting(Setting.KEYS.zodiac2, zodiac);
-                        isCalenderChanged = true;
-                        snackbarSaved();
+                    if (setting.value != zodiac) {
+                        dataContext.editSetting(Setting.KEYS.zodiac2, zodiac)
+                        isCalenderChanged = true
+                        snackbarSaved()
                     }
                 } else {
-                    dataContext.editSetting(Setting.KEYS.zodiac2, zodiac);
-                    isCalenderChanged = true;
-                    snackbarSaved();
+                    dataContext.editSetting(Setting.KEYS.zodiac2, zodiac)
+                    isCalenderChanged = true
+                    snackbarSaved()
                 }
             }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        spinner_welcome.setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        Setting setting = dataContext.getSetting(Setting.KEYS.welcome, 0);
-                        if (!setting.getValue().equals(position + "")) {
-                            dataContext.editSetting(Setting.KEYS.welcome, spinner_welcome.getSelectedItemPosition());
-                            snackbarSaved();
-                        }
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                }
-
-        );
-        spinner_duration.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Setting setting = dataContext.getSetting(Setting.KEYS.welcome_duration, 1);
-                if (!setting.getValue().equals(position + "")) {
-                    dataContext.editSetting(Setting.KEYS.welcome_duration, spinner_duration.getSelectedItemPosition());
-                    snackbarSaved();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    private void initializeDuration() {
-        List<String> list = new ArrayList<String>();
-        list.add("0秒");
-        list.add("3秒");
-        list.add("4秒");
-        list.add("5秒");
-        list.add("6秒");
-        list.add("7秒");
-        this.fillSpinner(spinner_duration, list);
-    }
-
-    private void initializeWelcome() {
-        List<String> list = new ArrayList<String>();
-        for (int i = 0; i < _Session.welcomes.size(); i++) {
-            list.add(_Session.welcomes.get(i).getListItemString());
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-        this.fillSpinner(spinner_welcome, list);
-    }
+        spinner_welcome.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+                val setting = dataContext.getSetting(Setting.KEYS.welcome, 0)
+                if (setting.getInt() != position) {
+                    dataContext.editSetting(Setting.KEYS.welcome, spinner_welcome.selectedItemPosition)
+                    snackbarSaved()
+                }
+            }
 
-    private void initializeZodiac(Spinner spinner) {
-        List<String> mItems = new ArrayList<String>();
-        for (int i = 0; i < Zodiac.count(); i++) {
-            mItems.add(Zodiac.fromInt(i).toString());
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-        this.fillSpinner(spinner, mItems);
+        spinner_duration.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
+                val setting = dataContext.getSetting(Setting.KEYS.welcome_duration, 1)
+                if (setting.getInt() != position) {
+                    dataContext.editSetting(Setting.KEYS.welcome_duration, spinner_duration.selectedItemPosition)
+                    snackbarSaved()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
-    private void initializeLunarMonth(Spinner spinner) {
-        this.fillSpinner(spinner, LunarDate.Months);
+    private fun initializeDuration() {
+        val list: MutableList<String> = ArrayList()
+        list.add("0秒")
+        list.add("3秒")
+        list.add("4秒")
+        list.add("5秒")
+        list.add("6秒")
+        list.add("7秒")
+        fillSpinner(spinner_duration, list)
     }
 
-    private void initializeLunarDay(Spinner spinner) {
-        this.fillSpinner(spinner, LunarDate.Days);
+    private fun initializeWelcome() {
+        val list: MutableList<String> = ArrayList()
+        for (i in _Session.welcomes.indices) {
+            list.add(_Session.welcomes[i].getListItemString())
+        }
+        fillSpinner(spinner_welcome, list)
     }
 
-    private void fillSpinner(Spinner spinner, List<String> values) {
-        ArrayAdapter<String> aspn = new ArrayAdapter<String>(SettingActivity.this, R.layout.inflate_spinner, values);
-        aspn.setDropDownViewResource(R.layout.inflate_spinner_dropdown);
-        spinner.setAdapter(aspn);
+    private fun initializeZodiac(spinner: Spinner) {
+        val mItems: MutableList<String> = ArrayList()
+        for (i in 0 until Zodiac.count()) {
+            mItems.add(Zodiac.fromInt(i).toString())
+        }
+        fillSpinner(spinner, mItems)
     }
 
-    @Override
-    public void onBackListener() {
-        this.finish();
+    private fun initializeLunarMonth(spinner: Spinner) {
+        fillSpinner(spinner, LunarDate.Months)
+    }
+
+    private fun initializeLunarDay(spinner: Spinner) {
+        fillSpinner(spinner, LunarDate.Days)
+    }
+
+    private fun fillSpinner(spinner: Spinner, values: MutableList<String>) {
+        val aspn = ArrayAdapter(this@SettingActivity, R.layout.inflate_spinner, values)
+        aspn.setDropDownViewResource(R.layout.inflate_spinner_dropdown)
+        spinner.adapter = aspn
+    }
+
+    override fun onBackListener() {
+        finish()
     }
 
     /**
      *
      */
-    protected class MDlistdAdapter extends BaseAdapter {
-        @Override
-        public int getCount() {
-            return mdListItems.size();
+    protected inner class MDlistdAdapter : BaseAdapter() {
+        override fun getCount(): Int {
+            return mdListItems.size
         }
 
-        @Override
-        public Object getItem(int position) {
-            return null;
+        override fun getItem(position: Int): Any? {
+            return null
         }
 
-        @Override
-        public long getItemId(int position) {
-            return 0;
+        override fun getItemId(position: Int): Long {
+            return 0
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final int index = position;
-            final View vew = convertView;
-            getApplicationContext().getResources();
-            convertView = View.inflate(SettingActivity.this, R.layout.inflate_md_list_item, null);
-            HashMap<String, String> map = mdListItems.get(position);
-            TextView textViewRelation = (TextView) convertView.findViewById(R.id.textView_relation);
-            TextView textViewType = (TextView) convertView.findViewById(R.id.textView_type);
-            TextView textViewLunarDate = (TextView) convertView.findViewById(R.id.textView_lunarDate);
-            ImageView btnDel = (ImageView) convertView.findViewById(R.id.imageView_Del);
-            btnDel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SettingActivity.this);
-                    builder.setTitle("删除确认");
-                    builder.setMessage("是否要删除此纪念日?");
-                    builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dataContext.deleteMemorialDay(UUID.fromString(mdListItems.get(index).get("id")));
-                            mdListItems.remove(index);
-                            mdListAdapter.notifyDataSetChanged();
-                            isCalenderChanged = true;
-                            dialog.cancel();
-                            snackbar("删除成功");
-//                            Toast.makeText(SettingActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    builder.create().show();
+        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+            var convertView = convertView
+            val vew = convertView
+            applicationContext.resources
+            convertView = View.inflate(this@SettingActivity, R.layout.inflate_md_list_item, null)
+            val map = mdListItems[position]
+            val textViewRelation = convertView.findViewById<View>(R.id.textView_relation) as TextView
+            val textViewType = convertView.findViewById<View>(R.id.textView_type) as TextView
+            val textViewLunarDate = convertView.findViewById<View>(R.id.textView_lunarDate) as TextView
+            val btnDel = convertView.findViewById<View>(R.id.imageView_Del) as ImageView
+            btnDel.setOnClickListener {
+                val builder = AlertDialog.Builder(this@SettingActivity)
+                builder.setTitle("删除确认")
+                builder.setMessage("是否要删除此纪念日?")
+                builder.setPositiveButton("确认") { dialog, which ->
+                    dataContext.deleteMemorialDay(UUID.fromString(mdListItems[position]["id"]))
+                    mdListItems.removeAt(position)
+                    mdListAdapter.notifyDataSetChanged()
+                    isCalenderChanged = true
+                    dialog.cancel()
+                    snackbar("删除成功")
+                    //                            Toast.makeText(SettingActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
                 }
-            });
-            textViewRelation.setText(map.get("relation"));
-            textViewType.setText(map.get("type"));
-            textViewLunarDate.setText(map.get("lunarDate"));
-            return convertView;
+                builder.setNegativeButton("取消") { dialog, which -> dialog.cancel() }
+                builder.create().show()
+            }
+            textViewRelation.text = map["relation"]
+            textViewType.text = map["type"]
+            textViewLunarDate.text = map["lunarDate"]
+            return convertView
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+    override fun onBackPressed() {
+        super.onBackPressed()
     }
 
-    private void snackbarSaved() {
-        snackbar("设置已保存");
+    private fun snackbarSaved() {
+        snackbar("设置已保存")
     }
 
-    private void snackbar(String message) {
-        RelativeLayout root = (RelativeLayout) findViewById(R.id.layout_setting_root);
-        Snackbar.make(root, message, Snackbar.LENGTH_LONG).show();
+    private fun snackbar(message: String) {
+        val root = findViewById(R.id.layout_setting_root) as RelativeLayout
+        Snackbar.make(root, message, Snackbar.LENGTH_LONG).show()
     }
 
-    public void showBirthdayDialog(final Context context, String title, final CallBack callBack) {
-
-        View view = View.inflate(context, R.layout.inflate_dialog_date_picker, null);
-        AlertDialog dialog = new AlertDialog.Builder(context).setView(view).create();
-        dialog.setTitle(title);
-        final NumberPicker npYear = (NumberPicker) view.findViewById(R.id.npYear);
-        final NumberPicker npMonth = (NumberPicker) view.findViewById(R.id.npMonth);
-        final NumberPicker npDay = (NumberPicker) view.findViewById(R.id.npDay);
-        final NumberPicker npHour = (NumberPicker) view.findViewById(R.id.npHour);
-
-        Setting setting = dataContext.getSetting(Setting.KEYS.birthday);
-        DateTime date = null;
+    fun showBirthdayDialog(context: Context, title: String?, callBack: CallBack?) {
+        val view = View.inflate(context, R.layout.inflate_dialog_date_picker, null)
+        val dialog = AlertDialog.Builder(context).setView(view).create()
+        dialog.setTitle(title)
+        val npYear = view.findViewById<View>(R.id.npYear) as NumberPicker
+        val npMonth = view.findViewById<View>(R.id.npMonth) as NumberPicker
+        val npDay = view.findViewById<View>(R.id.npDay) as NumberPicker
+        val npHour = view.findViewById<View>(R.id.npHour) as NumberPicker
+        val setting = dataContext.getSetting(Setting.KEYS.birthday)
+        var date: DateTime? = null
         if (setting == null) {
-            date = new DateTime();
-            date.add(Calendar.YEAR, -20);
+            date = DateTime()
+            date.add(Calendar.YEAR, -20)
         } else {
-            date = setting.getDateTime();
+            date = setting.getDateTime()
         }
-        final int cyear = new DateTime().getYear();
-        final int year = date.getYear();
-        int month = date.getMonth();
-        final int day = date.getDay();
-
-
+        val cyear = DateTime().getYear()
+        val year = date.getYear()
+        val month = date.getMonth()
+        val day = date.getDay()
         try {
-            String[] yearNumbers = new String[100];
-            for (int i = cyear - 99; i <= cyear; i++) {
-                yearNumbers[i - cyear + 99] = i + "年";
+            val yearNumbers = arrayOfNulls<String>(100)
+            for (i in cyear - 99..cyear) {
+                yearNumbers[i - cyear + 99] = i.toString() + "年"
             }
-            String[] monthNumbers = new String[12];
-            for (int i = 0; i < 12; i++) {
-                monthNumbers[i] = i + 1 + "月";
+            val monthNumbers = arrayOfNulls<String>(12)
+            for (i in 0..11) {
+                monthNumbers[i] =  "${i+1}月"
             }
-            String[] dayNumbers = new String[31];
-            for (int i = 0; i < 31; i++) {
-                dayNumbers[i] = i + 1 + "日";
+            val dayNumbers = arrayOfNulls<String>(31)
+            for (i in 0..30) {
+                dayNumbers[i] =  "${i+1}日"
             }
-            npHour.setVisibility(View.GONE);
-            npYear.setMinValue(cyear - 99);
-            npYear.setMaxValue(cyear);
-            npYear.setValue(year);
-            npYear.setDisplayedValues(yearNumbers);
-            npYear.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-            npMonth.setMinValue(1);
-            npMonth.setMaxValue(12);
-            npMonth.setDisplayedValues(monthNumbers);
-            npMonth.setValue(month + 1);
-            npMonth.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-            npDay.setMinValue(1);
-            npDay.setMaxValue(31);
-            npDay.setDisplayedValues(dayNumbers);
-            npDay.setValue(day);
-            npDay.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-        } catch (Exception e) {
-            _Utils.printException(SettingActivity.this, e);
+            npHour.visibility = View.GONE
+            npYear.minValue = cyear - 99
+            npYear.maxValue = cyear
+            npYear.value = year
+            npYear.displayedValues = yearNumbers
+            npYear.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+            npMonth.minValue = 1
+            npMonth.maxValue = 12
+            npMonth.displayedValues = monthNumbers
+            npMonth.value = month + 1
+            npMonth.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+            npDay.minValue = 1
+            npDay.maxValue = 31
+            npDay.displayedValues = dayNumbers
+            npDay.value = day
+            npDay.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        } catch (e: Exception) {
+            _Utils.printException(this@SettingActivity, e)
         }
-
-        npMonth.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                DateTime selected = new DateTime(npYear.getValue(), npMonth.getValue() - 1, 1);
-                int max = selected.getActualMaximum(Calendar.DAY_OF_MONTH);
-
-                int day = npDay.getValue();
-                npDay.setMaxValue(max);
-                if (day > max) {
-                    npDay.setValue(1);
-                } else {
-                    npDay.setValue(day);
-                }
+        npMonth.setOnValueChangedListener { picker, oldVal, newVal ->
+            val selected = DateTime(npYear.value, npMonth.value - 1, 1)
+            val max = selected.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val day = npDay.value
+            npDay.maxValue = max
+            if (day > max) {
+                npDay.value = 1
+            } else {
+                npDay.value = day
             }
-        });
-
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    int year = npYear.getValue();
-                    int month = npMonth.getValue() - 1;
-                    int day = npDay.getValue();
-                    DateTime selectedDateTime = new DateTime(year, month, day, 0, 0, 0);
-                    dataContext.editSetting(Setting.KEYS.birthday, selectedDateTime.getTimeInMillis());
-                    isRecordSetChanged = true;
-                    autoWayDataInit();
-                    if (callBack != null) {
-                        callBack.execute();
-                    }
-                    dialog.dismiss();
-                } catch (Exception e) {
-                    _Utils.printException(context, e);
-                }
+        }
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定") { dialog, which ->
+            try {
+                val year = npYear.value
+                val month = npMonth.value - 1
+                val day = npDay.value
+                val selectedDateTime = DateTime(year, month, day, 0, 0, 0)
+                dataContext.editSetting(Setting.KEYS.birthday, selectedDateTime.timeInMillis)
+                isRecordSetChanged = true
+                autoWayDataInit()
+                callBack?.execute()
+                dialog.dismiss()
+            } catch (e: Exception) {
+                _Utils.printException(context, e)
             }
-        });
-
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    dialog.dismiss();
-                } catch (Exception e) {
-                    _Utils.printException(context, e);
-                }
+        }
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消") { dialog, which ->
+            try {
+                dialog.dismiss()
+            } catch (e: Exception) {
+                _Utils.printException(context, e)
             }
-        });
-        dialog.show();
+        }
+        dialog.show()
     }
 
-    private interface CallBack {
-        void execute();
+    interface CallBack {
+        fun execute()
     }
 
-/*
+    /*
     public void showTargetDialog(final Context context) {
 
         try {
@@ -760,14 +598,16 @@ public class SettingActivity extends AppCompatActivity implements OnActionFragme
             e.printStackTrace();
         }
     }*/
-
-    @Override
-    protected void onPause() {
-        super.onPause();
+    override fun onPause() {
+        super.onPause()
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    override fun onResume() {
+        super.onResume()
+    }
+
+    companion object {
+        var isCalenderChanged = false
+        var isRecordSetChanged = false
     }
 }

@@ -1,376 +1,276 @@
-package com.wang17.religiouscalendar.activity;
+package com.wang17.religiouscalendar.activity
 
-import android.animation.AnimatorInflater;
-import android.animation.ArgbEvaluator;
-import android.animation.ObjectAnimator;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.AssetManager;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.NumberPicker;
-import android.widget.PopupWindow;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.animation.AnimatorInflater
+import android.animation.ArgbEvaluator
+import android.animation.ObjectAnimator
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.res.Resources.NotFoundException
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.AsyncTask
+import android.os.Bundle
+import android.os.Handler
+import android.support.design.widget.NavigationView
+import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
+import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import android.util.TypedValue
+import android.view.*
+import android.view.View.OnLongClickListener
+import android.view.animation.Animation
+import android.widget.*
+import android.widget.AdapterView.OnItemClickListener
+import com.wang17.religiouscalendar.R
+import com.wang17.religiouscalendar.activity.IntroduceActivity.ItemName
+import com.wang17.religiouscalendar.e
+import com.wang17.religiouscalendar.emnu.SolarTerm
+import com.wang17.religiouscalendar.model.*
+import com.wang17.religiouscalendar.util.*
+import java.io.*
+import java.nio.ByteBuffer
+import java.util.*
+import kotlin.experimental.and
 
-import com.wang17.religiouscalendar.R;
-import com.wang17.religiouscalendar.emnu.SolarTerm;
-import com.wang17.religiouscalendar.util.AnimationUtils;
-import com.wang17.religiouscalendar.util.CalendarHelper;
-import com.wang17.religiouscalendar.util.GanZhi;
-import com.wang17.religiouscalendar.util.Lunar;
-import com.wang17.religiouscalendar.util.Religious;
-import com.wang17.religiouscalendar.util._Utils;
-import com.wang17.religiouscalendar.util._Session;
-import com.wang17.religiouscalendar.util._String;
-import com.wang17.religiouscalendar.model.CalendarItem;
-import com.wang17.religiouscalendar.model.DataContext;
-import com.wang17.religiouscalendar.model.DateTime;
-import com.wang17.religiouscalendar.model.ReligiousCallBack;
-import com.wang17.religiouscalendar.model.Setting;
-import com.wang17.religiouscalendar.model.SexualDay;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private static final int INFO_TEXT_SIZE = 14;
+class MainActivity : AppCompatActivity(), View.OnClickListener {
     // 视图变量
-    private View headerView;
-    private TextView tvGanzhi, tvNongLi, tvYear, tvFo, tvToday, tvMonth, tvChijie1, tvChijie2;
-    private CalenderGridAdapter calendarAdapter;
-    private ImageButton ibLeftMenu, ibSettting;
-    private ImageView ivBanner, ivWelcome;
-    private DrawerLayout drawer;
-    private LinearLayout layout_religious;
-    private GridView userCalender;
-    private PopupWindow mPopWindow;
-    private LinearLayout layoutJinJi, layoutJyw, layoutYgx, layoutRecord, layoutWelcome;
-    private ProgressBar pbLoading;
+    private lateinit var headerView: View
+    private lateinit var tvGanzhi: TextView
+    private lateinit var tvNongLi: TextView
+    private lateinit var tvYear: TextView
+    private lateinit var tvFo: TextView
+    private lateinit var tvToday: TextView
+    private lateinit var tvMonth: TextView
+    private lateinit var tvChijie1: TextView
+    private lateinit var tvChijie2: TextView
+    private lateinit var calendarAdapter: CalenderGridAdapter
+    private lateinit var ibLeftMenu: ImageButton
+    private lateinit var ibSettting: ImageButton
+    private lateinit var ivBanner: ImageView
+    private lateinit var ivWelcome: ImageView
+    private lateinit var drawer: DrawerLayout
+    private lateinit var layout_religious: LinearLayout
+    private lateinit var userCalender: GridView
+    private lateinit var mPopWindow: PopupWindow
+    private lateinit var layoutJinJi: LinearLayout
+    private lateinit var layoutJyw: LinearLayout
+    private lateinit var layout_ygx: LinearLayout
+    private lateinit var layoutRecord: LinearLayout
+    private lateinit var layoutWelcome: LinearLayout
+    private lateinit var pbLoading: ProgressBar
+
     // 类变量
-    private DataContext dataContext;
-    private Typeface fontHWZS, fontGF;
-    private DateTime selectedDate;
-    private RefreshCalendarTask refreshCalendarTask;
+    private lateinit var dataContext: DataContext
+    private lateinit var fontHWZS: Typeface
+    private lateinit var fontGF: Typeface
+    private lateinit var selectedDate: DateTime
+    private lateinit var refreshCalendarTask: RefreshCalendarTask
+
     // 值变量
-    Animation animation;
-    private int calendarItemLength, preSelectedPosition, todayPosition, currentYear, currentMonth;
-    private long xxxTimeMillis;
-    private boolean isFirstTime, isShowRecords;
-    private Map<Integer, CalendarItem> calendarItemsMap;
-    private TreeMap<DateTime, SolarTerm> solarTermMap;
-    private Map<DateTime, SolarTerm> currentMonthSolarTermMap;
-    private Map<DateTime, View> calendarItemViewsMap;
-    private HashMap<DateTime, String> religiousDayMap, remarkMap;
-    private Handler uiHandler;
-    private static final int TO_SEXUAL_RECORD_ACTIVITY = 298;
-    public static final int TO_SETTING_ACTIVITY = 1;
-
-    public CalenderHeaderGridAdapter calenderHeaderGridAdapter;
-    private boolean isWeekendFirst;
-
-    private int welcomeDurationIndex;
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        return super.onSupportNavigateUp();
+    lateinit var animation: Animation
+    private var calendarItemLength = 0
+    private var preSelectedPosition = 0
+    private var todayPosition = 0
+    private var currentYear = 0
+    private var currentMonth = 0
+    private var xxxTimeMillis: Long = 0
+    private var isFirstTime = false
+    private var isShowRecords = false
+    private lateinit var calendarItemsMap: MutableMap<Int, CalendarItem>
+    private lateinit var solarTermMap: TreeMap<DateTime, SolarTerm>
+    private lateinit var currentMonthSolarTermMap: MutableMap<DateTime, SolarTerm>
+    private lateinit var calendarItemViewsMap: MutableMap<DateTime, View>
+    private lateinit var religiousDayMap: HashMap<DateTime, String>
+    private lateinit var remarkMap: HashMap<DateTime, String>
+    private var uiHandler: Handler = Handler()
+    private lateinit var calenderHeaderGridAdapter: CalenderHeaderGridAdapter
+    private var isWeekendFirst = false
+    private var welcomeDurationIndex = 0
+    override fun onSupportNavigateUp(): Boolean {
+        return super.onSupportNavigateUp()
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         try {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
-
-            DataContext context = new DataContext(this);
-
-
-            isWeekendFirst = context.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean();
-            ArrayList<Integer> pics = new ArrayList<>();
-
-            xxxTimeMillis = System.currentTimeMillis();
-            uiHandler = new Handler();
-            dataContext = new DataContext(MainActivity.this);
-            isFirstTime = true;
-
-
-            drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                    this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.setDrawerListener(toggle);
-            toggle.syncState();
-
-
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            headerView = navigationView.getHeaderView(0);
-            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(MenuItem item) {
-
-                    menuItemSelected(item);
-                    drawer.closeDrawer(GravityCompat.START);
-                    return true;
-                }
-            });
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_main)
+            val dc = DataContext(this)
+            isWeekendFirst = dc.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean()
+            val pics = ArrayList<Int>()
+            xxxTimeMillis = System.currentTimeMillis()
+            dataContext = DataContext(this@MainActivity)
+            isFirstTime = true
+            drawer = findViewById(R.id.drawer_layout) as DrawerLayout
+            val toggle = ActionBarDrawerToggle(
+                    this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+            drawer.setDrawerListener(toggle)
+            toggle.syncState()
+            val navigationView = findViewById(R.id.nav_view) as NavigationView
+            headerView = navigationView.getHeaderView(0)
+            navigationView.setNavigationItemSelectedListener { item ->
+                menuItemSelected(item)
+                drawer.closeDrawer(GravityCompat.START)
+                true
+            }
 
             //region 启动界面
-
-            layoutWelcome = (LinearLayout) findViewById(R.id.layout_welcome);
-            ivWelcome = (ImageView) findViewById(R.id.imageView_welcome);
-            welcomeDurationIndex = dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getInt();
+            layoutWelcome = findViewById(R.id.layout_welcome) as LinearLayout
+            ivWelcome = findViewById(R.id.imageView_welcome) as ImageView
+            welcomeDurationIndex = dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getInt()
             if (welcomeDurationIndex == 0) {
-                ivWelcome.setVisibility(View.INVISIBLE);
+                ivWelcome.visibility = View.INVISIBLE
             } else {
-                ivWelcome.setVisibility(View.VISIBLE);
-                int itemPosition = Integer.parseInt(dataContext.getSetting(Setting.KEYS.welcome, 0).getValue());
-                if (itemPosition >= _Session.welcomes.size()) {
-                    itemPosition = 0;
-                    dataContext.editSetting(Setting.KEYS.welcome, itemPosition + "");
+                ivWelcome.visibility = View.VISIBLE
+                var itemPosition = dataContext.getSetting(Setting.KEYS.welcome, 0).getInt()
+                if (itemPosition >= _Session.welcomes.size) {
+                    itemPosition = 0
+                    dataContext.editSetting(Setting.KEYS.welcome, itemPosition.toString() + "")
                 }
-                ivWelcome.setImageResource(_Session.welcomes.get(itemPosition).getResId());
+                ivWelcome.setImageResource(_Session.welcomes[itemPosition].getResId())
             }
 
             //endregion
 
 
             //
-            solarTermMap = loadJavaSolarTerms(R.raw.solar_java_50);
+            solarTermMap = loadJavaSolarTerms(R.raw.solar_java_50)
 
             //
-            initViews();
-
-        } catch (Exception ex) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, ex);
+            initViews()
+        } catch (ex: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
         }
     }
 
     //region 事件
-    View.OnClickListener leftMenuClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            } else {
-                drawer.openDrawer(GravityCompat.START);
-            }
+    var leftMenuClick = View.OnClickListener {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START)
+        } else {
+            drawer.openDrawer(GravityCompat.START)
         }
-    };
-    View.OnLongClickListener leftMenuLongClick = new View.OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View v) {
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            }
-            startActivityForResult(new Intent(MainActivity.this, SettingActivity.class), TO_SETTING_ACTIVITY);
-            return true;
+    }
+    var leftMenuLongClick = OnLongClickListener {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START)
         }
-    };
-    View.OnClickListener settingClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            }
-            startActivityForResult(new Intent(MainActivity.this, SettingActivity.class), TO_SETTING_ACTIVITY);
+        startActivityForResult(Intent(this@MainActivity, SettingActivity::class.java), TO_SETTING_ACTIVITY)
+        true
+    }
+    var settingClick = View.OnClickListener {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START)
         }
-    };
+        startActivityForResult(Intent(this@MainActivity, SettingActivity::class.java), TO_SETTING_ACTIVITY)
+    }
     //endregion
-
     /**
      * 六字名号呼吸效果。
      */
-    private void nianfo(View target) throws Exception {
-        ObjectAnimator objectAnimator = (ObjectAnimator) AnimatorInflater.loadAnimator(MainActivity.this, R.animator.color_animator);
-        objectAnimator.setEvaluator(new ArgbEvaluator());
-        objectAnimator.setTarget(target);
-        objectAnimator.start();
+    @Throws(Exception::class)
+    private fun nianfo(target: View?) {
+        val objectAnimator = AnimatorInflater.loadAnimator(this@MainActivity, R.animator.color_animator) as ObjectAnimator
+        objectAnimator.setEvaluator(ArgbEvaluator())
+        objectAnimator.target = target
+        objectAnimator.start()
     }
 
-    private void setTextForRecord(String text1, String text2) {
+    private fun setTextForRecord(text1: String, text2: String) {
+        var text1 = text1
+        var text2 = text2
         if (!text2.isEmpty()) {
-            text1 = "已持戒：" + text1;
-            text2 = text2 + "后，元气恢复。";
+            text1 = "已持戒：$text1"
+            text2 = text2 + "后，元气恢复。"
         }
-        tvChijie1.setText(text1);
-        tvChijie2.setText(text2);
+        tvChijie1.text = text1
+        tvChijie2.text = text2
     }
 
     /**
      * 方法 - 初始化所有变量
      */
-    private void initViews() {
+    private fun initViews() {
         try {
-            calendarItemViewsMap = new HashMap<>();
-            currentMonthSolarTermMap = new HashMap<>();
-            religiousDayMap = new HashMap<>();
-            remarkMap = new HashMap<>();
-            refreshCalendarTask = new RefreshCalendarTask();
+            calendarItemViewsMap = HashMap()
+            currentMonthSolarTermMap = HashMap()
+            religiousDayMap = HashMap()
+            remarkMap = HashMap()
+            refreshCalendarTask = RefreshCalendarTask()
 
             //region 持戒记录功能设置
-            layoutRecord = headerView.findViewById(R.id.layout_record);
-            tvChijie1 = headerView.findViewById(R.id.textView_chijie);
-            tvChijie2 = headerView.findViewById(R.id.textView_chijie2);
-
-            initRecordPart();
+            layoutRecord = headerView.findViewById(R.id.layout_record)
+            tvChijie1 = headerView.findViewById(R.id.textView_chijie)
+            tvChijie2 = headerView.findViewById(R.id.textView_chijie2)
+            initRecordPart()
 
 
             //endregion
 
 
             //region 左侧菜单操作
-            layoutYgx = headerView.findViewById(R.id.layout_ygx);
-            layoutYgx.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(MainActivity.this, IntroduceActivity.class);
-                    intent.putExtra(IntroduceActivity.PARAM_NAME, IntroduceActivity.ItemName.印光大师序.toString());
-                    startActivity(intent);
-                }
-            });
-            layoutJinJi = headerView.findViewById(R.id.layout_jinji);
-            layoutJinJi.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(MainActivity.this, IntroduceActivity.class);
-                    intent.putExtra(IntroduceActivity.PARAM_NAME, IntroduceActivity.ItemName.天地人禁忌.toString());
-                    startActivity(intent);
-                }
-            });
-            layoutJyw = headerView.findViewById(R.id.layout_jyw);
-            layoutJyw.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(MainActivity.this, IntroduceActivity.class);
-                    intent.putExtra(IntroduceActivity.PARAM_NAME, IntroduceActivity.ItemName.文昌帝君戒淫文.toString());
-                    startActivity(intent);
-                }
-            });
+            layout_ygx = headerView.findViewById(R.id.layout_ygx)
+            layout_ygx.setOnClickListener(View.OnClickListener {
+                val intent = Intent(this@MainActivity, IntroduceActivity::class.java)
+                intent.putExtra(IntroduceActivity.Companion.PARAM_NAME, ItemName.印光大师序.toString())
+                startActivity(intent)
+            })
+            layoutJinJi = headerView.findViewById(R.id.layout_jinji)
+            layoutJinJi.setOnClickListener(View.OnClickListener {
+                val intent = Intent(this@MainActivity, IntroduceActivity::class.java)
+                intent.putExtra(IntroduceActivity.Companion.PARAM_NAME, ItemName.天地人禁忌.toString())
+                startActivity(intent)
+            })
+            layoutJyw = headerView.findViewById(R.id.layout_jyw)
+            layoutJyw.setOnClickListener(View.OnClickListener {
+                val intent = Intent(this@MainActivity, IntroduceActivity::class.java)
+                intent.putExtra(IntroduceActivity.Companion.PARAM_NAME, ItemName.文昌帝君戒淫文.toString())
+                startActivity(intent)
+            })
             //endregion
 
-
-//            imageLeft = (ImageView) findViewById(R.id.image_left);
-//            imageLeft.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    DateTime now = selectedDate.addMonths(-1);
-//                    DateTime dateTime = new DateTime();
-//                    dateTime.set(now.getYear(), now.getMonth(), 1);
-//                    int maxDayOfMonth = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
-//                    int selectedDay = MainActivity.this.selectedDate.getDay();
-//                    setSelectedDate(now.getYear(), now.getMonth(), maxDayOfMonth < selectedDay ? maxDayOfMonth : selectedDay);
-//                }
-//            });
-//
-//            imageRight = (ImageView) findViewById(R.id.image_right);
-//            imageRight.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    DateTime now = selectedDate.addMonths(1);
-//                    DateTime dateTime = new DateTime();
-//                    dateTime.set(now.getYear(), now.getMonth(), 1);
-//                    int maxDayOfMonth = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
-//                    int selectedDay = MainActivity.this.selectedDate.getDay();
-//                    setSelectedDate(now.getYear(), now.getMonth(), maxDayOfMonth < selectedDay ? maxDayOfMonth : selectedDay);
-//                }
-//            });
-
-
-            pbLoading = (ProgressBar) findViewById(R.id.progressBar_loading);
+            pbLoading = findViewById(R.id.progressBar_loading) as ProgressBar
 
             //
-            int itemPosition = 0;
-            itemPosition = Integer.parseInt(dataContext.getSetting(Setting.KEYS.banner, itemPosition).getValue());
-            if (itemPosition >= _Session.banners.size()) {
-                itemPosition = 0;
-                dataContext.editSetting(Setting.KEYS.banner, itemPosition);
+            var itemPosition = 0
+            itemPosition = dataContext.getSetting(Setting.KEYS.banner, itemPosition).getInt()
+            if (itemPosition >= _Session.banners.size) {
+                itemPosition = 0
+                dataContext.editSetting(Setting.KEYS.banner, itemPosition)
             }
 
             // 加载include_main_banner
-            ivBanner = (ImageView) findViewById(R.id.imageView_banner);
-            ivBanner.setImageResource(_Session.banners.get(itemPosition).getResId());
-            ivBanner.setOnClickListener(new View.OnClickListener() {//2130903043
-                @Override
-                public void onClick(View v) {
-                    showPopupWindow();
-                }
-            });
-
-            ibLeftMenu = (ImageButton) findViewById(R.id.ib_leftMenu);
-            rorateWan();
-            ibSettting = headerView.findViewById(R.id.imageButton_setting);
-
-            ibLeftMenu.setOnClickListener(leftMenuClick);
-            ibLeftMenu.setOnLongClickListener(leftMenuLongClick);
-            ibSettting.setOnClickListener(settingClick);
-            ibSettting.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    return true;
-                }
-            });
-
-
-            AssetManager mgr = getAssets();//得到AssetManager
-            fontHWZS = Typeface.createFromAsset(mgr, "fonts/STZHONGS.TTF");
-            fontGF = Typeface.createFromAsset(mgr, "fonts/GONGFANG.ttf");
-
-
-            tvFo = (TextView) findViewById(R.id.tvfo);
-//            textViewFo.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+            ivBanner = findViewById(R.id.imageView_banner) as ImageView
+            ivBanner.setImageResource(_Session.banners[itemPosition].getResId())
+            ivBanner.setOnClickListener { showPopupWindow() }
+            ibLeftMenu = findViewById(R.id.ib_leftMenu) as ImageButton
+            rorateWan()
+            ibSettting = headerView.findViewById(R.id.imageButton_setting)
+            ibLeftMenu.setOnClickListener(leftMenuClick)
+            ibLeftMenu.setOnLongClickListener(leftMenuLongClick)
+            ibSettting.setOnClickListener(settingClick)
+            ibSettting.setOnLongClickListener(OnLongClickListener { true })
+            val mgr = assets //得到AssetManager
+            fontHWZS = Typeface.createFromAsset(mgr, "fonts/STZHONGS.TTF")
+            fontGF = Typeface.createFromAsset(mgr, "fonts/GONGFANG.ttf")
+            tvFo = findViewById(R.id.tvfo) as TextView
+            //            textViewFo.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
 //            ((TextView)findViewById(R.id.textView_banner_text)).setTypeface(fontHWZS);
 //            textViewFo.getPaint().setFakeBoldText(true);
             //
-            nianfo(tvFo);
+            nianfo(tvFo)
 
             // selectedDate
-            selectedDate = DateTime.getToday();
-            currentYear = selectedDate.getYear();
-            currentMonth = selectedDate.getMonth();
+            selectedDate = DateTime.getToday()
+            currentYear = selectedDate.getYear()
+            currentMonth = selectedDate.getMonth()
 
             // buttonToday
-            tvToday = (TextView) findViewById(R.id.btn_today);
-            tvToday.setTypeface(fontGF);
-            tvToday.setOnClickListener(btnToday_OnClickListener);
+            tvToday = findViewById(R.id.btn_today) as TextView
+            tvToday.setTypeface(fontGF)
+            tvToday.setOnClickListener(btnToday_OnClickListener)
 
 //            textViewToday = (TextView) findViewById(R.id.textView_today);
 //            textViewToday.setTypeface(fontGF);
@@ -378,80 +278,65 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // 信息栏
 //            yearMonth = (TextView) findViewById(R.id.tvYearMonth);
 //            yangliBig = (TextView) findViewById(R.id.tvYangLiBig);
-            tvMonth = (TextView) findViewById(R.id.button_month);
-            tvMonth.setOnClickListener(btnCurrentMonth_OnClickListener);
-
-
-            final Button buttonQuickMonth = (Button) findViewById(R.id.button_quick_month);
-            buttonQuickMonth.setText(currentMonth + 1 + "月");
-            buttonQuickMonth.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int selectedDay = selectedDate.getDay();
-                    DateTime dateTime = new DateTime(currentYear, currentMonth, selectedDay);
-                    dateTime = dateTime.addMonths(1);
-                    setSelectedDate(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
-                    buttonQuickMonth.setText(currentMonth + 1 + "月");
-//                    }else{
+            tvMonth = findViewById(R.id.button_month) as TextView
+            tvMonth.setOnClickListener(btnCurrentMonth_OnClickListener)
+            val buttonQuickMonth = findViewById(R.id.button_quick_month) as Button
+            buttonQuickMonth.setText((currentMonth + 1).toString() + "月")
+            buttonQuickMonth.setOnClickListener {
+                val selectedDay = selectedDate.getDay()
+                var dateTime = DateTime(currentYear, currentMonth, selectedDay)
+                dateTime = dateTime.addMonths(1)
+                setSelectedDate(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay())
+                buttonQuickMonth.setText((currentMonth + 1).toString() + "月")
+                //                    }else{
 //                        dateTime = dateTime.addMonths(-1);
 //                        setSelectedDate(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
 //                        buttonQuickMonth.setText(currentMonth+1+"月");
 //                    }
-                }
-            });
-
-            tvYear = (TextView) findViewById(R.id.textView_year);
-            tvYear.setOnClickListener(btnCurrentMonth_OnClickListener);
-            tvGanzhi = (TextView) findViewById(R.id.textView_ganZhi);
-
-            tvNongLi = (TextView) findViewById(R.id.textView_nongLi);
-            layout_religious = (LinearLayout) findViewById(R.id.linearReligious);
-
-
-            tvYear.setTypeface(fontGF);
-//            tvYear.getPaint().setFakeBoldText(true);
-            tvMonth.setTypeface(fontGF);
-//            tvMonth.getPaint().setFakeBoldText(true);
-            tvGanzhi.setTypeface(fontHWZS);
-            tvGanzhi.getPaint().setFakeBoldText(true);
-            tvNongLi.setTypeface(fontHWZS);
-            tvNongLi.getPaint().setFakeBoldText(true);
-            tvFo.setTypeface(fontGF);
-//            tvFo.getPaint().setFakeBoldText(true);
+            }
+            tvYear = findViewById(R.id.textView_year) as TextView
+            tvYear.setOnClickListener(btnCurrentMonth_OnClickListener)
+            tvGanzhi = findViewById(R.id.textView_ganZhi) as TextView
+            tvNongLi = findViewById(R.id.textView_nongLi) as TextView
+            layout_religious = findViewById(R.id.linearReligious) as LinearLayout
+            tvYear.setTypeface(fontGF)
+            //            tvYear.getPaint().setFakeBoldText(true);
+            tvMonth.setTypeface(fontGF)
+            //            tvMonth.getPaint().setFakeBoldText(true);
+            tvGanzhi.setTypeface(fontHWZS)
+            tvGanzhi.paint.isFakeBoldText = true
+            tvNongLi.setTypeface(fontHWZS)
+            tvNongLi.paint.isFakeBoldText = true
+            tvFo.setTypeface(fontGF)
+            //            tvFo.getPaint().setFakeBoldText(true);
 
             // calendarAdapter
-            calendarAdapter = new CalenderGridAdapter();
-            calendarItemsMap = new HashMap<Integer, CalendarItem>();
-
-            setYearMonthText();
+            calendarAdapter = CalenderGridAdapter()
+            calendarItemsMap = HashMap()
+            setYearMonthText()
 
             // btnCurrentMonth
 //            btnCurrentMonth = (Button) findViewById(R.id.btnChangeMonth);
 //            btnCurrentMonth.setOnClickListener(btnCurrentMonth_OnClickListener);
 
             // userCalender
-            userCalender = (GridView) findViewById(R.id.userCalender);
-            userCalender.setOnItemClickListener(userCalender_OnItemClickListener);
-            GridView calendarHeader = (GridView) findViewById(R.id.userCalenderHeader);
-            calenderHeaderGridAdapter = new CalenderHeaderGridAdapter();
-            calendarHeader.setAdapter(calenderHeaderGridAdapter); // 添加星期标头
+            userCalender = findViewById(R.id.userCalender) as GridView
+            userCalender.onItemClickListener = userCalender_OnItemClickListener
+            val calendarHeader = findViewById(R.id.userCalenderHeader) as GridView
+            calenderHeaderGridAdapter = CalenderHeaderGridAdapter()
+            calendarHeader.adapter = calenderHeaderGridAdapter // 添加星期标头
 
             // 填充日历
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    refreshCalendar();
-                }
-            }).start();
-        } catch (Exception ex) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, ex);
+            Thread { refreshCalendar() }.start()
+        } catch (ex: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
         }
     }
 
-    private void setYearMonthText() {
-        tvMonth.setText(currentMonth + 1 + "月");
-        tvYear.setText(_String.concat(currentYear, "年"));
-//        int month = new Lunar(selectedDate).getMonth();
+    private fun setYearMonthText() {
+        tvMonth.setText((currentMonth + 1).toString() + "月")
+        tvYear.text = _String.concat(currentYear, "年")
+        //        int month = new Lunar(selectedDate).getMonth();
 //        String monthStr = "";
 //        switch (month) {
 //            case 1:
@@ -494,263 +379,229 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        buttonMonth.setText(monthStr);
     }
 
-    private void initRecordPart() {
-
+    private fun initRecordPart() {
         try {
-            layoutRecord.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showAddSexualDayDialog();
-                }
-            });
-
-            layoutRecord.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    try {
-                        if (dataContext.getLastSexualDay() != null) {
-                            startActivityForResult(new Intent(MainActivity.this, SexualDayRecordActivity.class), TO_SEXUAL_RECORD_ACTIVITY);
-                        } else {
-                            new AlertDialog.Builder(MainActivity.this).setMessage("当前没有记录！").show();
-                        }
-                    } catch (Exception e) {
-                        _Utils.printException(MainActivity.this, e);
+            layoutRecord.setOnClickListener { showAddSexualDayDialog() }
+            layoutRecord.setOnLongClickListener {
+                try {
+                    if (dataContext.getLastSexualDay() != null) {
+                        startActivityForResult(Intent(this@MainActivity, SexualDayRecordActivity::class.java), TO_SEXUAL_RECORD_ACTIVITY)
+                    } else {
+                        AlertDialog.Builder(this@MainActivity).setMessage("当前没有记录！").show()
                     }
-                    return true;
+                } catch (e: Exception) {
+                    _Utils.printException(this@MainActivity, e)
                 }
-            });
-
+                true
+            }
             if (dataContext.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == false) {
-                dataContext.editSetting(Setting.KEYS.recordIsOpened, false);
-                dataContext.editSetting(Setting.KEYS.targetAuto, true);
-                dataContext.deleteSetting(Setting.KEYS.targetInHour);
-//                new AlertDialog.Builder(this).setMessage("系统移除了自定义行房周期功能，请到设置界面设置出生日期，再使用此功能。").setNegativeButton("知道了", null).show();
+                dataContext.editSetting(Setting.KEYS.recordIsOpened, false)
+                dataContext.editSetting(Setting.KEYS.targetAuto, true)
+                dataContext.deleteSetting(Setting.KEYS.targetInHour)
+                //                new AlertDialog.Builder(this).setMessage("系统移除了自定义行房周期功能，请到设置界面设置出生日期，再使用此功能。").setNegativeButton("知道了", null).show();
 //                return;
             }
-            isShowRecords = Boolean.parseBoolean(dataContext.getSetting(Setting.KEYS.recordIsOpened, false).getValue());
+            isShowRecords = java.lang.Boolean.parseBoolean(dataContext.getSetting(Setting.KEYS.recordIsOpened, false).value)
             if (isShowRecords) {
-                layoutRecord.setVisibility(View.VISIBLE);
-                SexualDay lastSexualDay = dataContext.getLastSexualDay();
-
-                int targetInHour = 0;
+                layoutRecord.visibility = View.VISIBLE
+                val lastSexualDay = dataContext.getLastSexualDay()
+                var targetInHour = 0
                 if (lastSexualDay != null) {
-                    targetInHour = _Utils.getTargetInHour(dataContext.getSetting(Setting.KEYS.birthday).getDateTime());
-                    int haveInHour = (int) ((System.currentTimeMillis() - lastSexualDay.getDateTime().getTimeInMillis()) / 3600000);
-                    int leaveInHour = targetInHour - haveInHour;
-
-                    if (leaveInHour > 0) {
-                        setTextForRecord(DateTime.toSpanString(haveInHour), DateTime.toSpanString(leaveInHour));
-                    } else {
-                        leaveInHour *= -1;
-                        setTextForRecord(DateTime.toSpanString(haveInHour), "+" + DateTime.toSpanString(leaveInHour));
+                    val set = dataContext.getSetting(Setting.KEYS.birthday)
+                    if (set != null) {
+                        targetInHour = _Utils.getTargetInHour(set.getDateTime())
+                        val haveInHour = ((System.currentTimeMillis() - lastSexualDay.dateTime.timeInMillis) / 3600000).toInt()
+                        var leaveInHour = targetInHour - haveInHour
+                        if (leaveInHour > 0) {
+                            setTextForRecord(DateTime.toSpanString(haveInHour), DateTime.toSpanString(leaveInHour))
+                        } else {
+                            leaveInHour *= -1
+                            setTextForRecord(DateTime.toSpanString(haveInHour), "+" + DateTime.toSpanString(leaveInHour))
+                        }
+                        tvChijie2.visibility = View.VISIBLE
                     }
-                    tvChijie2.setVisibility(View.VISIBLE);
                 } else {
-                    setTextForRecord("点击添加记录", "");
-                    tvChijie2.setVisibility(View.GONE);
+                    setTextForRecord("点击添加记录", "")
+                    tvChijie2.visibility = View.GONE
                 }
-
             } else {
-                layoutRecord.setVisibility(View.GONE);
+                layoutRecord.visibility = View.GONE
             }
-        } catch (Exception e) {
-            _Utils.printException(MainActivity.this, e);
+        } catch (e: Exception) {
+            _Utils.printException(this@MainActivity, e)
         }
     }
 
-
-    private void showPopupWindow() {
+    private fun showPopupWindow() {
         //设置contentView
-        View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.popup_window, null);
-        mPopWindow = new PopupWindow(contentView, DrawerLayout.LayoutParams.WRAP_CONTENT, DrawerLayout.LayoutParams.WRAP_CONTENT, true);
-        mPopWindow.setContentView(contentView);
+        val contentView = LayoutInflater.from(this@MainActivity).inflate(R.layout.popup_window, null)
+        mPopWindow = PopupWindow(contentView, DrawerLayout.LayoutParams.WRAP_CONTENT, DrawerLayout.LayoutParams.WRAP_CONTENT, true)
+        mPopWindow.contentView = contentView
         //设置各个控件的点击响应
-        TextView tv0 = contentView.findViewById(R.id.item00);
-        TextView tv1 = contentView.findViewById(R.id.item01);
-        TextView tv2 = contentView.findViewById(R.id.item02);
-        TextView tv3 = contentView.findViewById(R.id.item03);
-        TextView tv4 = contentView.findViewById(R.id.item04);
-        tv0.setOnClickListener(this);
-        tv1.setOnClickListener(this);
-        tv2.setOnClickListener(this);
-        tv3.setOnClickListener(this);
-        tv4.setOnClickListener(this);
+        val tv0 = contentView.findViewById<TextView>(R.id.item00)
+        val tv1 = contentView.findViewById<TextView>(R.id.item01)
+        val tv2 = contentView.findViewById<TextView>(R.id.item02)
+        val tv3 = contentView.findViewById<TextView>(R.id.item03)
+        val tv4 = contentView.findViewById<TextView>(R.id.item04)
+        tv0.setOnClickListener(this)
+        tv1.setOnClickListener(this)
+        tv2.setOnClickListener(this)
+        tv3.setOnClickListener(this)
+        tv4.setOnClickListener(this)
         //显示PopupWindow
 //        View rootview = (View)findViewById(R.id.layout_upper_banner);
 //        mPopWindow.showAtLocation(rootview,);
-
-        View rootview = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_main, null);
-        mPopWindow.showAtLocation(rootview, Gravity.RIGHT | Gravity.TOP, 0, 0);
-
+        val rootview = LayoutInflater.from(this@MainActivity).inflate(R.layout.activity_main, null)
+        mPopWindow.showAtLocation(rootview, Gravity.RIGHT or Gravity.TOP, 0, 0)
     }
 
-    @Override
-    public void onClick(View v) {
-
-        int id = v.getId();
+    override fun onClick(v: View) {
+        val id = v.id
         try {
-            switch (id) {
-                case R.id.item00: {
-                    dataContext.editSetting(Setting.KEYS.banner, 0);
-                    ivBanner.setImageResource(_Session.banners.get(0).getResId());
+            when (id) {
+                R.id.item00 -> {
+                    dataContext.editSetting(Setting.KEYS.banner, 0)
+                    ivBanner.setImageResource(_Session.banners[0].getResId())
                 }
-                break;
-                case R.id.item01: {
-                    dataContext.editSetting(Setting.KEYS.banner, 1);
-                    ivBanner.setImageResource(_Session.banners.get(1).getResId());
+                R.id.item01 -> {
+                    dataContext.editSetting(Setting.KEYS.banner, 1)
+                    ivBanner.setImageResource(_Session.banners[1].getResId())
                 }
-                break;
-                case R.id.item02: {
-                    dataContext.editSetting(Setting.KEYS.banner, 2);
-                    ivBanner.setImageResource(_Session.banners.get(2).getResId());
+                R.id.item02 -> {
+                    dataContext.editSetting(Setting.KEYS.banner, 2)
+                    ivBanner.setImageResource(_Session.banners[2].getResId())
                 }
-                break;
-                case R.id.item03: {
-                    dataContext.editSetting(Setting.KEYS.banner, 3);
-                    ivBanner.setImageResource(_Session.banners.get(3).getResId());
+                R.id.item03 -> {
+                    dataContext.editSetting(Setting.KEYS.banner, 3)
+                    ivBanner.setImageResource(_Session.banners[3].getResId())
                 }
-                break;
-                case R.id.item04: {
-                    dataContext.editSetting(Setting.KEYS.banner, 4);
-                    ivBanner.setImageResource(_Session.banners.get(4).getResId());
+                R.id.item04 -> {
+                    dataContext.editSetting(Setting.KEYS.banner, 4)
+                    ivBanner.setImageResource(_Session.banners[4].getResId())
                 }
-                break;
             }
-            mPopWindow.dismiss();
-        } catch (Exception ex) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, ex);
+            mPopWindow.dismiss()
+        } catch (ex: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
         }
     }
 
     /**
      * 自定义日历标头适配器
      */
-    protected class CalenderHeaderGridAdapter extends BaseAdapter {
-        private String[] header;
+    inner class CalenderHeaderGridAdapter : BaseAdapter() {
+        private var header: Array<String>
+        override fun getCount(): Int {
+            return 7
+        }
 
-        public CalenderHeaderGridAdapter() {
+        override fun getItem(position: Int): Any? {
+            return null
+        }
+
+        override fun getItemId(position: Int): Long {
+            return 0
+        }
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val mTextView = TextView(applicationContext)
+            mTextView.text = header[position]
+            mTextView.gravity = Gravity.CENTER_HORIZONTAL
+            mTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12f)
+            mTextView.paint.isFakeBoldText = true
+            mTextView.typeface = Typeface.MONOSPACE
+            mTextView.setTextColor(Color.parseColor("#000000"))
+            mTextView.width = 60
+            return mTextView
+        }
+
+        override fun notifyDataSetChanged() {
             if (isWeekendFirst) {
-                this.header = new String[]{"日", "一", "二", "三", "四", "五", "六"};
+                header = arrayOf("日", "一", "二", "三", "四", "五", "六")
             } else {
-                this.header = new String[]{"一", "二", "三", "四", "五", "六", "日"};
+                header = arrayOf("一", "二", "三", "四", "五", "六", "日")
             }
+            super.notifyDataSetChanged()
         }
 
-        @Override
-        public int getCount() {
-            return 7;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            TextView mTextView = new TextView(getApplicationContext());
-            mTextView.setText(header[position]);
-            mTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-            mTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
-            mTextView.getPaint().setFakeBoldText(true);
-            mTextView.setTypeface(Typeface.MONOSPACE);
-            mTextView.setTextColor(Color.parseColor("#000000"));
-            mTextView.setWidth(60);
-            return mTextView;
-        }
-
-        @Override
-        public void notifyDataSetChanged() {
+        init {
             if (isWeekendFirst) {
-                this.header = new String[]{"日", "一", "二", "三", "四", "五", "六"};
+                header = arrayOf("日", "一", "二", "三", "四", "五", "六")
             } else {
-                this.header = new String[]{"一", "二", "三", "四", "五", "六", "日"};
+                header = arrayOf("一", "二", "三", "四", "五", "六", "日")
             }
-            super.notifyDataSetChanged();
         }
     }
-
     // FIXME: 2020/5/30 周六排序错误的问题，日历排版有没有BUG？
     /**
      * 自定义日历适配器
      */
-    protected class CalenderGridAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return calendarItemLength;
+    protected inner class CalenderGridAdapter : BaseAdapter() {
+        override fun getCount(): Int {
+            return calendarItemLength
         }
 
-        @Override
-        public Object getItem(int position) {
-            return null;
+        override fun getItem(position: Int): Any? {
+            return null
         }
 
-        @Override
-        public long getItemId(int position) {
-            return 0;
+        override fun getItemId(position: Int): Long {
+            return 0
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
 //            convertView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.inflat_calender_item, null);
+            var cv = convertView
             try {
-                convertView = View.inflate(MainActivity.this, R.layout.inflat_calender_item, null);
-                TextView textViewYangLi = convertView.findViewById(R.id.calenderItem_tv_YangLiDay);
-                TextView textViewNongLi = convertView.findViewById(R.id.calendarItem_tv_NongLiDay);
-                ImageView imageIsToday = convertView.findViewById(R.id.calendarItem_cvIsToday);
-                ImageView imageIsSelected = convertView.findViewById(R.id.calendarItem_cvIsSelected);
+                cv = View.inflate(this@MainActivity, R.layout.inflat_calender_item, null)
+                val textViewYangLi = cv.findViewById<TextView>(R.id.calenderItem_tv_YangLiDay)
+                val textViewNongLi = cv.findViewById<TextView>(R.id.calendarItem_tv_NongLiDay)
+                val imageIsToday = cv.findViewById<ImageView>(R.id.calendarItem_cvIsToday)
+                val imageIsSelected = cv.findViewById<ImageView>(R.id.calendarItem_cvIsSelected)
                 if (calendarItemsMap.containsKey(position)) {
-                    CalendarItem calendarItem = calendarItemsMap.get(position);
-                    DateTime today = DateTime.getToday();
-                    textViewYangLi.setText(calendarItem.getYangLi().get(DateTime.DAY_OF_MONTH) + "");
+                    val calendarItem = calendarItemsMap[position]
+                    val today = DateTime.getToday()
+                    textViewYangLi.text = calendarItem!!.yangLi[Calendar.DAY_OF_MONTH].toString() + ""
 
                     // 农历月初，字体设置。
-                    if (calendarItem.getNongLi().getDay() == 1) {
-                        if (calendarItem.getNongLi().isLeap())
-                            textViewNongLi.setText("闰" + calendarItem.getNongLi().getMonthStr());
+                    if (calendarItem!!.nongLi.getDay() == 1) {
+                        if (calendarItem!!.nongLi.isLeap())
+                            textViewNongLi.text = "闰" + calendarItem!!.nongLi.getMonthStr()
                         else
-                            textViewNongLi.setText(calendarItem.getNongLi().getMonthStr());
-
-                        textViewNongLi.setTextColor(Color.BLACK);
-                        textViewNongLi.getPaint().setFakeBoldText(true);
+                            textViewNongLi.text = calendarItem!!.nongLi.getMonthStr()
+                        textViewNongLi.setTextColor(Color.BLACK)
+                        textViewNongLi.paint.isFakeBoldText = true
                     } else {
-                        textViewNongLi.setText(calendarItem.getNongLi().getDayStr());
+                        textViewNongLi.text = calendarItem!!.nongLi.getDayStr()
                     }
 
                     // 今天
-                    if (today.compareTo(calendarItem.getYangLi().getDate()) == 0) {
-                        imageIsToday.setVisibility(View.VISIBLE);
-                        textViewYangLi.setTextColor(Color.WHITE);
-                        textViewNongLi.setTextColor(Color.WHITE);
-                        todayPosition = position;
+                    if (today.compareTo(calendarItem!!.yangLi.getDate()) == 0) {
+                        imageIsToday.visibility = View.VISIBLE
+                        textViewYangLi.setTextColor(Color.WHITE)
+                        textViewNongLi.setTextColor(Color.WHITE)
+                        todayPosition = position
                     }
 
                     // 选中的日期
-                    if (CalendarHelper.isSameDate(calendarItem.getYangLi(), selectedDate) && !CalendarHelper.isSameDate(calendarItem.getYangLi(), today)) {
-                        imageIsSelected.setVisibility(View.VISIBLE);
-                        preSelectedPosition = position;
+                    if (CalendarHelper.isSameDate(calendarItem!!.yangLi, selectedDate) && !CalendarHelper.isSameDate(calendarItem!!.yangLi, today)) {
+                        imageIsSelected.visibility = View.VISIBLE
+                        preSelectedPosition = position
                     }
-                    calendarItemViewsMap.put(calendarItem.getYangLi(), convertView);
+                    calendarItemViewsMap[calendarItem!!.yangLi] = cv
                 } else {
-                    textViewYangLi.setText("");
-                    textViewNongLi.setText("");
+                    textViewYangLi.text = ""
+                    textViewNongLi.text = ""
                 }
-            } catch (Exception e) {
-                _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+            } catch (e: Exception) {
+                _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
             }
-            return convertView;
+            return cv
         }
     }
 
-
-    private int findReligiousKeyWord(String religious) {
-        if (religious.contains("俱亡")
+    private fun findReligiousKeyWord(religious: String): Int {
+        return if (religious.contains("俱亡")
                 || religious.contains("奇祸")
                 || religious.contains("大祸")
                 || religious.contains("促寿")
@@ -775,9 +626,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 || religious.contains("减寿五年")
                 || religious.contains("恶胎")
                 || religious.contains("夺纪")) {
-            return 1;
-        }
-        return 0;
+            1
+        } else 0
     }
 
     /**
@@ -786,24 +636,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param day
      * @return
      */
-    private String Convert2WeekDay(int day) throws Exception {
-        switch (day) {
-            case 1:
-                return "星期日";
-            case 2:
-                return "星期一";
-            case 3:
-                return "星期二";
-            case 4:
-                return "星期三";
-            case 5:
-                return "星期四";
-            case 6:
-                return "星期五";
-            case 7:
-                return "星期六";
+    @Throws(Exception::class)
+    private fun Convert2WeekDay(day: Int): String {
+        when (day) {
+            1 -> return "星期日"
+            2 -> return "星期一"
+            3 -> return "星期二"
+            4 -> return "星期三"
+            5 -> return "星期四"
+            6 -> return "星期五"
+            7 -> return "星期六"
         }
-        return "";
+        return ""
     }
 
     /**
@@ -812,79 +656,66 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      *
      * @param seletedDateTime 当前选中的日期
      */
-    private void refreshInfoLayout(DateTime seletedDateTime) {
+    private fun refreshInfoLayout(seletedDateTime: DateTime) {
         try {
-            Log.e("wangsc", "刷新信息板：" + seletedDateTime.toLongDateString());
-            if (calendarItemsMap.size() == 0) return;
-
-            CalendarItem calendarItem = null;
-            for (Map.Entry<Integer, CalendarItem> entity : calendarItemsMap.entrySet()) {
-                if (CalendarHelper.isSameDate(entity.getValue().getYangLi(), seletedDateTime)) {
-                    calendarItem = entity.getValue();
+            Log.e("wangsc", "刷新信息板：" + seletedDateTime.toLongDateString())
+            if (calendarItemsMap.size == 0) return
+            var calendarItem: CalendarItem? = null
+            for ((_, value) in calendarItemsMap) {
+                if (CalendarHelper.isSameDate(value.yangLi, seletedDateTime)) {
+                    calendarItem = value
                 }
             }
-
-
-            if (calendarItem == null) return;
-//        yearMonth.setText(currentYear + "." + format(currentMonth + 1));
-//        yangliBig.setText(seletedDateTime.getDay() + "");
-//            textViewYear.setText(_String.concat(calendarItem.getYangLi().getYear(), "年"));
+            if (calendarItem == null) return
 
             try {
-                GanZhi gz = new GanZhi(calendarItem.getYangLi(), this.solarTermMap);
-                tvGanzhi.setText(_String.concat("[", gz.getZodiac(), "]",gz.getTianGanYear(), gz.getDiZhiYear(), "年",
-                        gz.getTianGanMonth(), gz.getDiZhiMonth(), "月",
-                        gz.getTianGanDay(), gz.getDiZhiDay(), "日"));
-                tvNongLi.setText(_String.concat(calendarItem.getNongLi().getMonthStr(), calendarItem.getNongLi().getDayStr()));
-            } catch (Exception ex) {
-                _Utils.printExceptionSycn(MainActivity.this, uiHandler, ex);
+                val gz = GanZhi(calendarItem.yangLi, solarTermMap)
+                tvGanzhi.text = _String.concat("[", gz.zodiac, "]", gz.tianGanYear, gz.diZhiYear, "年",
+                        gz.tianGanMonth, gz.diZhiMonth, "月",
+                        gz.tianGanDay, gz.diZhiDay, "日")
+                tvNongLi.text = _String.concat(calendarItem.nongLi.getMonthStr(), calendarItem.nongLi.getDayStr())
+            } catch (ex: Exception) {
+                _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
             }
+            layout_religious.removeAllViews()
 
-            layout_religious.removeAllViews();
+            val haveReligious = calendarItem.religious != null && calendarItem.religious.length > 0
+            val haveRemarks = calendarItem.remarks != null && calendarItem.remarks.length > 0
+            e("religious is null : ${calendarItem.religious == null} , religious size : ${calendarItem.religious.length} ,remarks is null : ${calendarItem.remarks == null} , remarks size : ${calendarItem.remarks.length}  ")
 
-            boolean haveReligious = calendarItem.getReligious() != null;
-            boolean haveRemarks = calendarItem.getRemarks() != null;
             if (haveReligious) {
-                String[] religious = calendarItem.getReligious().split("\n");
-                int i = 1;
-                for (String str : religious) {
-                    View view = View.inflate(MainActivity.this, R.layout.inflate_targ_religious, null);
-
-
-                    TextView tv = (TextView) view.findViewById(R.id.textView_religious);
-                    tv.setText(str);
-                    tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP,INFO_TEXT_SIZE);
-                    tv.getPaint().setFakeBoldText(true);
-                    tv.setTypeface(fontHWZS);
+                val religious = calendarItem.religious.split("\n").toTypedArray()
+                val i = 1
+                for (str in religious) {
+                    val view = View.inflate(this@MainActivity, R.layout.inflate_targ_religious, null)
+                    val tv = view.findViewById<View>(R.id.textView_religious) as TextView
+                    tv.text = str
+                    tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, INFO_TEXT_SIZE.toFloat())
+                    tv.paint.isFakeBoldText = true
+                    tv.typeface = fontHWZS
                     if (findReligiousKeyWord(str) == 1) {
-                        tv.setTextColor(getResources().getColor(R.color.month_text_color));
+                        tv.setTextColor(resources.getColor(R.color.month_text_color))
                     }
-
-                    layout_religious.addView(view);
+                    layout_religious.addView(view)
                 }
             }
             if (haveRemarks) {
-                String[] remarks = calendarItem.getRemarks().split("\n");
-                int i = 1;
-
-                for (String str : remarks) {
-                    View view = View.inflate(MainActivity.this, R.layout.inflate_targ_note, null);
-
-                    TextView tv = (TextView) view.findViewById(R.id.textView_note);
-                    tv.setText(str);
-                    tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP,INFO_TEXT_SIZE);
-                    tv.getPaint().setFakeBoldText(true);
-                    tv.setTypeface(fontHWZS);
-
-                    layout_religious.addView(view);
+                val remarks = calendarItem.remarks.split("\n").toTypedArray()
+                val i = 1
+                for (str in remarks) {
+                    val view = View.inflate(this@MainActivity, R.layout.inflate_targ_note, null)
+                    val tv = view.findViewById<View>(R.id.textView_note) as TextView
+                    tv.text = str
+                    tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, INFO_TEXT_SIZE.toFloat())
+                    tv.paint.isFakeBoldText = true
+                    tv.typeface = fontHWZS
+                    layout_religious.addView(view)
                 }
             }
-        } catch (Exception e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
     }
-
-    private static final String _TAG = "wangsc";
 
     /**
      * 得到指定日期在日历中的position。
@@ -892,49 +723,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param dateTime
      * @return
      */
-    private int dateTimeToPosition(DateTime dateTime, boolean tag) {
+    private fun dateTimeToPosition(dateTime: DateTime, tag: Boolean): Int {
         /**
          * DAY_OF_WEEK：当前周的第几天。从 1 开始。
          * WEEK_OF_MONTH：当前月的第几个星期。从 1 开始。
          *
          * 周日1；  周一2； 周二3；  周三4；  周四5；  周五6；  周六7；
-         *                                          1       2
-         *  3       4       5       6       7       8       9
-         *  10      11      12      13      14      15      16
-         *  17      18      19      20      21      22      23
-         *  24      25      26      27      28      29      30
-         *  31
+         * 1       2
+         * 3       4       5       6       7       8       9
+         * 10      11      12      13      14      15      16
+         * 17      18      19      20      21      22      23
+         * 24      25      26      27      28      29      30
+         * 31
          */
-        if (isWeekendFirst) {
-            int week = dateTime.get(DateTime.WEEK_OF_MONTH);
-            int day_week = dateTime.get(DateTime.DAY_OF_WEEK);
-            return (week - 1) * 7 + day_week - 1;
+        var tag = tag
+        return if (isWeekendFirst) {
+            val week = dateTime[Calendar.WEEK_OF_MONTH]
+            val day_week = dateTime[Calendar.DAY_OF_WEEK]
+            (week - 1) * 7 + day_week - 1
         } else {
             // FIXME: 2020/5/29 周六偏差
             /**
              * DAY_OF_WEEK：当前周的第几天。从1开始。
              * WEEK_OF_MONTH：当前月的第几个星期。从1开始。
              *
-             *   周一1；  周二2； 周三3；  周四4；  周五5；  周六6；  周日7；
-             *                                    1       2       3
-             *     4      5       6       7       8       9       10
-             *     11     12      13      14      15      16      17
-             *     18     19      20      21      22      23      24
-             *     25     26      27      28      29      30      31
+             * 周一1；  周二2； 周三3；  周四4；  周五5；  周六6；  周日7；
+             * 1       2       3
+             * 4      5       6       7       8       9       10
+             * 11     12      13      14      15      16      17
+             * 18     19      20      21      22      23      24
+             * 25     26      27      28      29      30      31
              */
-            int week = dateTime.get(DateTime.WEEK_OF_MONTH);
-            int day_week = dateTime.get(DateTime.DAY_OF_WEEK) - 1;
+            var week = dateTime[Calendar.WEEK_OF_MONTH]
+            var day_week = dateTime[Calendar.DAY_OF_WEEK] - 1
             if (day_week == 0) {
-                day_week = 7;
-                week--;
+                day_week = 7
+                week--
                 if (week == 0) {
-                    tag = true;
+                    tag = true
                 }
             }
             if (tag) {
-                week++;
+                week++
             }
-            return (week - 1) * 7 + day_week - 1;
+            (week - 1) * 7 + day_week - 1
         }
     }
 
@@ -943,153 +775,142 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      *
      * @throws Exception
      */
-    private void refreshCalendar() {
+    private fun refreshCalendar() {
         try {
-            refreshCalendarTask.cancel(true);
-            calendarItemsMap.clear();
-            calendarItemViewsMap.clear();
-            currentMonthSolarTermMap.clear();
-            religiousDayMap.clear();
-            remarkMap.clear();
-
-            int maxDayInMonth = 0;
-            DateTime tmpToday = new DateTime(currentYear, currentMonth, 1);
-            calendarItemLength = maxDayInMonth = tmpToday.getActualMaximum(DateTime.DAY_OF_MONTH);
-
+            refreshCalendarTask.cancel(true)
+            calendarItemsMap.clear()
+            calendarItemViewsMap.clear()
+            currentMonthSolarTermMap.clear()
+            religiousDayMap.clear()
+            remarkMap.clear()
+            var maxDayInMonth = 0
+            val tmpToday = DateTime(currentYear, currentMonth, 1)
+            maxDayInMonth = tmpToday.getActualMaximum(Calendar.DAY_OF_MONTH)
+            calendarItemLength = maxDayInMonth
             /**
              * calendarItemLength首先由上面的语句设置为当月天数。然后再由下面的语句，把每个月日历前面空白的几天加上。
              */
             if (isWeekendFirst) {
-                int day_week = tmpToday.get(DateTime.DAY_OF_WEEK);
-                calendarItemLength += day_week - 1;
+                val day_week = tmpToday[Calendar.DAY_OF_WEEK]
+                calendarItemLength += day_week - 1
             } else {
-                int day_week = tmpToday.get(DateTime.DAY_OF_WEEK) - 1;
-                if (day_week == 0)
-                    day_week = 7;
-                calendarItemLength += day_week - 1;
+                var day_week = tmpToday[Calendar.DAY_OF_WEEK] - 1
+                if (day_week == 0) day_week = 7
+                calendarItemLength += day_week - 1
             }
 
             // “今”按钮是否显示
-            DateTime today = DateTime.getToday();
+            val today = DateTime.getToday()
             if (selectedDate.compareTo(today) == 0) {
-                setTodayEnable(false);
+                setTodayEnable(false)
             } else {
-                setTodayEnable(true);
+                setTodayEnable(true)
             }
 
             // FIXME: 2020/5/29 周六偏差
             // 得到填充日历控件所需要的数据
-            boolean tag = false;
-            for (int i = 1; i <= maxDayInMonth; i++) {
-                int week = tmpToday.get(DateTime.WEEK_OF_MONTH);
+            var tag = false
+            for (i in 1..maxDayInMonth) {
+                var week = tmpToday[Calendar.WEEK_OF_MONTH]
                 if (isWeekendFirst) {
                     /**
                      * DAY_OF_WEEK：当前周的第几天。从1开始。
                      * WEEK_OF_MONTH：当前月的第几个星期。从1开始。
                      *
                      * 周日1；  周一2； 周二3；  周三4；  周四5；  周五6；  周六7；
-                     *                                          1       2
-                     *  3       4       5       6       7       8       9
-                     *  10      11      12      13      14      15      16
-                     *  17      18      19      20      21      22      23
-                     *  24      25      26      27      28      29      30
-                     *  31
+                     * 1       2
+                     * 3       4       5       6       7       8       9
+                     * 10      11      12      13      14      15      16
+                     * 17      18      19      20      21      22      23
+                     * 24      25      26      27      28      29      30
+                     * 31
                      */
-                    int day_week = tmpToday.get(DateTime.DAY_OF_WEEK);
-                    int key = (week - 1) * 7 + day_week - 1;
-                    DateTime newCalendar = new DateTime();
-                    newCalendar.setTimeInMillis(tmpToday.getTimeInMillis());
-                    CalendarItem item = new CalendarItem(newCalendar);
-                    calendarItemsMap.put(key, item);
+                    val day_week = tmpToday[Calendar.DAY_OF_WEEK]
+                    val key = (week - 1) * 7 + day_week - 1
+                    val newCalendar = DateTime()
+                    newCalendar.timeInMillis = tmpToday.timeInMillis
+                    val item = CalendarItem(newCalendar)
+                    calendarItemsMap[key] = item
                 } else {
                     /**
                      * DAY_OF_WEEK：当前周的第几天。从1开始。
                      * WEEK_OF_MONTH：当前月的第几个星期。从1开始。
                      *
-                     *   周一1；  周二2； 周三3；  周四4；  周五5；  周六6；  周日7；
-                     *                                    1       2       3
-                     *     4      5       6       7       8       9       10
-                     *     11     12      13      14      15      16      17
-                     *     18     19      20      21      22      23      24
-                     *     25     26      27      28      29      30      31
+                     * 周一1；  周二2； 周三3；  周四4；  周五5；  周六6；  周日7；
+                     * 1       2       3
+                     * 4      5       6       7       8       9       10
+                     * 11     12      13      14      15      16      17
+                     * 18     19      20      21      22      23      24
+                     * 25     26      27      28      29      30      31
                      */
-                    int day_week = tmpToday.get(DateTime.DAY_OF_WEEK) - 1;
+                    var day_week = tmpToday[Calendar.DAY_OF_WEEK] - 1
                     if (day_week == 0) {
-                        day_week = 7;
-                        week--;
+                        day_week = 7
+                        week--
                         if (week == 0) {
-                            tag = true;
+                            tag = true
                         }
                     }
                     if (tag) {
-                        week++;
+                        week++
                     }
-                    int key = (week - 1) * 7 + day_week - 1;
-                    DateTime newCalendar = new DateTime();
-                    newCalendar.setTimeInMillis(tmpToday.getTimeInMillis());
-                    CalendarItem item = new CalendarItem(newCalendar);
-                    calendarItemsMap.put(key, item);
+                    val key = (week - 1) * 7 + day_week - 1
+                    val newCalendar = DateTime()
+                    newCalendar.timeInMillis = tmpToday.timeInMillis
+                    val item = CalendarItem(newCalendar)
+                    calendarItemsMap[key] = item
                 }
-                tmpToday.add(DateTime.DAY_OF_MONTH, 1);
+                tmpToday.add(Calendar.DAY_OF_MONTH, 1)
             }
 
             // 填充日历控件
-            todayPosition = -1;
-            preSelectedPosition = -1;
-
-
-            uiHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        userCalender.setAdapter(calendarAdapter);
-                        refreshCalendarTask = new RefreshCalendarTask();
-                        refreshCalendarTask.execute();
-                        calenderHeaderGridAdapter.notifyDataSetChanged();
-                    } catch (Exception e) {
-                        _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
-                    }
+            todayPosition = -1
+            preSelectedPosition = -1
+            uiHandler.post {
+                try {
+                    userCalender.adapter = calendarAdapter
+                    refreshCalendarTask = RefreshCalendarTask()
+                    refreshCalendarTask.execute()
+                    calenderHeaderGridAdapter.notifyDataSetChanged()
+                } catch (e: Exception) {
+                    _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
                 }
-            });
+            }
             if (isFirstTime && welcomeDurationIndex != 0) {
-                int duration = _Session.duration[dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getInt()];
-                Log.i("wangsc", "duration: " + duration);
-                long span = duration - (System.currentTimeMillis() - xxxTimeMillis);
+                val duration = _Session.duration[dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getInt()]
+                Log.i("wangsc", "duration: $duration")
+                val span = duration - (System.currentTimeMillis() - xxxTimeMillis)
                 if (span > 0) {
                     try {
-                        Thread.sleep(span);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Thread.sleep(span)
+                    } catch (e: InterruptedException) {
+                        e.printStackTrace()
                     }
                 }
-                isFirstTime = false;
+                isFirstTime = false
             }
-            uiHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        layoutWelcome.setVisibility(View.INVISIBLE);
-                    } catch (Exception e) {
-                        _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
-                    }
+            uiHandler.post {
+                try {
+                    layoutWelcome.visibility = View.INVISIBLE
+                } catch (e: Exception) {
+                    _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
                 }
-            });
-        } catch (NumberFormatException e) {
-            _Utils.printExceptionSycn(this, uiHandler, e);
+            }
+        } catch (e: NumberFormatException) {
+            _Utils.printExceptionSycn(this, uiHandler, e)
         }
     }
 
-    int progress;
-
-    private void disableButton() {
+    var progres = 0
+    private fun disableButton() {
 //        imageLeft.setEnabled(false);
 //        imageRight.setEnabled(false);
 //        imageLeft.setColorFilter(Color.GRAY);
 //        imageRight.setColorFilter(Color.GRAY);
-        tvToday.setTextColor(Color.GRAY);
+        tvToday.setTextColor(Color.GRAY)
     }
 
-    private void enableButton() {
+    private fun enableButton() {
 //        imageLeft.setEnabled(true);
 //        imageRight.setEnabled(true);
 ////        buttonMonth.setEnabled(true);
@@ -1097,66 +918,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        imageLeft.setColorFilter(Color.TRANSPARENT);
 //        imageRight.setColorFilter(Color.TRANSPARENT);
 //        buttonMonth.setTextColor(getResources().getColor(R.color.month_text_color));
-        tvToday.setTextColor(getResources().getColor(R.color.month_text_color));
+        tvToday.setTextColor(resources.getColor(R.color.month_text_color))
     }
 
-    private class RefreshCalendarTask extends AsyncTask {
-
+    private inner class RefreshCalendarTask : AsyncTask<Any?, Any?, Any?>() {
         /**
          * doInBackground方法内部执行后台任务,不可在此方法内修改UI
          *
          * @param params
          * @return
          */
-        @Override
-        protected Object doInBackground(Object[] params) {
+        override fun doInBackground(params: Array<Any?>): Any? {
             try {
-
-                progress = 0;
-                publishProgress(progress);
+                progres = 0
+                publishProgress(progres)
                 // 得到本月节气
-                for (Map.Entry<DateTime, SolarTerm> entry : solarTermMap.entrySet()) {
-                    if (entry.getKey().getYear() == currentYear && entry.getKey().getMonth() == currentMonth) {
-                        currentMonthSolarTermMap.put(entry.getKey(), entry.getValue());
+                for ((key, value) in solarTermMap) {
+                    if (key.getYear() == currentYear && key.getMonth() == currentMonth) {
+                        currentMonthSolarTermMap[key] = value
                     }
                 }
-
-                publishProgress(progress++);
+                publishProgress(progres++)
 
                 // 获得当月戒期信息
                 try {
-                    Religious religious = new Religious(MainActivity.this, currentYear, currentMonth, solarTermMap, new ReligiousCallBack() {
-                        @Override
-                        public void execute() {
-                            publishProgress(progress++);
+                    val religious = Religious(this@MainActivity, currentYear, currentMonth, solarTermMap, object : ReligiousCallBack {
+                        override fun execute() {
+                            publishProgress(progres++)
                         }
-                    });
-                    religiousDayMap = religious.getReligiousDays();
+                    })
 
-                    publishProgress(progress++);
-                    remarkMap = religious.getRemarks();
-                } catch (InterruptedException e) {
-                } catch (Exception ex) {
-                    religiousDayMap = new HashMap<>();
-                    remarkMap = new HashMap<>();
-                    _Utils.printExceptionSycn(MainActivity.this, uiHandler, ex);
+                    religiousDayMap = religious.religiousDays
+                    publishProgress(progres++)
+                    remarkMap = religious.remarks
+                } catch (e: InterruptedException) {
+                } catch (ex: Exception) {
+                    religiousDayMap = HashMap()
+                    remarkMap = HashMap()
+                    _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
                 }
-                publishProgress(progress++);
-            } catch (Exception e) {
-                _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+                publishProgress(progres++)
+            } catch (e: Exception) {
+                _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
             }
-            return null;
+            return null
         }
 
         /**
          * onPreExecute方法用于在执行后台任务前做一些UI操作
          */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pbLoading.setVisibility(View.VISIBLE);
-            pbLoading.setProgress(0);
-            pbLoading.setMax(selectedDate.getActualMaximum(DateTime.DAY_OF_MONTH));
+        override fun onPreExecute() {
+            super.onPreExecute()
+            pbLoading.visibility = View.VISIBLE
+            pbLoading.progress = 0
+            pbLoading.max = selectedDate.getActualMaximum(Calendar.DAY_OF_MONTH)
         }
 
         /**
@@ -1164,12 +979,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          *
          * @param values
          */
-        @Override
-        protected void onProgressUpdate(Object[] values) {
-            super.onProgressUpdate(values);
-            pbLoading.setProgress((int) values[0]);
-            if ((int) values[0] == 0) {
-                disableButton();
+        override fun onProgressUpdate(values: Array<Any?>) {
+            super.onProgressUpdate(*values)
+            pbLoading.progress = values[0] as Int
+            if (values[0] as Int == 0) {
+                disableButton()
             }
         }
 
@@ -1178,263 +992,175 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          *
          * @param o
          */
-        @Override
-        protected void onPostExecute(Object o) {
-            super.onPostExecute(o);
-
+        override fun onPostExecute(o: Any?) {
+            super.onPostExecute(o)
             try {
-                Boolean tag = false;
-                DateTime dateTime = new DateTime(selectedDate.getYear(), selectedDate.getMonth(), 1);
-                if (dateTime.get(DateTime.DAY_OF_WEEK) - 1 == 0) {
-                    tag = true;
+                var tag = false
+                val dateTime = DateTime(selectedDate.getYear(), selectedDate.getMonth(), 1)
+                if (dateTime[Calendar.DAY_OF_WEEK] - 1 == 0) {
+                    tag = true
                 }
-
-                for (Map.Entry<DateTime, View> entry : calendarItemViewsMap.entrySet()) {
-                    CalendarItem calendarItem = calendarItemsMap.get(dateTimeToPosition(entry.getKey(), tag));
+                for ((key, convertView) in calendarItemViewsMap) {
+                    val calendarItem = calendarItemsMap[dateTimeToPosition(key, tag)]
                     if (calendarItem != null) {
-                        View convertView = entry.getValue();
-                        TextView textViewNongLi = (TextView) convertView.findViewById(R.id.calendarItem_tv_NongLiDay);
-                        ImageView imageIsUnReligious = (ImageView) convertView.findViewById(R.id.calendarItem_cvIsUnReligious);
+                        val textViewNongLi = convertView.findViewById<View>(R.id.calendarItem_tv_NongLiDay) as TextView
+                        val imageIsUnReligious = convertView.findViewById<View>(R.id.calendarItem_cvIsUnReligious) as ImageView
 
                         // 节气
-                        for (Map.Entry<DateTime, SolarTerm> termEntry : currentMonthSolarTermMap.entrySet()) {
-                            DateTime today = new DateTime(termEntry.getKey().getYear(), termEntry.getKey().getMonth(), termEntry.getKey().get(DateTime.DAY_OF_MONTH), 0, 0, 0);
-                            if (CalendarHelper.isSameDate(today, calendarItem.getYangLi())) {
-                                textViewNongLi.setText(termEntry.getValue().toString());
+                        for ((key1, value) in currentMonthSolarTermMap) {
+                            val today = DateTime(key1.getYear(), key1.getMonth(), key1[Calendar.DAY_OF_MONTH], 0, 0, 0)
+                            if (CalendarHelper.isSameDate(today, calendarItem.yangLi)) {
+                                textViewNongLi.text = value.toString()
                                 //                            textViewNongLi.setTextColor(Color.CYAN);
-                                break;
+                                break
                             }
                         }
 
                         //
-                        DateTime currentDate = entry.getKey().getDate();
+                        val currentDate = key.getDate()
                         if (religiousDayMap.containsKey(currentDate)) {
-                            calendarItem.setReligious(religiousDayMap.get(currentDate));
+                            calendarItem.religious = religiousDayMap[currentDate] ?: ""
                         }
                         if (remarkMap.containsKey(currentDate)) {
-                            calendarItem.setRemarks(remarkMap.get(currentDate));
+                            calendarItem.remarks = remarkMap[currentDate] ?: ""
                         }
 
                         // 非戒期日
-                        if (calendarItem.getReligious() == null) {
-                            imageIsUnReligious.setVisibility(View.VISIBLE);
+                        if (calendarItem.religious == null||calendarItem.religious.length==0) {
+                            imageIsUnReligious.visibility = View.VISIBLE
+                        } else if (findReligiousKeyWord(calendarItem.religious) == 1) {
+                            textViewNongLi.setTextColor(resources.getColor(R.color.month_text_color))
                         }
-                        // 戒期日，找到警示关键字。
-                        else if (findReligiousKeyWord(calendarItem.getReligious()) == 1) {
-                            textViewNongLi.setTextColor(getResources().getColor(R.color.month_text_color));
-                        }
-                        refreshInfoLayout(selectedDate);
+                        refreshInfoLayout(selectedDate)
                     }
                 }
 
                 //region test
-                for (Map.Entry<Integer, CalendarItem> entity : calendarItemsMap.entrySet()) {
-                    log("\n序号：" + entity.getKey() + "，阳历：" + entity.getValue().getYangLi().toShortDateString() + "，农历：" + entity.getValue().getNongLi().getDayStr() + "\n" + entity.getValue().getReligious());
+                for ((key, value) in calendarItemsMap) {
+                    log("""
+    
+    序号：$key，阳历：${value.yangLi.toShortDateString()}，农历：${value.nongLi.getDayStr()}
+    ${value.religious}
+    """.trimIndent())
                 }
                 //endregion
-                enableButton();
-            } catch (Exception e) {
-                _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+                enableButton()
+            } catch (e: Exception) {
+                _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
             } finally {
-                pbLoading.setVisibility(View.GONE);
+                pbLoading.visibility = View.GONE
             }
         }
 
         /**
          * onCancelled方法用于在取消执行中的任务时更改UI
          */
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-
-            pbLoading.setVisibility(View.VISIBLE);
-            pbLoading.setProgress(0);
+        override fun onCancelled() {
+            super.onCancelled()
+            pbLoading.visibility = View.VISIBLE
+            pbLoading.progress = 0
         }
     }
 
-    private void log(String log) {
-        Log.e("wangsc", log);
+    private fun log(log: String) {
+        Log.e("wangsc", log)
     }
-
 
     /**
      * 事件 - 改变月份按钮
      */
-    View.OnClickListener btnCurrentMonth_OnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            try {
-                showMonthPickerDialog(currentYear, currentMonth);
-            } catch (Exception ex) {
-                _Utils.printExceptionSycn(MainActivity.this, uiHandler, ex);
-            }
+    var btnCurrentMonth_OnClickListener = View.OnClickListener {
+        try {
+            showMonthPickerDialog(currentYear, currentMonth)
+        } catch (ex: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
         }
-    };
-
-
-    public void showMonthPickerDialog(int year, int month) {
-        View view = View.inflate(MainActivity.this, R.layout.inflate_date_picker_dialog, null);
-        AlertDialog dialog = new AlertDialog.Builder(MainActivity.this).setView(view).create();
-        dialog.setTitle("选择月份");
-
-
-        final NumberPicker npYear = (NumberPicker) view.findViewById(R.id.npYear);
-        final NumberPicker npMonth = (NumberPicker) view.findViewById(R.id.npMonth);
-
-
-        String[] yearValues = new String[Lunar.MaxYear - Lunar.MinYear + 1];
-        for (int i = 0; i < yearValues.length; i++) {
-            yearValues[i] = i + Lunar.MinYear + "年";
-        }
-
-        String[] monthValues = new String[12];
-        for (int i = 0; i < monthValues.length; i++) {
-            monthValues[i] = i + 1 + "月";
-        }
-
-
-        npYear.setMinValue(Lunar.MinYear);
-        npYear.setMaxValue(Lunar.MaxYear);
-        npYear.setDisplayedValues(yearValues);
-        npYear.setValue(year);
-        npYear.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-        npMonth.setMinValue(1);
-        npMonth.setMaxValue(12);
-        npMonth.setDisplayedValues(monthValues);
-        npMonth.setValue(month + 1);
-        npMonth.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-
-
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "选择", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                int year = npYear.getValue();
-                int month = npMonth.getValue() - 1;
-                DateTime dateTime = new DateTime();
-                dateTime.set(year, month, 1);
-                int maxDayOfMonth = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
-                int selectedDay = MainActivity.this.selectedDate.getDay();
-                setSelectedDate(year, month, maxDayOfMonth < selectedDay ? maxDayOfMonth : selectedDay);
-                //                    refreshCalendarWithDialog();
-                dialog.dismiss();
-            }
-        });
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
     }
 
-//    public class MonthPickerDialog {
-//        Dialog dialog;
-//
-//        /**
-//         * @param year  1900 - 2049
-//         * @param month 0 - 11
-//         */
-//        public MonthPickerDialog(int year, int month) {
-//            try {
-//                dialog = new Dialog(MainActivity.this);
-//                dialog.setContentView(R.layout.inflate_date_picker_dialog);
-//                dialog.setTitle("选择月份");
-//
-//                final NumberPicker npYear = (NumberPicker) dialog.findViewById(R.id.npYear);
-//                final NumberPicker npMonth = (NumberPicker) dialog.findViewById(R.id.npMonth);
-//                Button btnOK = (Button) dialog.findViewById(R.id.btnOK);
-//                Button btnCancle = (Button) dialog.findViewById(R.id.btnCancel);
-//
-//
-//                npYear.setMinValue(Lunar.MinYear);
-//                npYear.setMaxValue(Lunar.MaxYear);
-//                npYear.setValue(year);
-//                npYear.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-//                npMonth.setMinValue(1);
-//                npMonth.setMaxValue(12);
-//                npMonth.setValue(month + 1);
-//                npMonth.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-//                btnOK.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        int year = npYear.getValue();
-//                        int month = npMonth.getValue() - 1;
-//                        DateTime dateTime = new DateTime();
-//                        dateTime.set(year, month, 1);
-//                        int maxDayOfMonth = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
-//                        int selectedDay = MainActivity.this.selectedDate.getDay();
-//                        setSelectedDate(year, month, maxDayOfMonth < selectedDay ? maxDayOfMonth : selectedDay);
-//                        //                    refreshCalendarWithDialog();
-//                        dialog.cancel();
-//                    }
-//                });
-//                btnCancle.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        dialog.cancel();
-//                    }
-//                });
-//            } catch (Exception e) {
-//                _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
-//            }
-//        }
-//
-//        public void show() {
-//            dialog.show();
-//        }
-//    }
+    fun showMonthPickerDialog(year: Int, month: Int) {
+        val view = View.inflate(this@MainActivity, R.layout.inflate_date_picker_dialog, null)
+        val dialog = AlertDialog.Builder(this@MainActivity).setView(view).create()
+        dialog.setTitle("选择月份")
+        val npYear = view.findViewById<View>(R.id.npYear) as NumberPicker
+        val npMonth = view.findViewById<View>(R.id.npMonth) as NumberPicker
+        val yearValues = arrayOfNulls<String>(Lunar.MaxYear - Lunar.MinYear + 1)
+        for (i in yearValues.indices) {
+            yearValues[i] = "${i + Lunar.MinYear}年"
+        }
+        val monthValues = arrayOfNulls<String>(12)
+        for (i in monthValues.indices) {
+            monthValues[i] = "${i + 1}月"
+        }
+        npYear.minValue = Lunar.MinYear
+        npYear.maxValue = Lunar.MaxYear
+        npYear.displayedValues = yearValues
+        npYear.value = year
+        npYear.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npMonth.minValue = 1
+        npMonth.maxValue = 12
+        npMonth.displayedValues = monthValues
+        npMonth.value = month + 1
+        npMonth.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "选择") { dialog, which ->
+            val year = npYear.value
+            val month = npMonth.value - 1
+            val dateTime = DateTime()
+            dateTime[year, month] = 1
+            val maxDayOfMonth = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val selectedDay = selectedDate.getDay()
+            setSelectedDate(year, month, if (maxDayOfMonth < selectedDay) maxDayOfMonth else selectedDay)
+            //                    refreshCalendarWithDialog();
+            dialog.dismiss()
+        }
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消") { dialog, which -> dialog.dismiss() }
+        dialog.show()
+    }
 
     /**
      * 事件 - 点击日历某天
      */
-    private AdapterView.OnItemClickListener userCalender_OnItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            try {
-                if (!calendarItemsMap.containsKey(position)) return;
-
-                CalendarItem calendarItem = calendarItemsMap.get(position);
+    private val userCalender_OnItemClickListener = OnItemClickListener { parent, view, position, id ->
+        try {
+            if (!calendarItemsMap.containsKey(position)) return@OnItemClickListener
+            val calendarItem = calendarItemsMap[position]
+            if (calendarItem != null) {
                 if (todayPosition != -1) {
                     if (preSelectedPosition != -1 && preSelectedPosition != todayPosition) {
-                        parent.getChildAt(preSelectedPosition).findViewById(R.id.calendarItem_cvIsSelected).setVisibility(View.INVISIBLE);
+                        parent.getChildAt(preSelectedPosition).findViewById<View>(R.id.calendarItem_cvIsSelected).visibility = View.INVISIBLE
                     }
                     if (position != todayPosition) {
-                        view.findViewById(R.id.calendarItem_cvIsSelected).setVisibility(View.VISIBLE);
+                        view.findViewById<View>(R.id.calendarItem_cvIsSelected).visibility = View.VISIBLE
                     }
                 } else {
                     if (preSelectedPosition != -1) {
-                        parent.getChildAt(preSelectedPosition).findViewById(R.id.calendarItem_cvIsSelected).setVisibility(View.INVISIBLE);
+                        parent.getChildAt(preSelectedPosition).findViewById<View>(R.id.calendarItem_cvIsSelected).visibility = View.INVISIBLE
                     }
-                    view.findViewById(R.id.calendarItem_cvIsSelected).setVisibility(View.VISIBLE);
+                    view.findViewById<View>(R.id.calendarItem_cvIsSelected).visibility = View.VISIBLE
                 }
-                preSelectedPosition = position;
+                preSelectedPosition = position
 
                 //
-                setSelectedDate(calendarItem.getYangLi().getYear(), calendarItem.getYangLi().getMonth(), calendarItem.getYangLi().getDay());
-            } catch (Exception e) {
-                _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+                setSelectedDate(calendarItem.yangLi.getYear(), calendarItem.yangLi.getMonth(), calendarItem.yangLi.getDay())
             }
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
-    };
+    }
 
     /**
      * 事件 - 返回今天
      */
-    private View.OnClickListener btnToday_OnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            try {
-                if (preSelectedPosition != -1) {
-                    userCalender.getChildAt(preSelectedPosition).findViewById(R.id.calendarItem_cvIsSelected).setVisibility(View.INVISIBLE);
-                }
-                DateTime today = DateTime.getToday();
-                setSelectedDate(today.getYear(), today.getMonth(), today.getDay());
-            } catch (Exception e) {
-                _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+    private val btnToday_OnClickListener = View.OnClickListener {
+        try {
+            if (preSelectedPosition != -1) {
+                userCalender.getChildAt(preSelectedPosition).findViewById<View>(R.id.calendarItem_cvIsSelected).visibility = View.INVISIBLE
             }
+            val today = DateTime.getToday()
+            setSelectedDate(today.getYear(), today.getMonth(), today.getDay())
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
-    };
+    }
 
     /**
      * 设置SelectedDate，并在修改该属性之后，重载自定义日历区域数据。
@@ -1443,40 +1169,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param month
      * @param day
      */
-    public void setSelectedDate(int year, int month, int day) {
+    fun setSelectedDate(year: Int, month: Int, day: Int) {
         try {
-            boolean monthHasChanged = false;
+            var monthHasChanged = false
 
             // 如果新选中日期与当前月份不再同一月份，则刷新日历。
             if (year != currentYear || month != currentMonth) {
-                monthHasChanged = true;
+                monthHasChanged = true
             }
-            this.selectedDate.set(year, month, day);
+            selectedDate[year, month] = day
 
             // 判断是否刷新自定义日历区域
             if (monthHasChanged) {
-                currentYear = year;
-                currentMonth = month;
-                refreshCalendar();
-//                refreshCalendarWithDialog(_String.concat("正在加载", currentYear, "年", currentMonth + 1, "月份", "戒期信息。"));
+                currentYear = year
+                currentMonth = month
+                refreshCalendar()
+                //                refreshCalendarWithDialog(_String.concat("正在加载", currentYear, "年", currentMonth + 1, "月份", "戒期信息。"));
             }
-            setYearMonthText();
+            setYearMonthText()
 
             // “今”按钮是否显示
-            DateTime today = DateTime.getToday();
+            val today = DateTime.getToday()
             if (year == today.getYear() && month == today.getMonth() && day == today.getDay()) {
-                log("today");
-                setTodayEnable(false);
+                log("today")
+                setTodayEnable(false)
             } else {
-                log("not today");
-                setTodayEnable(true);
+                log("not today")
+                setTodayEnable(true)
             }
 
 
             //
-            refreshInfoLayout(selectedDate);
-        } catch (Exception e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+            refreshInfoLayout(selectedDate)
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
     }
 
@@ -1485,36 +1211,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      *
      * @param enable
      */
-    private void setTodayEnable(Boolean enable) {
+    private fun setTodayEnable(enable: Boolean) {
         try {
-            final Boolean value = enable;
-            uiHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    log("xxxxxxxxxxxxxxxxxxxxx : "+value.toString());
-                    // TODO: 2021/1/5 asdfasdfsadfs
-                    if (value) {
-                        tvToday.setVisibility(View.VISIBLE);
-                        ibLeftMenu.setVisibility(View.INVISIBLE);
-                        stopRorateWan();
-                    } else {
-                        tvToday.setVisibility(View.INVISIBLE);
-                        ibLeftMenu.setVisibility(View.VISIBLE);
-                        rorateWan();
-                    }
+            uiHandler.post {
+                log("xxxxxxxxxxxxxxxxxxxxx : $enable")
+                // TODO: 2021/1/5 asdfasdfsadfs
+                if (enable) {
+                    tvToday.visibility = View.VISIBLE
+                    ibLeftMenu.visibility = View.INVISIBLE
+                    stopRorateWan()
+                } else {
+                    tvToday.visibility = View.INVISIBLE
+                    ibLeftMenu.visibility = View.VISIBLE
+                    rorateWan()
                 }
-            });
-        } catch (Exception e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+            }
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
     }
 
-    private void rorateWan(){
-        AnimationUtils.setRorateAnimation(MainActivity.this,ibLeftMenu,7000);
+    private fun rorateWan() {
+        AnimationUtils.setRorateAnimation(this@MainActivity, ibLeftMenu, 7000)
     }
 
-    private void stopRorateWan(){
-        ibLeftMenu.clearAnimation();
+    private fun stopRorateWan() {
+        ibLeftMenu.clearAnimation()
     }
 
     /**
@@ -1523,11 +1245,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param x
      * @return
      */
-    private String format(int x) {
-        String s = "" + x;
-        if (s.length() == 1)
-            s = "0" + s;
-        return s;
+    private fun format(x: Int): String {
+        var s = "" + x
+        if (s.length == 1) s = "0$s"
+        return s
     }
 
     /**
@@ -1538,29 +1259,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @throws IOException
      * @throws Exception
      */
-    private TreeMap<DateTime, SolarTerm> loadJavaSolarTerms(int resId) throws IOException, Exception {
-        TreeMap<DateTime, SolarTerm> result = new TreeMap<DateTime, SolarTerm>();
+    @Throws(IOException::class, Exception::class)
+    private fun loadJavaSolarTerms(resId: Int): TreeMap<DateTime, SolarTerm> {
+        val result = TreeMap<DateTime, SolarTerm>()
         try {
-            DataInputStream dis = new DataInputStream(getResources().openRawResource(resId));
-
-            long date = dis.readLong();
-            int solar = dis.readInt();
+            val dis = DataInputStream(resources.openRawResource(resId))
+            var date = dis.readLong()
+            var solar = dis.readInt()
             try {
                 while (true) {
-                    DateTime cal = new DateTime();
-                    cal.setTimeInMillis(date);
-                    SolarTerm solarTerm = SolarTerm.Int2SolarTerm(solar);
-                    result.put(cal, solarTerm);
-                    date = dis.readLong();
-                    solar = dis.readInt();
+                    val dt = DateTime()
+                    dt.timeInMillis = date
+                    val solarTerm = SolarTerm.Int2SolarTerm(solar)
+                    result[dt] = solarTerm!!
+                    date = dis.readLong()
+                    solar = dis.readInt()
                 }
-            } catch (EOFException ex) {
-                dis.close();
+            } catch (ex: EOFException) {
+                dis.close()
             }
-        } catch (Resources.NotFoundException e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
-        } catch (Exception e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+        } catch (e: NotFoundException) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
         // 按照KEY排序TreeMap
 //        TreeMap<DateTime, SolarTerm> result = new TreeMap<DateTime, SolarTerm>(new Comparator<DateTime>() {
@@ -1569,7 +1290,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                return lhs.compareTo(rhs);
 //            }
 //        });
-        return result;
+        return result
     }
 
     /**
@@ -1579,28 +1300,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @throws IOException
      * @throws Exception
      */
-    private void convertToJavafile(int resId) throws IOException, Exception {
+    @Throws(IOException::class, Exception::class)
+    private fun convertToJavafile(resId: Int) {
         try {
-            Map<DateTime, SolarTerm> solarTermMap = loadCsharpSolarTerms(resId);
-            File file = new File("/mnt/sdcard/solar300.dat");
+            val solarTermMap = loadCsharpSolarTerms(resId)
+            val file = File("/mnt/sdcard/solar300.dat")
             if (!file.exists()) {
-                file.createNewFile();
+                file.createNewFile()
             }
-            FileOutputStream fos = new FileOutputStream(file);
-            DataOutputStream dos = new DataOutputStream(fos);
-
-            Set set = solarTermMap.entrySet();
-            Iterator i = set.iterator();
+            val fos = FileOutputStream(file)
+            val dos = DataOutputStream(fos)
+            val set: Set<*> = solarTermMap.entries
+            val i = set.iterator()
             while (i.hasNext()) {
-                Map.Entry<DateTime, SolarTerm> solar = (Map.Entry<DateTime, SolarTerm>) i.next();
-                dos.writeLong(solar.getKey().getTimeInMillis());
-                dos.writeInt(solar.getValue().getValue());
+                val solar = i.next() as Map.Entry<DateTime, SolarTerm>
+                dos.writeLong(solar.key.timeInMillis)
+                dos.writeInt(solar.value.value)
             }
-            dos.flush();
-            dos.close();
-            fos.close();
-        } catch (Exception e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+            dos.flush()
+            dos.close()
+            fos.close()
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
     }
 
@@ -1610,34 +1331,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param resId 资源文件ID
      * @return
      */
-    private Map<DateTime, SolarTerm> loadCsharpSolarTerms(int resId) throws Exception {
-        Map<DateTime, SolarTerm> solarTermMap = new HashMap<DateTime, SolarTerm>();
+    @Throws(Exception::class)
+    private fun loadCsharpSolarTerms(resId: Int): Map<DateTime, SolarTerm> {
+        val solarTermMap: MutableMap<DateTime, SolarTerm> = HashMap()
         try {
-            InputStream stream = getResources().openRawResource(resId);
-            byte[] longBt = new byte[8];
-            byte[] intBt = new byte[4];
-            byte[] nullBt = new byte[4];
-            stream.read(longBt);
-            stream.read(intBt);
-            int cursor = stream.read(nullBt);
-
+            val stream = resources.openRawResource(resId)
+            val longBt = ByteArray(8)
+            val intBt = ByteArray(4)
+            val nullBt = ByteArray(4)
+            stream.read(longBt)
+            stream.read(intBt)
+            var cursor = stream.read(nullBt)
             while (cursor != -1) {
-                DateTime cal = new DateTime();
-                cal.setTimeInMillis(bytesToLong(longBt));
-                int solar = bytesToInt(intBt);
-                SolarTerm solarTerm = SolarTerm.Int2SolarTerm(solar);
-                solarTermMap.put(cal, solarTerm);
-                stream.read(longBt);
-                stream.read(intBt);
-                cursor = stream.read(nullBt);
+                val cal = DateTime()
+                cal.timeInMillis = bytesToLong(longBt)
+                val solar = bytesToInt(intBt)
+                val solarTerm = SolarTerm.Int2SolarTerm(solar)
+                solarTermMap[cal] = solarTerm!!
+                stream.read(longBt)
+                stream.read(intBt)
+                cursor = stream.read(nullBt)
             }
-            stream.close();
-        } catch (Resources.NotFoundException e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
-        } catch (Exception e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+            stream.close()
+        } catch (e: NotFoundException) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
+        } catch (e: Exception) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
-        return solarTermMap;
+        return solarTermMap
     }
 
     /**
@@ -1646,11 +1367,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param bytes 需要转化的byte[]
      * @return
      */
-    public int bytesToInt(byte[] bytes) {
-        return bytes[0] & 0xFF | (bytes[1] & 0xFF) << 8 | (bytes[2] & 0xFF) << 16 | (bytes[3] & 0xFF) << 24;
+    fun bytesToInt(bytes: ByteArray): Int {
+        return (bytes[0] and 0xFF.toByte()).toInt() or (bytes[1] and 0xFF.toByte()).toInt() shl (8) or (bytes[2] and 0xFF.toByte()).toInt() shl (16) or (bytes[3] and 0xFF.toByte()).toInt() shl (24)
     }
 
-    private ByteBuffer buffer;
+    private lateinit var buffer: ByteBuffer
 
     /**
      * byte[] 转化为long。
@@ -1658,49 +1379,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param bytes 需要转化的byte[]
      * @return
      */
-    public long bytesToLong(byte[] bytes) {
-        buffer = ByteBuffer.allocate(8);
-        for (int i = bytes.length - 1; i >= 0; i--) {
-            buffer.put(bytes[i]);
+    fun bytesToLong(bytes: ByteArray): Long {
+        buffer = ByteBuffer.allocate(8)
+        for (i in bytes.indices.reversed()) {
+            buffer.put(bytes[i])
         }
-        buffer.flip();//need flip
-        return buffer.getLong();
+        buffer.flip() //need flip
+        return buffer.getLong()
     }
 
-    @Override
-    public void onBackPressed() {
+    override fun onBackPressed() {
         try {
             if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
+                drawer.closeDrawer(GravityCompat.START)
             } else {
-                super.onBackPressed();
+                super.onBackPressed()
             }
-        } catch (Exception ex) {
-            super.onBackPressed();
+        } catch (ex: Exception) {
+            super.onBackPressed()
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        menuInflater.inflate(R.menu.main, menu)
+        return true
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        menuItemSelected(item);
-        return super.onOptionsItemSelected(item);
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        menuItemSelected(item)
+        return super.onOptionsItemSelected(item)
     }
 
-
-    private boolean menuItemSelected(MenuItem menuItem) {
-
-        int id = menuItem.getItemId();
+    private fun menuItemSelected(menuItem: MenuItem): Boolean {
+        val id = menuItem.itemId
         if (id == R.id.menu_settings) {
-            startActivityForResult(new Intent(MainActivity.this, SettingActivity.class), TO_SETTING_ACTIVITY);
+            startActivityForResult(Intent(this@MainActivity, SettingActivity::class.java), TO_SETTING_ACTIVITY)
         }
-//        else if (id == R.id.menu_select) {
+        //        else if (id == R.id.menu_select) {
 //            try {
 //                MonthPickerDialog monthPickerDialog = new MonthPickerDialog(currentYear, currentMonth);
 //                monthPickerDialog.show();
@@ -1708,133 +1424,121 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //
 //            }
 //        }
-
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+        drawer.closeDrawer(GravityCompat.START)
+        return true
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         try {
-            switch (requestCode) {
-                case TO_SETTING_ACTIVITY:
-                    if (SettingActivity.isCalenderChanged) {
+            when (requestCode) {
+                TO_SETTING_ACTIVITY -> {
+                    if (SettingActivity.Companion.isCalenderChanged) {
 //                        refreshCalendarWithDialog("配置已更改，正在重新加载...");
-                        isWeekendFirst = dataContext.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean();
-                        refreshCalendar();
+                        isWeekendFirst = dataContext.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean()
+                        refreshCalendar()
                     }
-                    if (SettingActivity.isRecordSetChanged) {
-                        initRecordPart();
+                    if (SettingActivity.Companion.isRecordSetChanged) {
+                        initRecordPart()
                     }
-                    break;
-                case TO_SEXUAL_RECORD_ACTIVITY:
-                    initRecordPart();
-                    break;
+                }
+                TO_SEXUAL_RECORD_ACTIVITY -> initRecordPart()
             }
-        } catch (NumberFormatException e) {
-            _Utils.printExceptionSycn(MainActivity.this, uiHandler, e);
+        } catch (e: NumberFormatException) {
+            _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
-    public void showAddSexualDayDialog() {
-
-        View view = View.inflate(MainActivity.this, R.layout.inflate_dialog_date_picker, null);
-        AlertDialog dialog = new AlertDialog.Builder(MainActivity.this).setView(view).create();
-        dialog.setTitle("最后一次行房日期");
-
-        DateTime dateTime = new DateTime();
-        final int year = dateTime.getYear();
-        int month = dateTime.getMonth();
-//        int maxDay = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
-        int day = dateTime.getDay();
-        int hour = dateTime.getHour();
-
-        String[] yearNumbers = new String[3];
-        for (int i = year - 2; i <= year; i++) {
-            yearNumbers[i - year + 2] = i + "年";
+    fun showAddSexualDayDialog() {
+        val view = View.inflate(this@MainActivity, R.layout.inflate_dialog_date_picker, null)
+        val dialog = AlertDialog.Builder(this@MainActivity).setView(view).create()
+        dialog.setTitle("最后一次行房日期")
+        val dateTime = DateTime()
+        val year = dateTime.getYear()
+        val month = dateTime.getMonth()
+        //        int maxDay = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
+        val day = dateTime.getDay()
+        val hour = dateTime.getHour()
+        val yearNumbers = arrayOfNulls<String>(3)
+        for (i in year - 2..year) {
+            yearNumbers[i - year + 2] = "${i}年"
         }
-        String[] monthNumbers = new String[12];
-        for (int i = 0; i < 12; i++) {
-            monthNumbers[i] = i + 1 + "月";
+        val monthNumbers = arrayOfNulls<String>(12)
+        for (i in 0..11) {
+            monthNumbers[i] = "${i + 1}月"
         }
-        String[] dayNumbers = new String[31];
-        for (int i = 0; i < 31; i++) {
-            dayNumbers[i] = i + 1 + "日";
+        val dayNumbers = arrayOfNulls<String>(31)
+        for (i in 0..30) {
+            dayNumbers[i] = "${i + 1}日"
         }
-        String[] hourNumbers = new String[24];
-        for (int i = 0; i < 24; i++) {
-            hourNumbers[i] = i + "点";
+        val hourNumbers = arrayOfNulls<String>(24)
+        for (i in 0..23) {
+            hourNumbers[i] = "${i}点"
         }
-        final NumberPicker npYear = (NumberPicker) view.findViewById(R.id.npYear);
-        final NumberPicker npMonth = (NumberPicker) view.findViewById(R.id.npMonth);
-        final NumberPicker npDay = (NumberPicker) view.findViewById(R.id.npDay);
-        final NumberPicker npHour = (NumberPicker) view.findViewById(R.id.npHour);
-        npYear.setMinValue(year - 2);
-        npYear.setMaxValue(year);
-        npYear.setValue(year);
-        npYear.setDisplayedValues(yearNumbers);
-        npYear.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-        npMonth.setMinValue(1);
-        npMonth.setMaxValue(12);
-        npMonth.setDisplayedValues(monthNumbers);
-        npMonth.setValue(month + 1);
-        npMonth.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-        npDay.setMinValue(1);
-        npDay.setMaxValue(31);
-        npDay.setDisplayedValues(dayNumbers);
-        npDay.setValue(day);
-        npDay.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-        npHour.setMinValue(0);
-        npHour.setMaxValue(23);
-        npHour.setDisplayedValues(hourNumbers);
-        npHour.setValue(hour);
-        npHour.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-
-
-        npMonth.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                DateTime selected = new DateTime(npYear.getValue(), npMonth.getValue() - 1, 1);
-                int max = selected.getActualMaximum(Calendar.DAY_OF_MONTH);
-
-                int day = npDay.getValue();
-                npDay.setMaxValue(max);
-                if (day > max) {
-                    npDay.setValue(1);
-                } else {
-                    npDay.setValue(day);
-                }
+        val npYear = view.findViewById<View>(R.id.npYear) as NumberPicker
+        val npMonth = view.findViewById<View>(R.id.npMonth) as NumberPicker
+        val npDay = view.findViewById<View>(R.id.npDay) as NumberPicker
+        val npHour = view.findViewById<View>(R.id.npHour) as NumberPicker
+        npYear.minValue = year - 2
+        npYear.maxValue = year
+        npYear.value = year
+        npYear.displayedValues = yearNumbers
+        npYear.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npMonth.minValue = 1
+        npMonth.maxValue = 12
+        npMonth.displayedValues = monthNumbers
+        npMonth.value = month + 1
+        npMonth.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npDay.minValue = 1
+        npDay.maxValue = 31
+        npDay.displayedValues = dayNumbers
+        npDay.value = day
+        npDay.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npHour.minValue = 0
+        npHour.maxValue = 23
+        npHour.displayedValues = hourNumbers
+        npHour.value = hour
+        npHour.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npMonth.setOnValueChangedListener { picker, oldVal, newVal ->
+            val selected = DateTime(npYear.value, npMonth.value - 1, 1)
+            val max = selected.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val day = npDay.value
+            npDay.maxValue = max
+            if (day > max) {
+                npDay.value = 1
+            } else {
+                npDay.value = day
             }
-        });
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    int year = npYear.getValue();
-                    int month = npMonth.getValue() - 1;
-                    int day = npDay.getValue();
-                    int hour = npHour.getValue();
-                    DateTime selectedDateTime = new DateTime(year, month, day, hour, 0, 0);
-                    SexualDay sexualDay = new SexualDay(selectedDateTime);
-                    dataContext.addSexualDay(sexualDay);
-                    initRecordPart();
-                    dialog.dismiss();
-                } catch (Exception e) {
-                    _Utils.printException(MainActivity.this, e);
-                }
+        }
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定") { dialog, which ->
+            try {
+                val year = npYear.value
+                val month = npMonth.value - 1
+                val day = npDay.value
+                val hour = npHour.value
+                val selectedDateTime = DateTime(year, month, day, hour, 0, 0)
+                val sexualDay = SexualDay(selectedDateTime, "", "")
+                dataContext.addSexualDay(sexualDay)
+                initRecordPart()
+                dialog.dismiss()
+            } catch (e: Exception) {
+                _Utils.printException(this@MainActivity, e)
             }
-        });
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    dialog.dismiss();
-                } catch (Exception e) {
-                    _Utils.printException(MainActivity.this, e);
-                }
+        }
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消") { dialog, which ->
+            try {
+                dialog.dismiss()
+            } catch (e: Exception) {
+                _Utils.printException(this@MainActivity, e)
             }
-        });
-        dialog.show();
+        }
+        dialog.show()
+    }
+
+    companion object {
+        private const val INFO_TEXT_SIZE = 14
+        private const val TO_SEXUAL_RECORD_ACTIVITY = 298
+        const val TO_SETTING_ACTIVITY = 1
+        private const val _TAG = "wangsc"
     }
 }

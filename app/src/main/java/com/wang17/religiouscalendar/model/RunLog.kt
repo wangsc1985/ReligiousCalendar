@@ -1,68 +1,36 @@
-package com.wang17.religiouscalendar.model;
+package com.wang17.religiouscalendar.model
 
-import java.util.UUID;
+import java.util.*
 
 /**
  * Created by 阿弥陀佛 on 2016/10/28.
  */
+class RunLog {
+    var id: UUID
+    var runTime: DateTime
+    var tag: String
+    var item: String
+    var message: String
 
-public class RunLog {
-    private UUID id;
-    private DateTime runTime;
-    private String tag;
-    private String item;
-    private String message;
-
-    public RunLog(UUID id) {
-        this.id = id;
+    constructor(tag:String,item: String, message: String) {
+        id = UUID.randomUUID()
+        runTime = DateTime()
+        this.tag = tag
+        this.item = item
+        this.message = message
     }
-
-    public RunLog(String item, String message) {
-        this.id = UUID.randomUUID();
-        this.runTime = new DateTime();
-        this.tag = new DateTime(runTime.getTimeInMillis()).toLongDateString();
-        this.item = item;
-        this.message = message;
+    constructor(id:UUID,tag:String,item: String, message: String) {
+        this.id = id
+        runTime = DateTime()
+        this.tag = tag
+        this.item = item
+        this.message = message
     }
-
-    public UUID getId() {
-        return id;
+    constructor(id:UUID,runTime:DateTime,tag:String,item: String, message: String) {
+        this.id = id
+        this.runTime = runTime
+        this.tag = tag
+        this.item = item
+        this.message = message
     }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public DateTime getRunTime() {
-        return runTime;
-    }
-
-    public void setRunTime(DateTime runTime) {
-        this.runTime = runTime;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public String getItem() {
-        return item;
-    }
-
-    public void setItem(String item) {
-        this.item = item;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
 }

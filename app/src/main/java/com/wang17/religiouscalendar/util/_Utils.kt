@@ -1,103 +1,100 @@
-package com.wang17.religiouscalendar.util;
+package com.wang17.religiouscalendar.util
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Handler;
-import android.support.v7.app.AlertDialog;
-
-import com.wang17.religiouscalendar.model.DataContext;
-import com.wang17.religiouscalendar.model.DateTime;
-import com.wang17.religiouscalendar.model.RunLog;
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.os.Handler
+import android.support.v7.app.AlertDialog
+import com.wang17.religiouscalendar.model.DataContext
+import com.wang17.religiouscalendar.model.DateTime
+import com.wang17.religiouscalendar.model.RunLog
 
 /**
  * Created by 阿弥陀佛 on 2016/10/2.
  */
-public class _Utils {
-
+object _Utils {
     /**
      * 行房节欲期
      *
      * @param birthday
      * @return
      */
-    public static long getTargetInMillis(DateTime birthday) {
-        DateTime now = new DateTime();
-        int age = (now.getYear() - birthday.getYear()) + 1;
+    fun getTargetInMillis(birthday: DateTime): Long {
+        val now = DateTime()
+        var age = now.getYear() - birthday.getYear() + 1
         if (now.getMonth() < birthday.getMonth()) {
-            age -= 1;
+            age -= 1
         }
-        double day = 100;
+        var day = 100.0
         if (age >= 16 && age < 18) {
-            day = 3;
-        }else if (age >= 18 && age < 20) {
-            day = 3;
+            day = 3.0
+        } else if (age >= 18 && age < 20) {
+            day = 3.0
         } else if (age >= 20 && age < 30) {
-            day = 4 + (age - 20) * 0.4;
+            day = 4 + (age - 20) * 0.4
         } else if (age >= 30 && age < 40) {
-            day = 8 + (age - 30) * 0.8;
+            day = 8 + (age - 30) * 0.8
         } else if (age >= 40 && age < 50) {
-            day = 16 + (age - 40) * 0.5;
+            day = 16 + (age - 40) * 0.5
         } else if (age >= 50 && age < 60) {
-            day = 21 + (age - 50) * 0.9;
+            day = 21 + (age - 50) * 0.9
         }
-        return (long) ((int) (day * 24)) * 60 * 60000;
+        return (day * 24).toInt().toLong() * 60 * 60000
     }
 
-    public static int getTargetInHour(DateTime birthday) {
-        return (int)(getTargetInMillis(birthday) / 3600000);
+    fun getTargetInHour(birthday: DateTime): Int {
+        return (getTargetInMillis(birthday) / 3600000).toInt()
     }
 
-    public static void printException(Context context, Exception e) {
-        if (e.getStackTrace().length == 0)
-            return;
-        String msg = "";
-        for (StackTraceElement ste : e.getStackTrace()) {
-            if (ste.getClassName().contains(context.getPackageName())) {
-                msg += "类名：\n" + ste.getClassName()
-                        + "\n方法名：\n" + ste.getMethodName()
-                        + "\n行号：" + ste.getLineNumber()
-                        + "\n错误信息：\n" + e.getMessage() + "\n";
+    fun printException(context: Context, e: Exception) {
+        if (e.stackTrace.size == 0) return
+        var msg = ""
+        for (ste in e.stackTrace) {
+            if (ste.className.contains(context.packageName)) {
+                msg += """
+                    类名：
+                    ${ste.className}
+                    方法名：
+                    ${ste.methodName}
+                    行号：${ste.lineNumber}
+                    错误信息：
+                    ${e.message}
+                    
+                    """.trimIndent()
             }
         }
         try {
-            new AlertDialog.Builder(context).setMessage(msg).setPositiveButton("知道了", null).show();
-        } catch (Exception e1) {
+            AlertDialog.Builder(context).setMessage(msg).setPositiveButton("知道了", null).show()
+        } catch (e1: Exception) {
         }
-        addRunLog(context, "运行错误", msg);
-        e.printStackTrace();
+        addRunLog(context, "err","运行错误", msg)
+        e.printStackTrace()
     }
 
-    public static void addRunLog(Context context, String item, String message) {
-        new DataContext(context).addRunLog(new RunLog(item, message));
+    fun addRunLog(context: Context,tag:String, item: String, message: String) {
+        DataContext(context).addRunLog(RunLog(tag, item, message))
     }
 
-    public static void printExceptionSycn(Context context, Handler handler, Exception e) {
+    fun printExceptionSycn(context: Context, handler: Handler, e: Exception) {
         try {
-            if (e.getStackTrace().length == 0)
-                return;
-
-            for (StackTraceElement ste : e.getStackTrace()) {
-                if (ste.getClassName().contains(context.getPackageName())) {
-                    String msg = "类名：\n" + ste.getClassName()
-                            + "\n方法名：\n" + ste.getMethodName()
-                            + "\n行号：" + ste.getLineNumber()
-                            + "\n错误信息：\n" + e.getMessage();
-
-                    final Context finalContext = context;
-                    final String message = msg;
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            new AlertDialog.Builder(finalContext).setTitle("运行错误").setMessage(message).setPositiveButton("知道了", null).show();
-                        }
-                    });
-                    break;
+            if (e.stackTrace.size == 0) return
+            for (ste in e.stackTrace) {
+                if (ste.className.contains(context.packageName)) {
+                    val msg = """
+                        类名：
+                        ${ste.className}
+                        方法名：
+                        ${ste.methodName}
+                        行号：${ste.lineNumber}
+                        错误信息：
+                        ${e.message}
+                        """.trimIndent()
+                    handler.post { AlertDialog.Builder(context).setTitle("运行错误").setMessage(msg).setPositiveButton("知道了", null).show() }
+                    break
                 }
             }
-        } catch (Exception e1) {
-            e1.printStackTrace();
+        } catch (e1: Exception) {
+            e1.printStackTrace()
         }
     }
 
@@ -107,15 +104,15 @@ public class _Utils {
      * @param context
      * @return
      */
-    public static boolean isWiFiActive(Context context) {
-        ConnectivityManager connectivity = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+    fun isWiFiActive(context: Context): Boolean {
+        val connectivity = context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (connectivity != null) {
-            NetworkInfo info = connectivity.getActiveNetworkInfo();
-            if (info.getTypeName().equals("WIFI") && info.isConnected()) {
-                return true;
+            val info = connectivity.activeNetworkInfo
+            if (info!!.typeName == "WIFI" && info.isConnected) {
+                return true
             }
         }
-        return false;
+        return false
     }
 
     /**
@@ -124,10 +121,10 @@ public class _Utils {
      * @param context
      * @return
      */
-    public static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-        return (info != null && info.isConnected());
+    fun isNetworkAvailable(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val info = cm.activeNetworkInfo
+        return info != null && info.isConnected
     }
 
     /**
@@ -137,8 +134,8 @@ public class _Utils {
      * @param permissionStr 例：android.permission.ACCESS_NETWORK_STATE
      * @return
      */
-    public static boolean havePermission(Context context, String permissionStr) {
-        PackageManager pm = context.getPackageManager();
-        return (PackageManager.PERMISSION_GRANTED == pm.checkPermission(permissionStr, context.getPackageName()));
+    fun havePermission(context: Context, permissionStr: String?): Boolean {
+        val pm = context.packageManager
+        return PackageManager.PERMISSION_GRANTED == pm.checkPermission(permissionStr!!, context.packageName)
     }
 }

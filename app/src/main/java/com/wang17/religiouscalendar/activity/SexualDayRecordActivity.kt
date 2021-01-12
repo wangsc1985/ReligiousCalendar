@@ -1,46 +1,31 @@
-package com.wang17.religiouscalendar.activity;
+package com.wang17.religiouscalendar.activity
 
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.os.Bundle
+import android.support.design.widget.Snackbar
+import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import android.widget.AdapterView.OnItemClickListener
+import com.wang17.religiouscalendar.R
+import com.wang17.religiouscalendar.fragment.ActionBarFragment
+import com.wang17.religiouscalendar.fragment.ActionBarFragment.OnActionFragmentBackListener
+import com.wang17.religiouscalendar.model.*
+import com.wang17.religiouscalendar.util._Utils
+import kotlinx.android.synthetic.main.activity_sexual_day_record.*
+import java.util.*
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.NumberPicker;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
-import com.wang17.religiouscalendar.R;
-import com.wang17.religiouscalendar.fragment.ActionBarFragment;
-import com.wang17.religiouscalendar.util._Utils;
-import com.wang17.religiouscalendar.model.DataContext;
-import com.wang17.religiouscalendar.model.DateTime;
-import com.wang17.religiouscalendar.model.Setting;
-import com.wang17.religiouscalendar.model.SexualDay;
-
-import java.util.Calendar;
-import java.util.List;
-
-public class SexualDayRecordActivity extends AppCompatActivity implements ActionBarFragment.OnActionFragmentBackListener {
-
-    // 视图变量
-    TextView textViewTime1, textViewTime2;
+class SexualDayRecordActivity : AppCompatActivity(), OnActionFragmentBackListener {
     // 类变量
-    private DataContext dataContext;
-    private List<SexualDay> sexualDays;
-    private SexualDayListdAdapter recordListdAdapter;
+    private lateinit var dataContext: DataContext
+    private lateinit var sexualDays: MutableList<SexualDay>
+    private var recordListdAdapter: SexualDayListdAdapter = SexualDayListdAdapter()
+
     // 值变量
-    private int max;
-    public static Boolean isDataChanged;
+    private var max = 0
 
     /**
      * 20 4
@@ -54,7 +39,8 @@ public class SexualDayRecordActivity extends AppCompatActivity implements Action
      * 28 7.2
      * 29 7.6
      * 30 8
-     * <p>
+     *
+     *
      * 31 8.8
      * 32 9.6
      * 33 10.4
@@ -65,7 +51,8 @@ public class SexualDayRecordActivity extends AppCompatActivity implements Action
      * 38 14.4
      * 39 15.2
      * 40 16
-     * <p>
+     *
+     *
      * 41 16.5
      * 42 17
      * 43 17.5
@@ -76,7 +63,8 @@ public class SexualDayRecordActivity extends AppCompatActivity implements Action
      * 48 20
      * 49 20.5
      * 50 21
-     * <p>
+     *
+     *
      * 51 21.9
      * 52 22.8
      * 53 23.7
@@ -87,7 +75,8 @@ public class SexualDayRecordActivity extends AppCompatActivity implements Action
      * 58 28.2
      * 59 29.1
      * 60 30
-     * <p>
+     *
+     *
      * 20 4
      * 30 8
      * 40 16
@@ -104,296 +93,240 @@ public class SexualDayRecordActivity extends AppCompatActivity implements Action
      * 久而不泄，至生痈疽。
      * 若年过六十，而有数旬不得交接，意中平平者，可闭精勿泄也。
      */
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         try {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_sexual_day_record);
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_action, ActionBarFragment.newInstance()).commit();
-
-            isDataChanged = false;
-            dataContext = new DataContext(this);
-            sexualDays = dataContext.getSexualDays(true);
-
-
-            if (dataContext.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == true) {
-                if (dataContext.getSetting(Setting.KEYS.birthday) != null) {
-                    max = (int) (_Utils.getTargetInMillis(new DateTime(dataContext.getSetting(Setting.KEYS.birthday).getLong())) / 3600000);
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_sexual_day_record)
+            supportFragmentManager.beginTransaction().replace(R.id.fragment_action, ActionBarFragment.newInstance()).commit()
+            isDataChanged = false
+            dataContext = DataContext(this)
+            sexualDays = dataContext.getSexualDays(true)
+            max = if (dataContext.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == true) {
+                val set = dataContext.getSetting(Setting.KEYS.birthday)
+                if ( set!= null) {
+                    (_Utils.getTargetInMillis(DateTime(set.getLong())) / 3600000).toInt()
                 } else {
-                    max = 0;
+                    0
                 }
             } else {
-                Setting setting2 = dataContext.getSetting(Setting.KEYS.targetInHour);
-                if (setting2 != null) {
-                    max = setting2.getInt();
+                val setting2 = dataContext.getSetting(Setting.KEYS.targetInHour)
+                setting2?.getInt() ?: 0
+            }
+            initSummary()
+            val listView_sexualDays = findViewById(R.id.listView_sexualDays) as ListView
+            listView_sexualDays.onItemClickListener = OnItemClickListener { parent, view, position, id ->
+                if (view.findViewById<View>(R.id.layout_operate).visibility == View.VISIBLE) {
+                    view.findViewById<View>(R.id.layout_operate).visibility = View.INVISIBLE
                 } else {
-                    max = 0;
+                    for (i in 0 until parent.childCount) {
+                        parent.getChildAt(i).findViewById<View>(R.id.layout_operate).visibility = View.INVISIBLE
+                    }
+                    view.findViewById<View>(R.id.layout_operate).visibility = View.VISIBLE
                 }
             }
-
-            initSummary();
-
-
-            ListView listView_sexualDays = (ListView) findViewById(R.id.listView_sexualDays);
-            listView_sexualDays.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (view.findViewById(R.id.layout_operate).getVisibility() == View.VISIBLE) {
-                        view.findViewById(R.id.layout_operate).setVisibility(View.INVISIBLE);
-                    } else {
-                        for (int i = 0; i < parent.getChildCount(); i++) {
-                            parent.getChildAt(i).findViewById(R.id.layout_operate).setVisibility(View.INVISIBLE);
-                        }
-                        view.findViewById(R.id.layout_operate).setVisibility(View.VISIBLE);
-                    }
-                }
-            });
-            recordListdAdapter = new SexualDayListdAdapter();
-            listView_sexualDays.setAdapter(recordListdAdapter);
-
-        } catch (Exception e) {
-            _Utils.printException(this, e);
+            listView_sexualDays.adapter = recordListdAdapter
+        } catch (e: Exception) {
+            _Utils.printException(this, e)
         }
     }
 
-    private void initSummary() {
-        SexualDay lastSexualDay = dataContext.getLastSexualDay();
-
-        int targetInHour= 0;
-        if (dataContext.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == true) {
-            targetInHour = _Utils.getTargetInHour(dataContext.getSetting(Setting.KEYS.birthday).getDateTime());
+    private fun initSummary() {
+        val lastSexualDay = dataContext.getLastSexualDay()
+        var targetInHour = 0
+        targetInHour = if (dataContext.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == true) {
+            _Utils.getTargetInHour(dataContext.getSetting(Setting.KEYS.birthday,System.currentTimeMillis()).getDateTime())
         } else {
-            targetInHour = dataContext.getSetting(Setting.KEYS.targetInHour).getInt();
+            dataContext.getSetting(Setting.KEYS.targetInHour,0)?.getInt()
         }
         if (max > 0 && lastSexualDay != null) {
-            textViewTime1 = (TextView) findViewById(R.id.textView_time1);
-            textViewTime2 = (TextView) findViewById(R.id.textView_time2);
-
-            int haveInHour = (int) ((System.currentTimeMillis() - lastSexualDay.getDateTime().getTimeInMillis()) / 3600000);
-            int leaveInHour = targetInHour - haveInHour;
+            val haveInHour = ((System.currentTimeMillis() - lastSexualDay.dateTime.timeInMillis) / 3600000).toInt()
+            var leaveInHour = targetInHour - haveInHour
             if (leaveInHour > 0) {
-                textViewTime1.setText(DateTime.toSpanString(haveInHour));
-                textViewTime2.setText(DateTime.toSpanString(leaveInHour));
+                textView_time1.text = DateTime.toSpanString(haveInHour)
+                textView_time2.text = DateTime.toSpanString(leaveInHour)
             } else {
-                leaveInHour *= -1;
-                textViewTime1.setText(DateTime.toSpanString(haveInHour));
-                textViewTime2.setText("+" + DateTime.toSpanString(leaveInHour));
+                leaveInHour *= -1
+                textView_time1.text = DateTime.toSpanString(haveInHour)
+                textView_time2.text = "+" + DateTime.toSpanString(leaveInHour)
             }
         }
     }
 
-    @Override
-    public void onBackListener() {
-        this.finish();
+    override fun onBackListener() {
+        finish()
     }
 
-    protected class SexualDayListdAdapter extends BaseAdapter {
-        @Override
-        public int getCount() {
-            return sexualDays.size();
+    protected inner class SexualDayListdAdapter : BaseAdapter() {
+        override fun getCount(): Int {
+            return sexualDays.size
         }
 
-        @Override
-        public Object getItem(int position) {
-            return null;
+        override fun getItem(position: Int): Any? {
+            return null
         }
 
-        @Override
-        public long getItemId(int position) {
-            return 0;
+        override fun getItemId(position: Int): Long {
+            return 0
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final int index = position;
+        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+            var convertView = convertView
             try {
-                convertView = View.inflate(SexualDayRecordActivity.this, R.layout.inflate_list_item_sexual_day, null);
-                final SexualDay sexualDay = sexualDays.get(position);
-                DateTime nextDateTime = new DateTime();
+                convertView = View.inflate(this@SexualDayRecordActivity, R.layout.inflate_list_item_sexual_day, null)
+                val sexualDay = sexualDays[position]
+                var nextDateTime = DateTime()
                 if (position > 0) {
-                    nextDateTime = sexualDays.get(position - 1).getDateTime();
+                    nextDateTime = sexualDays[position - 1].dateTime
                 }
-                long interval = (nextDateTime.getTimeInMillis() - sexualDay.getDateTime().getTimeInMillis());
-
-                final RelativeLayout layoutRoot = (RelativeLayout) convertView.findViewById(R.id.layout_root);
-                TextView textViewStartDay = (TextView) convertView.findViewById(R.id.textView_startDay);
-                TextView textViewStartTime = (TextView) convertView.findViewById(R.id.textView_startTime);
-                TextView textViewInterval = (TextView) convertView.findViewById(R.id.textView_interval);
-                final LinearLayout layoutOperate = (LinearLayout) convertView.findViewById(R.id.layout_operate);
-                FrameLayout layoutEdit = (FrameLayout) convertView.findViewById(R.id.layout_edit);
-                FrameLayout layoutDel = (FrameLayout) convertView.findViewById(R.id.layout_del);
-                ProgressBar progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
-                layoutEdit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showEditSexualDayDialog(sexualDay);
+                val interval = nextDateTime.timeInMillis - sexualDay.dateTime.timeInMillis
+                val layoutRoot = convertView.findViewById<View>(R.id.layout_root) as RelativeLayout
+                val textViewStartDay = convertView.findViewById<View>(R.id.textView_startDay) as TextView
+                val textViewStartTime = convertView.findViewById<View>(R.id.textView_startTime) as TextView
+                val textViewInterval = convertView.findViewById<View>(R.id.textView_interval) as TextView
+                val layoutOperate = convertView.findViewById<View>(R.id.layout_operate) as LinearLayout
+                val layoutEdit = convertView.findViewById<View>(R.id.layout_edit) as FrameLayout
+                val layoutDel = convertView.findViewById<View>(R.id.layout_del) as FrameLayout
+                val progressBar = convertView.findViewById<View>(R.id.progressBar) as ProgressBar
+                layoutEdit.setOnClickListener { showEditSexualDayDialog(sexualDay) }
+                layoutDel.setOnClickListener {
+                    try {
+                        AlertDialog.Builder(this@SexualDayRecordActivity).setTitle("删除确认").setMessage("是否要删除当前记录?").setPositiveButton("确认") { dialog, which ->
+                            dataContext.deleteSexualDay(sexualDays[position].id)
+                            sexualDays.removeAt(position)
+                            recordListdAdapter.notifyDataSetChanged()
+                            isDataChanged = true
+                            dialog.cancel()
+                            initSummary()
+                            snackbar("删除成功")
+                        }.setNegativeButton("取消") { dialog, which -> dialog.cancel() }.show()
+                    } catch (e: Exception) {
+                        _Utils.printException(this@SexualDayRecordActivity, e)
                     }
-                });
-                layoutDel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        try {
-                            new AlertDialog.Builder(SexualDayRecordActivity.this).setTitle("删除确认").setMessage("是否要删除当前记录?").setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dataContext.deleteSexualDay(sexualDays.get(index).getId());
-                                    sexualDays.remove(index);
-                                    recordListdAdapter.notifyDataSetChanged();
-                                    isDataChanged = true;
-                                    dialog.cancel();
-                                    initSummary();
-                                    snackbar("删除成功");
-                                }
-                            }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            }).show();
-                        } catch (Exception e) {
-                            _Utils.printException(SexualDayRecordActivity.this, e);
-                        }
-                    }
-                });
-                DateTime date = sexualDay.getDateTime();
-                textViewStartDay.setText(date.getMonthStr() + "月" + date.getDayStr() + "日");
-                textViewStartTime.setText(date.getHour() + ":" + date.getMiniteStr());
-                textViewInterval.setText(DateTime.toSpanString(interval, 4, 3));
+                }
+                val date = sexualDay.dateTime
+                textViewStartDay.text = date.getMonthStr() + "月" + date.getDayStr() + "日"
+                textViewStartTime.text = date.getHour().toString() + ":" + date.getMiniteStr()
+                textViewInterval.text = DateTime.toSpanString(interval, 4, 3)
                 //
                 if (max > 0) {
-                    progressBar.setMax(max);
-                    progressBar.setProgress((int) (interval / 3600000));
+                    progressBar.max = max
+                    progressBar.progress = (interval / 3600000).toInt()
                 } else {
-                    progressBar.setMax(100);
-                    progressBar.setProgress(0);
+                    progressBar.max = 100
+                    progressBar.progress = 0
                 }
-            } catch (Exception e) {
-                _Utils.printException(SexualDayRecordActivity.this, e);
+            } catch (e: Exception) {
+                _Utils.printException(this@SexualDayRecordActivity, e)
             }
-            return convertView;
+            return convertView
         }
     }
 
-    public void showEditSexualDayDialog(SexualDay sexualDay) {
-
-        final SexualDay sd = sexualDay;
-        View view = View.inflate(SexualDayRecordActivity.this, R.layout.inflate_dialog_date_picker, null);
-        AlertDialog dialog = new AlertDialog.Builder(SexualDayRecordActivity.this).setView(view).create();
-        dialog.setTitle("设定时间");
-
-        DateTime dateTime = sexualDay.getDateTime();
-        final int year = dateTime.getYear();
-        int month = dateTime.getMonth();
-//        int maxDay = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
-        int day = dateTime.getDay();
-        int hour = dateTime.getHour();
-
-        String[] yearNumbers = new String[3];
-        for (int i = year - 2; i <= year; i++) {
-            yearNumbers[i - year + 2] = i + "年";
+    fun showEditSexualDayDialog(sexualDay: SexualDay) {
+        val view = View.inflate(this@SexualDayRecordActivity, R.layout.inflate_dialog_date_picker, null)
+        val dialog = AlertDialog.Builder(this@SexualDayRecordActivity).setView(view).create()
+        dialog.setTitle("设定时间")
+        val dateTime = sexualDay.dateTime
+        val year = dateTime.getYear()
+        val month = dateTime.getMonth()
+        //        int maxDay = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
+        val day = dateTime.getDay()
+        val hour = dateTime.getHour()
+        val yearNumbers = arrayOfNulls<String>(3)
+        for (i in year - 2..year) {
+            yearNumbers[i - year + 2] = i.toString() + "年"
         }
-        String[] monthNumbers = new String[12];
-        for (int i = 0; i < 12; i++) {
-            monthNumbers[i] = i + 1 + "月";
+        val monthNumbers = arrayOfNulls<String>(12)
+        for (i in 0..11) {
+            monthNumbers[i] ="${i + 1}月"
         }
-        String[] dayNumbers = new String[31];
-        for (int i = 0; i < 31; i++) {
-            dayNumbers[i] = i + 1 + "日";
+        val dayNumbers = arrayOfNulls<String>(31)
+        for (i in 0..30) {
+            dayNumbers[i] = "${i + 1}日"
         }
-        String[] hourNumbers = new String[24];
-        for (int i = 0; i < 24; i++) {
-            hourNumbers[i] = i + "点";
+        val hourNumbers = arrayOfNulls<String>(24)
+        for (i in 0..23) {
+            hourNumbers[i] = i.toString() + "点"
         }
-        final NumberPicker npYear = (NumberPicker) view.findViewById(R.id.npYear);
-        final NumberPicker npMonth = (NumberPicker) view.findViewById(R.id.npMonth);
-        final NumberPicker npDay = (NumberPicker) view.findViewById(R.id.npDay);
-        final NumberPicker npHour = (NumberPicker) view.findViewById(R.id.npHour);
-        npYear.setMinValue(year - 2);
-        npYear.setMaxValue(year);
-        npYear.setValue(year);
-        npYear.setDisplayedValues(yearNumbers);
-        npYear.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-        npMonth.setMinValue(1);
-        npMonth.setMaxValue(12);
-        npMonth.setDisplayedValues(monthNumbers);
-        npMonth.setValue(month + 1);
-        npMonth.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-        npDay.setMinValue(1);
-        npDay.setMaxValue(31);
-        npDay.setDisplayedValues(dayNumbers);
-        npDay.setValue(day);
-        npDay.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-        npHour.setMinValue(0);
-        npHour.setMaxValue(23);
-        npHour.setDisplayedValues(hourNumbers);
-        npHour.setValue(hour);
-        npHour.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); // 禁止对话框打开后数字选择框被选中
-
-
-        npMonth.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                DateTime selected = new DateTime(npYear.getValue(), npMonth.getValue() - 1, 1);
-                int max = selected.getActualMaximum(Calendar.DAY_OF_MONTH);
-
-                int day = npDay.getValue();
-                npDay.setMaxValue(max);
-                if (day > max) {
-                    npDay.setValue(1);
-                } else {
-                    npDay.setValue(day);
-                }
+        val npYear = view.findViewById<View>(R.id.npYear) as NumberPicker
+        val npMonth = view.findViewById<View>(R.id.npMonth) as NumberPicker
+        val npDay = view.findViewById<View>(R.id.npDay) as NumberPicker
+        val npHour = view.findViewById<View>(R.id.npHour) as NumberPicker
+        npYear.minValue = year - 2
+        npYear.maxValue = year
+        npYear.value = year
+        npYear.displayedValues = yearNumbers
+        npYear.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npMonth.minValue = 1
+        npMonth.maxValue = 12
+        npMonth.displayedValues = monthNumbers
+        npMonth.value = month + 1
+        npMonth.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npDay.minValue = 1
+        npDay.maxValue = 31
+        npDay.displayedValues = dayNumbers
+        npDay.value = day
+        npDay.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npHour.minValue = 0
+        npHour.maxValue = 23
+        npHour.displayedValues = hourNumbers
+        npHour.value = hour
+        npHour.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+        npMonth.setOnValueChangedListener { picker, oldVal, newVal ->
+            val selected = DateTime(npYear.value, npMonth.value - 1, 1)
+            val max = selected.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val day = npDay.value
+            npDay.maxValue = max
+            if (day > max) {
+                npDay.value = 1
+            } else {
+                npDay.value = day
             }
-        });
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    int year = npYear.getValue();
-                    int month = npMonth.getValue() - 1;
-                    int day = npDay.getValue();
-                    int hour = npHour.getValue();
-                    DateTime selectedDateTime = new DateTime(year, month, day, hour, 0, 0);
-                    sd.setDateTime(selectedDateTime);
-                    dataContext.updateSexualDay(sd);
-                    recordListdAdapter.notifyDataSetChanged();
-                    isDataChanged = true;
-                    initSummary();
-                    dialog.dismiss();
-                } catch (Exception e) {
-                    _Utils.printException(SexualDayRecordActivity.this, e);
-                }
+        }
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定") { dialog, which ->
+            try {
+                val year = npYear.value
+                val month = npMonth.value - 1
+                val day = npDay.value
+                val hour = npHour.value
+                val selectedDateTime = DateTime(year, month, day, hour, 0, 0)
+                sexualDay.dateTime = selectedDateTime
+                dataContext.updateSexualDay(sexualDay)
+                recordListdAdapter.notifyDataSetChanged()
+                isDataChanged = true
+                initSummary()
+                dialog.dismiss()
+            } catch (e: Exception) {
+                _Utils.printException(this@SexualDayRecordActivity, e)
             }
-        });
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                try {
-                    dialog.dismiss();
-                } catch (Exception e) {
-                    _Utils.printException(SexualDayRecordActivity.this, e);
-                }
+        }
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消") { dialog, which ->
+            try {
+                dialog.dismiss()
+            } catch (e: Exception) {
+                _Utils.printException(this@SexualDayRecordActivity, e)
             }
-        });
-        dialog.show();
+        }
+        dialog.show()
     }
 
-    private void snackbar(String message) {
+    private fun snackbar(message: String) {
         try {
-            Snackbar.make(textViewTime1, message, Snackbar.LENGTH_LONG).show();
-        } catch (Exception e) {
-            Log.e("wangsc", e.getMessage());
+            Snackbar.make(textView_time1, message, Snackbar.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Log.e("wangsc", e.message!!)
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
+    override fun onPause() {
+        super.onPause()
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    override fun onResume() {
+        super.onResume()
+    }
+
+    companion object {
+        var isDataChanged: Boolean? = null
     }
 }

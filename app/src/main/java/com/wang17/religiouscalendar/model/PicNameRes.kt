@@ -1,23 +1,14 @@
-package com.wang17.religiouscalendar.model;
+package com.wang17.religiouscalendar.model
 
 /**
  * Created by 阿弥陀佛 on 2016/9/28.
  */
-public class PicNameRes {
-
-    private int resId;
-    private String listItemString;
-
-    public PicNameRes(int resId, String listItemString){
-        this.resId = resId;
-        this.listItemString = listItemString;
+class PicNameRes(private val resId: Int, private val listItemString: String) {
+    fun getResId(): Int {
+        return resId
     }
 
-    public int getResId() {
-        return resId;
-    }
-
-    public String getListItemString() {
-        return listItemString;
+    fun getListItemString(): String {
+        return listItemString
     }
 }

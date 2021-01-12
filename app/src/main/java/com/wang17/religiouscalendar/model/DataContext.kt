@@ -1,134 +1,118 @@
-package com.wang17.religiouscalendar.model;
+package com.wang17.religiouscalendar.model
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-
-import com.wang17.religiouscalendar.emnu.MDrelation;
-import com.wang17.religiouscalendar.emnu.MDtype;
-import com.wang17.religiouscalendar.util._Utils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import android.content.ContentValues
+import android.content.Context
+import com.wang17.religiouscalendar.emnu.MDrelation
+import com.wang17.religiouscalendar.emnu.MDtype
+import com.wang17.religiouscalendar.model.Setting.KEYS
+import com.wang17.religiouscalendar.util._Utils
+import java.util.*
 
 /**
  * Created by 阿弥陀佛 on 2015/11/18.
  */
-public class DataContext {
-
-    private DatabaseHelper dbHelper;
-    private Context context;
-
-    public DataContext(Context context) {
-        dbHelper = new DatabaseHelper(context);
-        this.context = context;
-    }
+class DataContext(context: Context) {
+    private val dbHelper: DatabaseHelper
+    private val context: Context
 
     //region RunLog
-    public List<RunLog> getRunLogs() {
-        List<RunLog> result = new ArrayList<>();
+    fun getRunLogs(): List<RunLog> {
+        val result: MutableList<RunLog> = ArrayList()
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            val db = dbHelper.readableDatabase
             //查询获得游标
-            Cursor cursor = db.query("runLog", null, null, null, null, null, null);
+            val cursor = db.query("runLog", null, null, null, null, null, null)
             //判断游标是否为空
             while (cursor.moveToNext()) {
-                RunLog model = new RunLog(UUID.fromString(cursor.getString(0)));
-                model.setRunTime(new DateTime(cursor.getLong(1)));
-                model.setTag(cursor.getString(2));
-                model.setItem(cursor.getString(3));
-                model.setMessage(cursor.getString(4));
-                result.add(model);
+                val model = RunLog(UUID.fromString(cursor.getString(0)),
+                        DateTime(cursor.getLong(1)),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        cursor.getString(4))
+                result.add(model)
             }
-            cursor.close();
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            cursor.close()
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
-        return result;
+        return result
     }
 
-    public void addRunLog(RunLog runLog) {
+    fun addRunLog(runLog: RunLog) {
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            val db = dbHelper.writableDatabase
             //使用insert方法向表中插入数据
-            ContentValues values = new ContentValues();
-            values.put("id", runLog.getId().toString());
-            values.put("runTime", runLog.getRunTime().getTimeInMillis());
-            values.put("tag", runLog.getTag());
-            values.put("item", runLog.getItem());
-            values.put("message", runLog.getMessage());
+            val values = ContentValues()
+            values.put("id", runLog.id.toString())
+            values.put("runTime", runLog.runTime.timeInMillis)
+            values.put("tag", runLog.tag)
+            values.put("item", runLog.item)
+            values.put("message", runLog.message)
             //调用方法插入数据
-            db.insert("runLog", "id", values);
+            db.insert("runLog", "id", values)
             //关闭SQLiteDatabase对象
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
     }
 
-    public void updateRunLog(RunLog runLog) {
-
+    fun updateRunLog(runLog: RunLog) {
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            val db = dbHelper.writableDatabase
 
             //使用update方法更新表中的数据
-            ContentValues values = new ContentValues();
-            values.put("runTime", runLog.getRunTime().getTimeInMillis());
-            values.put("tag", runLog.getTag());
-            values.put("item", runLog.getItem());
-            values.put("message", runLog.getMessage());
-
-            db.update("runLog", values, "id=?", new String[]{runLog.getId().toString()});
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            val values = ContentValues()
+            values.put("runTime", runLog.runTime.timeInMillis)
+            values.put("tag", runLog.tag)
+            values.put("item", runLog.item)
+            values.put("message", runLog.message)
+            db.update("runLog", values, "id=?", arrayOf(runLog.id.toString()))
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
     }
 
-    public void deleteRunLog() {
+    fun deleteRunLog() {
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            db.delete("runLog", null, null);
+            val db = dbHelper.writableDatabase
+            db.delete("runLog", null, null)
             //关闭SQLiteDatabase对象
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
     }
     //endregion
-
-
     //region SexualDay
-
     /**
      * 增加一条SexualDay
      *
      * @param sexualDay 记录对象
      */
-    public void addSexualDay(SexualDay sexualDay) {
+    fun addSexualDay(sexualDay: SexualDay) {
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            val db = dbHelper.writableDatabase
             //使用insert方法向表中插入数据
-            ContentValues values = new ContentValues();
-            values.put("id", sexualDay.getId().toString());
-            values.put("dateTime", sexualDay.getDateTime().getTimeInMillis());
-            values.put("item", sexualDay.getItem());
-            values.put("summary", sexualDay.getSummary());
+            val values = ContentValues()
+            values.put("id", sexualDay.id.toString())
+            values.put("dateTime", sexualDay.dateTime.timeInMillis)
+            values.put("item", sexualDay.item)
+            values.put("summary", sexualDay.summary)
 
             //调用方法插入数据
-            db.insert("sexualDay", "id", values);
+            db.insert("sexualDay", "id", values)
             //关闭SQLiteDatabase对象
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
     }
 
@@ -137,27 +121,26 @@ public class DataContext {
      *
      * @return
      */
-    public SexualDay getLastSexualDay() {
+    fun getLastSexualDay(): SexualDay? {
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            val db = dbHelper.readableDatabase
             //查询获得游标
-            Cursor cursor = db.query("sexualDay", null, null, null, null, null, "DateTime  DESC");
+            val cursor = db.query("sexualDay", null, null, null, null, null, "DateTime  DESC")
             //判断游标是否为空
-
             if (cursor.moveToNext()) {
-                SexualDay model = new SexualDay(UUID.fromString(cursor.getString(0)));
-                model.setDateTime(new DateTime(cursor.getLong(1)));
-                model.setItem(cursor.getString(2));
-                model.setSummary(cursor.getString(3));
-                cursor.close();
-                return model;
+                val model = SexualDay(UUID.fromString(cursor.getString(0)),
+                        DateTime(cursor.getLong(1)),
+                        cursor.getString(2),
+                        cursor.getString(3))
+                cursor.close()
+                return model
             }
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
-        return null;
+        return null
     }
 
     /**
@@ -165,28 +148,27 @@ public class DataContext {
      *
      * @return
      */
-    public List<SexualDay> getSexualDays(boolean isTimeDesc) {
-
-        List<SexualDay> result = new ArrayList<SexualDay>();
+    fun getSexualDays(isTimeDesc: Boolean): MutableList<SexualDay> {
+        val result: MutableList<SexualDay> = ArrayList()
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            val db = dbHelper.readableDatabase
             //查询获得游标
-            Cursor cursor = db.query("sexualDay", null, null, null, null, null, isTimeDesc ? "DateTime DESC" : null);
+            val cursor = db.query("sexualDay", null, null, null, null, null, if (isTimeDesc) "DateTime DESC" else null)
             //判断游标是否为空
             while (cursor.moveToNext()) {
-                SexualDay model = new SexualDay(UUID.fromString(cursor.getString(0)));
-                model.setDateTime(new DateTime(cursor.getLong(1)));
-                model.setItem(cursor.getString(2));
-                model.setSummary(cursor.getString(3));
-                result.add(model);
+                val model = SexualDay(UUID.fromString(cursor.getString(0)),
+                        DateTime(cursor.getLong(1)),
+                        cursor.getString(2),
+                        cursor.getString(3))
+                result.add(model)
             }
-            cursor.close();
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            cursor.close()
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
-        return result;
+        return result
     }
 
     /**
@@ -194,22 +176,20 @@ public class DataContext {
      *
      * @return
      */
-    public void updateSexualDay(SexualDay sexualDay) {
-
+    fun updateSexualDay(sexualDay: SexualDay) {
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            val db = dbHelper.writableDatabase
 
             //使用update方法更新表中的数据
-            ContentValues values = new ContentValues();
-            values.put("dateTime", sexualDay.getDateTime().getTimeInMillis());
-            values.put("item", sexualDay.getItem());
-            values.put("summary", sexualDay.getSummary());
-
-            db.update("sexualDay", values, "id=?", new String[]{sexualDay.getId().toString()});
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            val values = ContentValues()
+            values.put("dateTime", sexualDay.dateTime.timeInMillis)
+            values.put("item", sexualDay.item)
+            values.put("summary", sexualDay.summary)
+            db.update("sexualDay", values, "id=?", arrayOf(sexualDay.id.toString()))
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
     }
 
@@ -218,130 +198,124 @@ public class DataContext {
      *
      * @param id
      */
-    public void deleteSexualDay(UUID id) {
+    fun deleteSexualDay(id: UUID) {
         try {
             //获取数据库对象
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            db.delete("sexualDay", "id=?", new String[]{id.toString()});
+            val db = dbHelper.writableDatabase
+            db.delete("sexualDay", "id=?", arrayOf(id.toString()))
             //关闭SQLiteDatabase对象
-            db.close();
-        } catch (Exception e) {
-            _Utils.printException(context, e);
+            db.close()
+        } catch (e: Exception) {
+            _Utils.printException(context, e)
         }
     }
+
     //endregion
-
-
     //region MemorialDay
-    public void addMemorialDay(MemorialDay memorialDay) {
+    fun addMemorialDay(memorialDay: MemorialDay) {
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        val db = dbHelper.writableDatabase
         //使用insert方法向表中插入数据
-        ContentValues values = new ContentValues();
-        values.put("id", memorialDay.getId().toString());
-        values.put("type", memorialDay.getType().toInt());
-        values.put("relation", memorialDay.getRelation().toInt());
-        values.put("month", memorialDay.getLunarDate().getMonth());
-        values.put("day", memorialDay.getLunarDate().getDay());
+        val values = ContentValues()
+        values.put("id", memorialDay.id.toString())
+        values.put("type", memorialDay.type.toInt())
+        values.put("relation", memorialDay.relation.toInt())
+        values.put("month", memorialDay.lunarDate.month)
+        values.put("day", memorialDay.lunarDate.day)
 
         //调用方法插入数据
-        db.insert("memorialDay", "id", values);
+        db.insert("memorialDay", "id", values)
         //关闭SQLiteDatabase对象
-        db.close();
+        db.close()
     }
 
-    public MemorialDay getMemorialDay(UUID id) {
+    fun getMemorialDay(id: UUID): MemorialDay? {
 
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        val db = dbHelper.readableDatabase
         //查询获得游标
-        Cursor cursor = db.query("memorialDay", null, "id=?", new String[]{id.toString()}, null, null, null);
+        val cursor = db.query("memorialDay", null, "id=?", arrayOf(id.toString()), null, null, null)
         //判断游标是否为空
         if (cursor.moveToNext()) {
-            MemorialDay model = new MemorialDay();
-            model.setId(id);
-            model.setType(MDtype.fromInt(cursor.getInt(1)));
-            model.setRelation(MDrelation.fromInt(cursor.getInt(2)));
-            model.setLunarDate(new LunarDate(cursor.getInt(3), cursor.getInt(4)));
-            cursor.close();
-            return model;
+            val model = MemorialDay(UUID.fromString(cursor.getString(0)),
+                    MDtype.fromInt(cursor.getInt(1)),
+                    MDrelation.fromInt(cursor.getInt(2)),
+                    LunarDate(cursor.getInt(3), cursor.getInt(4)))
+            cursor.close()
+            return model
         }
-        return null;
+        return null
     }
 
-    public List<MemorialDay> getMemorialDays(int lunarMonth, int lunarDay) {
-
-        List<MemorialDay> result = new ArrayList<MemorialDay>();
+    fun getMemorialDays(lunarMonth: Int, lunarDay: Int): List<MemorialDay> {
+        val result: MutableList<MemorialDay> = ArrayList()
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        val db = dbHelper.readableDatabase
         //查询获得游标
-        Cursor cursor = db.query("memorialDay", null, "month=? AND day=?", new String[]{lunarMonth + "", lunarDay + ""}, null, null, null);
+        val cursor = db.query("memorialDay", null, "month=? AND day=?", arrayOf(lunarMonth.toString() + "", lunarDay.toString() + ""), null, null, null)
         //判断游标是否为空
         while (cursor.moveToNext()) {
-            MemorialDay model = new MemorialDay();
-            model.setId(UUID.fromString(cursor.getString(0)));
-            model.setType(MDtype.fromInt(cursor.getInt(1)));
-            model.setRelation(MDrelation.fromInt(cursor.getInt(2)));
-            model.setLunarDate(new LunarDate(cursor.getInt(3), cursor.getInt(4)));
-            result.add(model);
+            val model = MemorialDay(UUID.fromString(cursor.getString(0)),
+                    MDtype.fromInt(cursor.getInt(1)),
+                    MDrelation.fromInt(cursor.getInt(2)),
+                    LunarDate(cursor.getInt(3), cursor.getInt(4)))
+            result.add(model)
         }
-        cursor.close();
-        return result;
+        cursor.close()
+        return result
     }
 
-    public List<MemorialDay> getMemorialDays() {
-
-        List<MemorialDay> result = new ArrayList<MemorialDay>();
+    fun getMemorialDays(): List<MemorialDay> {
+        val result: MutableList<MemorialDay> = ArrayList()
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        val db = dbHelper.readableDatabase
         //查询获得游标
-        Cursor cursor = db.query("memorialDay", null, null, null, null, null, null);
+        val cursor = db.query("memorialDay", null, null, null, null, null, null)
         //判断游标是否为空
         while (cursor.moveToNext()) {
-            MemorialDay model = new MemorialDay();
-            model.setId(UUID.fromString(cursor.getString(0)));
-            model.setType(MDtype.fromInt(cursor.getInt(1)));
-            model.setRelation(MDrelation.fromInt(cursor.getInt(2)));
-            model.setLunarDate(new LunarDate(cursor.getInt(3), cursor.getInt(4)));
-            result.add(model);
+            val model = MemorialDay(UUID.fromString(cursor.getString(0)),
+                    MDtype.fromInt(cursor.getInt(1)),
+                    MDrelation.fromInt(cursor.getInt(2)),
+                    LunarDate(cursor.getInt(3), cursor.getInt(4)))
+            result.add(model)
         }
-        cursor.close();
-        return result;
+        cursor.close()
+        return result
     }
 
-    public void deleteMemorialDay(UUID id) {
+    fun deleteMemorialDay(id: UUID) {
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete("memorialDay", "id=?", new String[]{id.toString()});
+        val db = dbHelper.writableDatabase
+        db.delete("memorialDay", "id=?", arrayOf(id.toString()))
         //关闭SQLiteDatabase对象
-        db.close();
+        db.close()
     }
-    //endregion
 
+    //endregion
     //region Setting
-    public Setting getSetting(Setting.KEYS key) {
+    fun getSetting(key: KEYS): Setting? {
 
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        val db = dbHelper.readableDatabase
         //查询获得游标
-        Cursor cursor = db.query("setting", null, "key=?", new String[]{key.toString()}, null, null, null);
+        val cursor = db.query("setting", null, "key=?", arrayOf(key.toString()), null, null, null)
         //判断游标是否为空
         while (cursor.moveToNext()) {
-            Setting setting = new Setting(key.toString(), cursor.getString(1));
-            cursor.close();
-            return setting;
+            val setting = Setting(key.toString(), cursor.getString(1))
+            cursor.close()
+            return setting
         }
-        return null;
+        return null
     }
 
-    public Setting getSetting(Setting.KEYS key, Object defaultValue){
-        Setting setting = getSetting(key);
+    fun getSetting(key: KEYS, defaultValue: Any): Setting {
+        var setting = getSetting(key)
         if (setting == null) {
-            this.addSetting(key, defaultValue);
-            setting = new Setting(key.toString(),defaultValue.toString());
-            return setting;
+            addSetting(key, defaultValue)
+            setting = Setting(key.toString(), defaultValue.toString())
+            return setting
         }
-        return setting;
+        return setting
     }
 
     /**
@@ -350,41 +324,43 @@ public class DataContext {
      * @param key
      * @param value
      */
-    public void editSetting(Setting.KEYS key, Object value) {
+    fun editSetting(key: KEYS, value: Any) {
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        val db = dbHelper.writableDatabase
         //使用update方法更新表中的数据
-        ContentValues values = new ContentValues();
-        values.put("value", value.toString());
-        if (db.update("setting", values, "key=?", new String[]{key.toString()}) == 0) {
-            this.addSetting(key, value.toString());
+        val values = ContentValues()
+        values.put("value", value.toString())
+        if (db.update("setting", values, "key=?", arrayOf(key.toString())) == 0) {
+            addSetting(key, value.toString())
         }
-        db.close();
+        db.close()
     }
 
-    public void deleteSetting(Setting.KEYS key) {
+    fun deleteSetting(key: KEYS) {
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete("setting", "key=?", new String[]{key.toString()});
-//        String sql = "DELETE FROM setting WHERE userId="+userId.toString()+" AND key="+key;
+        val db = dbHelper.writableDatabase
+        db.delete("setting", "key=?", arrayOf(key.toString()))
+        //        String sql = "DELETE FROM setting WHERE userId="+userId.toString()+" AND key="+key;
 //        addLog(new Log(sql,userId),db);
         //关闭SQLiteDatabase对象
-        db.close();
+        db.close()
     }
 
-    public void addSetting(Setting.KEYS key, Object value) {
+    fun addSetting(key: KEYS, value: Any) {
         //获取数据库对象
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        val db = dbHelper.writableDatabase
         //使用insert方法向表中插入数据
-        ContentValues values = new ContentValues();
-        values.put("key", key.toString());
-        values.put("value", value.toString());
+        val values = ContentValues()
+        values.put("key", key.toString())
+        values.put("value", value.toString())
         //调用方法插入数据
-        db.insert("setting", "key", values);
+        db.insert("setting", "key", values)
         //关闭SQLiteDatabase对象
-        db.close();
+        db.close()
+    } //endregion
+
+    init {
+        dbHelper = DatabaseHelper(context)
+        this.context = context
     }
-    //endregion
-
-
 }

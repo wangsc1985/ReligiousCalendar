@@ -1,48 +1,34 @@
-package com.wang17.religiouscalendar.model;
+package com.wang17.religiouscalendar.model
 
 /**
  * Created by 阿弥陀佛 on 2015/6/30.
  */
-public class Setting {
+class Setting {
+    var key:String
+    var value:String
 
-    private String key;
-    private String value;
-
-    public Setting(String key,String value){
-        this.key=key;
-        this.value = value;
-    }
-
-    public String getKey() {
-        return key;
-    }
-    public void setKey(String key) {
-        this.key = key;
+    constructor(key: String, value: String) {
+        this.key = key
+        this.value = value
     }
 
-    public String getValue() {
-        return value;
+    fun getBoolean(): Boolean {
+        return java.lang.Boolean.parseBoolean(value)
     }
 
-    public Boolean getBoolean(){
-        return Boolean.parseBoolean(value);
-    }
-    public int getInt(){
-        return Integer.parseInt(value);
-    }
-    public long getLong(){
-        return Long.parseLong(value);
-    }
-    public DateTime getDateTime(){
-        return new DateTime(getLong());
+    fun getInt(): Int {
+        return value.toInt()
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    fun getLong(): Long {
+        return value.toLong()
     }
 
-    public enum KEYS{
-        banner,welcome,welcome_duration,zodiac1,zodiac2,szr,lzr,gyz,latestVersionCode,
-        recordIsOpened, targetAuto,birthday, is_weekend_first, targetInHour
+    fun getDateTime(): DateTime {
+        return DateTime(getLong())
+    }
+
+    enum class KEYS {
+        banner, welcome, welcome_duration, zodiac1, zodiac2, szr, lzr, gyz, latestVersionCode, recordIsOpened, targetAuto, birthday, is_weekend_first, targetInHour
     }
 }

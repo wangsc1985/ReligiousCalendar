@@ -1,23 +1,19 @@
-package com.wang17.religiouscalendar.util;
+package com.wang17.religiouscalendar.util
 
 /**
  * Created by 阿弥陀佛 on 2015/6/23.
  */
-public class _String {
-    public static String concat(Object... strings) {
-        StringBuilder sb = new StringBuilder();
-        for (Object str : strings) {
-            if (str != null)
-                sb.append(str.toString());
+object _String {
+    fun concat(vararg strings: Any?): String {
+        val sb = StringBuilder()
+        for (str in strings) {
+            if (str != null) sb.append(str.toString())
         }
-        return sb.toString();
+        return sb.toString()
     }
 
-    public static boolean IsNullOrEmpty(String str) {
-        if (str == null || str.length() == 0)
-            return true;
-        else
-            return false;
+    fun IsNullOrEmpty(str: String?): Boolean {
+        return if (str == null || str.length == 0) true else false
     }
 
     /**
@@ -26,10 +22,9 @@ public class _String {
      * @param x
      * @return
      */
-    public static String format(int x) {
-        String s = "" + x;
-        if (s.length() == 1)
-            s = "0" + s;
-        return s;
+    fun format(x: Int): String {
+        var s = "" + x
+        if (s.length == 1) s = "0$s"
+        return s
     }
 }

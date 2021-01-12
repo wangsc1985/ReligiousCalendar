@@ -1,86 +1,71 @@
-package com.wang17.religiouscalendar.model;
+package com.wang17.religiouscalendar.model
 
-import com.wang17.religiouscalendar.util._String;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.wang17.religiouscalendar.util._String
+import java.util.*
 
 /**
  * Created by 阿弥陀佛 on 2015/6/24.
  * 只存储农历月和农历日的类
  */
-public class LunarDate {
+class LunarDate {
+    companion object {
+        val Months: MutableList<String> = ArrayList()
+        private val str = arrayOf("", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十")
+        val Days: MutableList<String> = ArrayList()
 
-    public static final List<String> Months;
-
-    static {
-        Months = new ArrayList<String>();
-        Months.add("正月");
-        Months.add("二月");
-        Months.add("三月");
-        Months.add("四月");
-        Months.add("五月");
-        Months.add("六月");
-        Months.add("七月");
-        Months.add("八月");
-        Months.add("九月");
-        Months.add("十月");
-        Months.add("十一月");
-        Months.add("十二月");
-    }
-
-    private static String[] str = new String[]{"", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"};
-    public static final List<String> Days;
-
-    static {
-        Days = new ArrayList<String>();
-        for (int i = 1; i <= 10; i++) {
-            Days.add("初" + str[i]);
+        init {
+            Months.add("正月")
+            Months.add("二月")
+            Months.add("三月")
+            Months.add("四月")
+            Months.add("五月")
+            Months.add("六月")
+            Months.add("七月")
+            Months.add("八月")
+            Months.add("九月")
+            Months.add("十月")
+            Months.add("十一月")
+            Months.add("十二月")
         }
-        for (int i = 1; i <= 9; i++) {
-            Days.add("十" + str[i]);
+
+        init {
+            for (i in 1..10) {
+                Days.add("初" + str[i])
+            }
+            for (i in 1..9) {
+                Days.add("十" + str[i])
+            }
+            Days.add("二十")
+            for (i in 1..9) {
+                Days.add("廿" + str[i])
+            }
+            Days.add("三十")
         }
-        Days.add("二十");
-        for (int i = 1; i <= 9; i++) {
-            Days.add("廿" + str[i]);
-        }
-        Days.add("三十");
     }
 
-    private int month;
-    private int day;
+    var month: Int
+    var day: Int
 
-    public int getMonth() {
-        return month;
+    constructor(lunarMonth: String, lunarDay: String) {
+        month = Months!!.indexOf(lunarMonth) + 1
+        day = Days!!.indexOf(lunarDay) + 1
     }
 
-    public int getDay() {
-        return day;
+    constructor(lunarMonth: Int, lunarDay: Int) {
+        month = lunarMonth
+        day = lunarDay
     }
 
-    public LunarDate(String lunarMonth, String lunarDay) {
-        this.month = Months.indexOf(lunarMonth) + 1;
-        this.day = Days.indexOf(lunarDay) + 1;
+    override fun equals(obj: Any?): Boolean {
+        val md = obj as LunarDate?
+        return md!!.month == month && md.day == day
     }
 
-    public LunarDate(int lunarMonth, int lunarDay) {
-        this.month = lunarMonth;
-        this.day = lunarDay;
+    override fun hashCode(): Int {
+        return _String.concat(_String.format(month), _String.format(day)).hashCode()
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        LunarDate md = (LunarDate) obj;
-        return md.month == this.month && md.day == this.day;
-    }
-
-    @Override
-    public int hashCode() {
-        return _String.concat(_String.format(this.month), _String.format(this.day)).hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return Months.get(this.month-1)+Days.get(this.day-1);
+    override fun toString(): String {
+        return Months!![month - 1] + Days!![day - 1]
     }
 }

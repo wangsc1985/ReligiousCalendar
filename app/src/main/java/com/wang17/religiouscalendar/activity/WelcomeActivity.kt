@@ -1,85 +1,76 @@
-package com.wang17.religiouscalendar.activity;
+package com.wang17.religiouscalendar.activity
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.widget.ImageView;
+import android.content.Intent
+import android.os.Bundle
+import android.os.Handler
+import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.Animation.AnimationListener
+import android.widget.*
+import com.wang17.religiouscalendar.R
+import com.wang17.religiouscalendar.model.*
+import com.wang17.religiouscalendar.util._Session
+import com.wang17.religiouscalendar.util._Utils
 
-import com.wang17.religiouscalendar.R;
-import com.wang17.religiouscalendar.util._Utils;
-import com.wang17.religiouscalendar.util._Session;
-import com.wang17.religiouscalendar.model.DataContext;
-import com.wang17.religiouscalendar.model.Setting;
-
-public class WelcomeActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+class WelcomeActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
         try {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_welcome);
-
-            DataContext context = new DataContext(WelcomeActivity.this);
-            int softVersion = 13;
-            ImageView welcomeImg = (ImageView) this.findViewById(R.id.imageBuddha);
-            Setting setting = context.getSetting(Setting.KEYS.welcome);
-            int itemPosition = 0;
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_welcome)
+            val context = DataContext(this@WelcomeActivity)
+            val softVersion = 13
+            val welcomeImg = findViewById(R.id.imageBuddha) as ImageView
+            val setting = context.getSetting(Setting.KEYS.welcome)
+            var itemPosition = 0
             if (setting != null) {
-                itemPosition = Integer.parseInt(setting.getValue());
+                itemPosition = setting.getInt()
             } else {
-                context.addSetting(Setting.KEYS.welcome, itemPosition + "");
+                context.addSetting(Setting.KEYS.welcome, itemPosition.toString() + "")
             }
-            if (itemPosition >= _Session.welcomes.size()) {
-                itemPosition = 0;
-                context.editSetting(Setting.KEYS.welcome, itemPosition + "");
+            if (itemPosition >= _Session.welcomes.size) {
+                itemPosition = 0
+                context.editSetting(Setting.KEYS.welcome, itemPosition.toString() + "")
             }
-            welcomeImg.setImageResource(_Session.welcomes.get(itemPosition).getResId());
-
-            AlphaAnimation animation = new AlphaAnimation(1, 1);
-            animation.setDuration(2500);// 设置动画显示时间
-            animation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    Log.i("wangsc", "WelcomeActivity animation start ...");
+            welcomeImg.setImageResource(_Session.welcomes[itemPosition].getResId())
+            val animation = AlphaAnimation(1f, 1f)
+            animation.duration = 2500 // 设置动画显示时间
+            animation.setAnimationListener(object : AnimationListener {
+                override fun onAnimationStart(animation: Animation) {
+                    Log.i("wangsc", "WelcomeActivity animation start ...")
                 }
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    Log.i("wangsc", "WelcomeActivity animation end ...");
-                    startActivity(new Intent(getApplication(), MainActivity.class));
-                    WelcomeActivity.this.finish();
+                override fun onAnimationEnd(animation: Animation) {
+                    Log.i("wangsc", "WelcomeActivity animation end ...")
+                    startActivity(Intent(application, MainActivity::class.java))
+                    finish()
                 }
 
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-                    Log.i("wangsc", "WelcomeActivity animation repeat ...");
+                override fun onAnimationRepeat(animation: Animation) {
+                    Log.i("wangsc", "WelcomeActivity animation repeat ...")
                 }
-            });
-            welcomeImg.startAnimation(animation);
-        } catch (Exception ex) {
-            _Utils.printExceptionSycn(WelcomeActivity.this,uiHandler,ex);
+            })
+            welcomeImg.startAnimation(animation)
+        } catch (ex: Exception) {
+            _Utils.printExceptionSycn(this@WelcomeActivity, uiHandler, ex)
         }
     }
 
-    private Handler uiHandler = new Handler();
-    class splashhandler implements Runnable {
-        public void run() {
-            startActivity(new Intent(getApplication(), MainActivity.class));
-            WelcomeActivity.this.finish();
+    private val uiHandler = Handler()
+
+    internal inner class splashhandler : Runnable {
+        override fun run() {
+            startActivity(Intent(application, MainActivity::class.java))
+            finish()
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
+    override fun onPause() {
+        super.onPause()
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    override fun onResume() {
+        super.onResume()
     }
 }
