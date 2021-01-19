@@ -79,7 +79,7 @@ class DateTime : GregorianCalendar {
         return this[SECOND]
     }
 
-    fun toShortDateString(): String? {
+    fun toShortDateString(): String {
         return _String.concat(getYear(), "年", getMonth() + 1, "月", getDay(), "日")
     }
 
@@ -88,7 +88,7 @@ class DateTime : GregorianCalendar {
      *
      * @return
      */
-    fun toLongDateString(): String? {
+    fun toLongDateString(): String {
         return _String.concat(toShortDateString(), "  ", toTimeString())
     }
 
@@ -97,7 +97,7 @@ class DateTime : GregorianCalendar {
      *
      * @return
      */
-    fun toTimeString(): String? {
+    fun toTimeString(): String {
         return _String.concat(getHourStr(), ":", getMiniteStr(), ":", getSecondStr())
     }
 

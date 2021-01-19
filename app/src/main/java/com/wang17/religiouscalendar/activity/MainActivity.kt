@@ -30,6 +30,10 @@ import com.wang17.religiouscalendar.e
 import com.wang17.religiouscalendar.emnu.SolarTerm
 import com.wang17.religiouscalendar.model.*
 import com.wang17.religiouscalendar.util.*
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.include_main_banner.*
+import kotlinx.android.synthetic.main.include_main_info.*
+import kotlinx.android.synthetic.main.include_main_menu.*
 import java.io.*
 import java.nio.ByteBuffer
 import java.util.*
@@ -38,29 +42,17 @@ import kotlin.experimental.and
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     // 视图变量
     private lateinit var headerView: View
-    private lateinit var tvGanzhi: TextView
-    private lateinit var tvNongLi: TextView
-    private lateinit var tvYear: TextView
-    private lateinit var tvFo: TextView
-    private lateinit var tvToday: TextView
-    private lateinit var tvMonth: TextView
     private lateinit var tvChijie1: TextView
     private lateinit var tvChijie2: TextView
     private lateinit var calendarAdapter: CalenderGridAdapter
-    private lateinit var ibLeftMenu: ImageButton
     private lateinit var ibSettting: ImageButton
-    private lateinit var ivBanner: ImageView
-    private lateinit var ivWelcome: ImageView
-    private lateinit var drawer: DrawerLayout
-    private lateinit var layout_religious: LinearLayout
     private lateinit var userCalender: GridView
     private lateinit var mPopWindow: PopupWindow
     private lateinit var layoutJinJi: LinearLayout
     private lateinit var layoutJyw: LinearLayout
     private lateinit var layout_ygx: LinearLayout
     private lateinit var layoutRecord: LinearLayout
-    private lateinit var layoutWelcome: LinearLayout
-    private lateinit var pbLoading: ProgressBar
+    private lateinit var progressBar_loading: ProgressBar
 
     // 类变量
     private lateinit var dataContext: DataContext
@@ -103,33 +95,30 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             xxxTimeMillis = System.currentTimeMillis()
             dataContext = DataContext(this@MainActivity)
             isFirstTime = true
-            drawer = findViewById(R.id.drawer_layout) as DrawerLayout
             val toggle = ActionBarDrawerToggle(
-                    this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-            drawer.setDrawerListener(toggle)
+                    this, drawer_layout, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+            drawer_layout.setDrawerListener(toggle)
             toggle.syncState()
-            val navigationView = findViewById(R.id.nav_view) as NavigationView
-            headerView = navigationView.getHeaderView(0)
-            navigationView.setNavigationItemSelectedListener { item ->
+            val nav_view = findViewById(R.id.nav_view) as NavigationView
+            headerView = nav_view.getHeaderView(0)
+            nav_view.setNavigationItemSelectedListener { item ->
                 menuItemSelected(item)
-                drawer.closeDrawer(GravityCompat.START)
+                drawer_layout.closeDrawer(GravityCompat.START)
                 true
             }
 
             //region 启动界面
-            layoutWelcome = findViewById(R.id.layout_welcome) as LinearLayout
-            ivWelcome = findViewById(R.id.imageView_welcome) as ImageView
             welcomeDurationIndex = dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getInt()
             if (welcomeDurationIndex == 0) {
-                ivWelcome.visibility = View.INVISIBLE
+                imageView_welcome.visibility = View.INVISIBLE
             } else {
-                ivWelcome.visibility = View.VISIBLE
+                imageView_welcome.visibility = View.VISIBLE
                 var itemPosition = dataContext.getSetting(Setting.KEYS.welcome, 0).getInt()
                 if (itemPosition >= _Session.welcomes.size) {
                     itemPosition = 0
                     dataContext.editSetting(Setting.KEYS.welcome, itemPosition.toString() + "")
                 }
-                ivWelcome.setImageResource(_Session.welcomes[itemPosition].getResId())
+                imageView_welcome.setImageResource(_Session.welcomes[itemPosition].getResId())
             }
 
             //endregion
@@ -147,22 +136,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     //region 事件
     var leftMenuClick = View.OnClickListener {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START)
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
         } else {
-            drawer.openDrawer(GravityCompat.START)
+            drawer_layout.openDrawer(GravityCompat.START)
         }
     }
     var leftMenuLongClick = OnLongClickListener {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START)
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
         }
         startActivityForResult(Intent(this@MainActivity, SettingActivity::class.java), TO_SETTING_ACTIVITY)
         true
     }
     var settingClick = View.OnClickListener {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START)
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
         }
         startActivityForResult(Intent(this@MainActivity, SettingActivity::class.java), TO_SETTING_ACTIVITY)
     }
@@ -231,7 +220,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             })
             //endregion
 
-            pbLoading = findViewById(R.id.progressBar_loading) as ProgressBar
+            progressBar_loading = findViewById(R.id.progressBar_loading) as ProgressBar
 
             //
             var itemPosition = 0
@@ -242,25 +231,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             // 加载include_main_banner
-            ivBanner = findViewById(R.id.imageView_banner) as ImageView
-            ivBanner.setImageResource(_Session.banners[itemPosition].getResId())
-            ivBanner.setOnClickListener { showPopupWindow() }
-            ibLeftMenu = findViewById(R.id.ib_leftMenu) as ImageButton
+            imageView_banner.setImageResource(_Session.banners[itemPosition].getResId())
+            imageView_banner.setOnClickListener { showPopupWindow() }
             rorateWan()
             ibSettting = headerView.findViewById(R.id.imageButton_setting)
-            ibLeftMenu.setOnClickListener(leftMenuClick)
-            ibLeftMenu.setOnLongClickListener(leftMenuLongClick)
+            ib_leftMenu.setOnClickListener(leftMenuClick)
+            ib_leftMenu.setOnLongClickListener(leftMenuLongClick)
             ibSettting.setOnClickListener(settingClick)
             ibSettting.setOnLongClickListener(OnLongClickListener { true })
             val mgr = assets //得到AssetManager
             fontHWZS = Typeface.createFromAsset(mgr, "fonts/STZHONGS.TTF")
             fontGF = Typeface.createFromAsset(mgr, "fonts/GONGFANG.ttf")
-            tvFo = findViewById(R.id.tvfo) as TextView
             //            textViewFo.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
 //            ((TextView)findViewById(R.id.textView_banner_text)).setTypeface(fontHWZS);
 //            textViewFo.getPaint().setFakeBoldText(true);
             //
-            nianfo(tvFo)
+            nianfo(tvfo)
 
             // selectedDate
             selectedDate = DateTime.getToday()
@@ -268,9 +254,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             currentMonth = selectedDate.getMonth()
 
             // buttonToday
-            tvToday = findViewById(R.id.btn_today) as TextView
-            tvToday.setTypeface(fontGF)
-            tvToday.setOnClickListener(btnToday_OnClickListener)
+            btn_today.setTypeface(fontGF)
+            btn_today.setOnClickListener(btnToday_OnClickListener)
 
 //            textViewToday = (TextView) findViewById(R.id.textView_today);
 //            textViewToday.setTypeface(fontGF);
@@ -278,36 +263,31 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             // 信息栏
 //            yearMonth = (TextView) findViewById(R.id.tvYearMonth);
 //            yangliBig = (TextView) findViewById(R.id.tvYangLiBig);
-            tvMonth = findViewById(R.id.button_month) as TextView
-            tvMonth.setOnClickListener(btnCurrentMonth_OnClickListener)
-            val buttonQuickMonth = findViewById(R.id.button_quick_month) as Button
-            buttonQuickMonth.setText((currentMonth + 1).toString() + "月")
-            buttonQuickMonth.setOnClickListener {
+            button_month.setOnClickListener(btnCurrentMonth_OnClickListener)
+            val button_quick_month = findViewById(R.id.button_quick_month) as Button
+            button_quick_month.setText((currentMonth + 1).toString() + "月")
+            button_quick_month.setOnClickListener {
                 val selectedDay = selectedDate.getDay()
                 var dateTime = DateTime(currentYear, currentMonth, selectedDay)
                 dateTime = dateTime.addMonths(1)
                 setSelectedDate(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay())
-                buttonQuickMonth.setText((currentMonth + 1).toString() + "月")
+                button_quick_month.setText((currentMonth + 1).toString() + "月")
                 //                    }else{
 //                        dateTime = dateTime.addMonths(-1);
 //                        setSelectedDate(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
 //                        buttonQuickMonth.setText(currentMonth+1+"月");
 //                    }
             }
-            tvYear = findViewById(R.id.textView_year) as TextView
-            tvYear.setOnClickListener(btnCurrentMonth_OnClickListener)
-            tvGanzhi = findViewById(R.id.textView_ganZhi) as TextView
-            tvNongLi = findViewById(R.id.textView_nongLi) as TextView
-            layout_religious = findViewById(R.id.linearReligious) as LinearLayout
-            tvYear.setTypeface(fontGF)
+            textView_year.setOnClickListener(btnCurrentMonth_OnClickListener)
+            textView_year.setTypeface(fontGF)
             //            tvYear.getPaint().setFakeBoldText(true);
-            tvMonth.setTypeface(fontGF)
+            button_month.setTypeface(fontGF)
             //            tvMonth.getPaint().setFakeBoldText(true);
-            tvGanzhi.setTypeface(fontHWZS)
-            tvGanzhi.paint.isFakeBoldText = true
-            tvNongLi.setTypeface(fontHWZS)
-            tvNongLi.paint.isFakeBoldText = true
-            tvFo.setTypeface(fontGF)
+            textView_ganZhi.setTypeface(fontHWZS)
+            textView_ganZhi.paint.isFakeBoldText = true
+            textView_nongLi.setTypeface(fontHWZS)
+            textView_nongLi.paint.isFakeBoldText = true
+            tvfo.setTypeface(fontGF)
             //            tvFo.getPaint().setFakeBoldText(true);
 
             // calendarAdapter
@@ -322,9 +302,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             // userCalender
             userCalender = findViewById(R.id.userCalender) as GridView
             userCalender.onItemClickListener = userCalender_OnItemClickListener
-            val calendarHeader = findViewById(R.id.userCalenderHeader) as GridView
+            val userCalenderHeader = findViewById(R.id.userCalenderHeader) as GridView
             calenderHeaderGridAdapter = CalenderHeaderGridAdapter()
-            calendarHeader.adapter = calenderHeaderGridAdapter // 添加星期标头
+            userCalenderHeader.adapter = calenderHeaderGridAdapter // 添加星期标头
 
             // 填充日历
             Thread { refreshCalendar() }.start()
@@ -334,8 +314,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setYearMonthText() {
-        tvMonth.setText((currentMonth + 1).toString() + "月")
-        tvYear.text = _String.concat(currentYear, "年")
+        button_month.setText((currentMonth + 1).toString() + "月")
+        textView_year.text = _String.concat(currentYear, "年")
         //        int month = new Lunar(selectedDate).getMonth();
 //        String monthStr = "";
 //        switch (month) {
@@ -461,23 +441,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             when (id) {
                 R.id.item00 -> {
                     dataContext.editSetting(Setting.KEYS.banner, 0)
-                    ivBanner.setImageResource(_Session.banners[0].getResId())
+                    imageView_banner.setImageResource(_Session.banners[0].getResId())
                 }
                 R.id.item01 -> {
                     dataContext.editSetting(Setting.KEYS.banner, 1)
-                    ivBanner.setImageResource(_Session.banners[1].getResId())
+                    imageView_banner.setImageResource(_Session.banners[1].getResId())
                 }
                 R.id.item02 -> {
                     dataContext.editSetting(Setting.KEYS.banner, 2)
-                    ivBanner.setImageResource(_Session.banners[2].getResId())
+                    imageView_banner.setImageResource(_Session.banners[2].getResId())
                 }
                 R.id.item03 -> {
                     dataContext.editSetting(Setting.KEYS.banner, 3)
-                    ivBanner.setImageResource(_Session.banners[3].getResId())
+                    imageView_banner.setImageResource(_Session.banners[3].getResId())
                 }
                 R.id.item04 -> {
                     dataContext.editSetting(Setting.KEYS.banner, 4)
-                    ivBanner.setImageResource(_Session.banners[4].getResId())
+                    imageView_banner.setImageResource(_Session.banners[4].getResId())
                 }
             }
             mPopWindow.dismiss()
@@ -658,7 +638,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
      */
     private fun refreshInfoLayout(seletedDateTime: DateTime) {
         try {
-            Log.e("wangsc", "刷新信息板：" + seletedDateTime.toLongDateString())
             if (calendarItemsMap.size == 0) return
             var calendarItem: CalendarItem? = null
             for ((_, value) in calendarItemsMap) {
@@ -670,18 +649,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
             try {
                 val gz = GanZhi(calendarItem.yangLi, solarTermMap)
-                tvGanzhi.text = _String.concat("[", gz.zodiac, "]", gz.tianGanYear, gz.diZhiYear, "年",
+                textView_ganZhi.text = _String.concat("[", gz.zodiac, "]", gz.tianGanYear, gz.diZhiYear, "年",
                         gz.tianGanMonth, gz.diZhiMonth, "月",
                         gz.tianGanDay, gz.diZhiDay, "日")
-                tvNongLi.text = _String.concat(calendarItem.nongLi.getMonthStr(), calendarItem.nongLi.getDayStr())
+                textView_nongLi.text = _String.concat(calendarItem.nongLi.getMonthStr(), calendarItem.nongLi.getDayStr())
             } catch (ex: Exception) {
                 _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
             }
-            layout_religious.removeAllViews()
+            linearReligious.removeAllViews()
 
             val haveReligious = calendarItem.religious != null && calendarItem.religious.length > 0
             val haveRemarks = calendarItem.remarks != null && calendarItem.remarks.length > 0
-            e("religious is null : ${calendarItem.religious == null} , religious size : ${calendarItem.religious.length} ,remarks is null : ${calendarItem.remarks == null} , remarks size : ${calendarItem.remarks.length}  ")
 
             if (haveReligious) {
                 val religious = calendarItem.religious.split("\n").toTypedArray()
@@ -696,7 +674,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     if (findReligiousKeyWord(str) == 1) {
                         tv.setTextColor(resources.getColor(R.color.month_text_color))
                     }
-                    layout_religious.addView(view)
+                    linearReligious.addView(view)
                 }
             }
             if (haveRemarks) {
@@ -709,7 +687,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, INFO_TEXT_SIZE.toFloat())
                     tv.paint.isFakeBoldText = true
                     tv.typeface = fontHWZS
-                    layout_religious.addView(view)
+                    linearReligious.addView(view)
                 }
             }
         } catch (e: Exception) {
@@ -891,7 +869,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
             uiHandler.post {
                 try {
-                    layoutWelcome.visibility = View.INVISIBLE
+                    layout_welcome.visibility = View.INVISIBLE
                 } catch (e: Exception) {
                     _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
                 }
@@ -907,7 +885,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //        imageRight.setEnabled(false);
 //        imageLeft.setColorFilter(Color.GRAY);
 //        imageRight.setColorFilter(Color.GRAY);
-        tvToday.setTextColor(Color.GRAY)
+        btn_today.setTextColor(Color.GRAY)
     }
 
     private fun enableButton() {
@@ -918,7 +896,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //        imageLeft.setColorFilter(Color.TRANSPARENT);
 //        imageRight.setColorFilter(Color.TRANSPARENT);
 //        buttonMonth.setTextColor(getResources().getColor(R.color.month_text_color));
-        tvToday.setTextColor(resources.getColor(R.color.month_text_color))
+        btn_today.setTextColor(resources.getColor(R.color.month_text_color))
     }
 
     private inner class RefreshCalendarTask : AsyncTask<Any?, Any?, Any?>() {
@@ -969,9 +947,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
          */
         override fun onPreExecute() {
             super.onPreExecute()
-            pbLoading.visibility = View.VISIBLE
-            pbLoading.progress = 0
-            pbLoading.max = selectedDate.getActualMaximum(Calendar.DAY_OF_MONTH)
+            progressBar_loading.visibility = View.VISIBLE
+            progressBar_loading.progress = 0
+            progressBar_loading.max = selectedDate.getActualMaximum(Calendar.DAY_OF_MONTH)
         }
 
         /**
@@ -981,7 +959,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
          */
         override fun onProgressUpdate(values: Array<Any?>) {
             super.onProgressUpdate(*values)
-            pbLoading.progress = values[0] as Int
+            progressBar_loading.progress = values[0] as Int
             if (values[0] as Int == 0) {
                 disableButton()
             }
@@ -1035,20 +1013,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     }
                 }
 
-                //region test
-                for ((key, value) in calendarItemsMap) {
-                    log("""
-    
-    序号：$key，阳历：${value.yangLi.toShortDateString()}，农历：${value.nongLi.getDayStr()}
-    ${value.religious}
-    """.trimIndent())
-                }
-                //endregion
                 enableButton()
             } catch (e: Exception) {
                 _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
             } finally {
-                pbLoading.visibility = View.GONE
+                progressBar_loading.visibility = View.GONE
             }
         }
 
@@ -1057,8 +1026,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
          */
         override fun onCancelled() {
             super.onCancelled()
-            pbLoading.visibility = View.VISIBLE
-            pbLoading.progress = 0
+            progressBar_loading.visibility = View.VISIBLE
+            progressBar_loading.progress = 0
         }
     }
 
@@ -1191,10 +1160,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             // “今”按钮是否显示
             val today = DateTime.getToday()
             if (year == today.getYear() && month == today.getMonth() && day == today.getDay()) {
-                log("today")
                 setTodayEnable(false)
             } else {
-                log("not today")
                 setTodayEnable(true)
             }
 
@@ -1214,15 +1181,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun setTodayEnable(enable: Boolean) {
         try {
             uiHandler.post {
-                log("xxxxxxxxxxxxxxxxxxxxx : $enable")
-                // TODO: 2021/1/5 asdfasdfsadfs
                 if (enable) {
-                    tvToday.visibility = View.VISIBLE
-                    ibLeftMenu.visibility = View.INVISIBLE
+                    btn_today.visibility = View.VISIBLE
+                    ib_leftMenu.visibility = View.INVISIBLE
                     stopRorateWan()
                 } else {
-                    tvToday.visibility = View.INVISIBLE
-                    ibLeftMenu.visibility = View.VISIBLE
+                    btn_today.visibility = View.INVISIBLE
+                    ib_leftMenu.visibility = View.VISIBLE
                     rorateWan()
                 }
             }
@@ -1232,11 +1197,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun rorateWan() {
-        AnimationUtils.setRorateAnimation(this@MainActivity, ibLeftMenu, 7000)
+        AnimationUtils.setRorateAnimation(this@MainActivity, ib_leftMenu, 7000)
     }
 
     private fun stopRorateWan() {
-        ibLeftMenu.clearAnimation()
+        ib_leftMenu.clearAnimation()
     }
 
     /**
@@ -1390,8 +1355,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onBackPressed() {
         try {
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START)
+            if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+                drawer_layout.closeDrawer(GravityCompat.START)
             } else {
                 super.onBackPressed()
             }
@@ -1424,7 +1389,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //
 //            }
 //        }
-        drawer.closeDrawer(GravityCompat.START)
+        drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 

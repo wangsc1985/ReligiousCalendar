@@ -1,7 +1,7 @@
 package com.wang17.religiouscalendar.util
 
 import android.content.Context
-import android.util.Log
+import com.wang17.religiouscalendar.e
 import com.wang17.religiouscalendar.emnu.SolarTerm
 import com.wang17.religiouscalendar.model.*
 import com.wang17.religiouscalendar.model.Setting.KEYS
@@ -11,7 +11,6 @@ import java.util.*
 import kotlin.Int
 import kotlin.String
 import kotlin.Throws
-import kotlin.run
 import kotlin.toString
 
 /**
@@ -96,7 +95,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             AddReligiousDay(solar.key.addDays(3).getDate(), "秋分后三日。犯之必得危疾。尤宜切戒。")
         }
         var dt2 = DateTime().timeInMillis
-        Log.i("wangsc-runtime", _String.concat("获取二分日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
+        e(_String.concat("获取二分日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
         callBack.execute()
         dt1 = DateTime().timeInMillis
         /// *******二至日*********
@@ -154,7 +153,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             }
         }
         dt2 = DateTime().timeInMillis
-        Log.i("wangsc-runtime", _String.concat("获取冬至、后庚辛第三戌日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
+        e(_String.concat("获取冬至、后庚辛第三戌日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
         callBack.execute()
         dt1 = DateTime().timeInMillis
         /// 四立日，四绝日 犯之减寿五年。
@@ -212,7 +211,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             AddReligiousDay(solar.key.getDate(), "立冬日(四立日)。犯之减寿五年。")
         }
         dt2 = DateTime().timeInMillis
-        Log.i("wangsc-runtime", _String.concat("获取四立日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
+        e(_String.concat("获取四立日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
         callBack.execute()
         dt1 = DateTime().timeInMillis
 
@@ -260,23 +259,25 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         }
         callBack.execute()
         dt2 = DateTime().timeInMillis
-        Log.i("wangsc-runtime", _String.concat("获取三伏日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
+        e(_String.concat("获取三伏日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
         dt1 = DateTime().timeInMillis
         var day = startDate
         while (day.compareTo(endDate) <= 0) {
             val ganzhi = GanZhi(day, solarTermTreeMap)
+            e(day.toLongDateString())
             val lunar = Lunar(day)
             val chineseMonth = lunar.month
             val chineseDay = lunar.day
 
             //　大小月，大月30天，小月30天
             var maxDay = lunar.day
-            var tempday = day.addDays(1)
-            var tmpLunar = Lunar(tempday)
+            var tempDay = day.addDays(1)
+            var tmpLunar = Lunar(tempDay)
+            e("计算当前农历月的天数")
             while (tmpLunar.month == lunar.month) {
                 maxDay = tmpLunar.day
-                tempday = tempday.addDays(1)
-                tmpLunar = Lunar(tempday)
+                tempDay = tempDay.addDays(1)
+                tmpLunar = Lunar(tempDay)
             }
 
 
