@@ -16,6 +16,7 @@ import com.wang17.religiouscalendar.fragment.ActionBarFragment.OnActionFragmentB
 import com.wang17.religiouscalendar.model.*
 import com.wang17.religiouscalendar.util._Utils
 import kotlinx.android.synthetic.main.activity_sexual_day_record.*
+import kotlinx.android.synthetic.main.include_setting_part5.*
 import java.util.*
 
 class SexualDayRecordActivity : AppCompatActivity(), OnActionFragmentBackListener {
@@ -97,7 +98,6 @@ class SexualDayRecordActivity : AppCompatActivity(), OnActionFragmentBackListene
         try {
             super.onCreate(savedInstanceState)
             setContentView(R.layout.activity_sexual_day_record)
-            supportFragmentManager.beginTransaction().replace(R.id.fragment_action, ActionBarFragment.newInstance()).commit()
             isDataChanged = false
             dataContext = DataContext(this)
             sexualDays = dataContext.getSexualDays(true)
@@ -169,7 +169,7 @@ class SexualDayRecordActivity : AppCompatActivity(), OnActionFragmentBackListene
             return 0
         }
 
-        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
             var convertView = convertView
             try {
                 convertView = View.inflate(this@SexualDayRecordActivity, R.layout.inflate_list_item_sexual_day, null)
@@ -206,7 +206,8 @@ class SexualDayRecordActivity : AppCompatActivity(), OnActionFragmentBackListene
                 val date = sexualDay.dateTime
                 textViewStartDay.text = date.getMonthStr() + "月" + date.getDayStr() + "日"
                 textViewStartTime.text = date.getHour().toString() + ":" + date.getMiniteStr()
-                textViewInterval.text = DateTime.toSpanString(interval, 4, 3)
+                val aa = (interval/ 3600000).toInt()
+                textViewInterval.text = DateTime.toSpanString(aa)
                 //
                 if (max > 0) {
                     progressBar.max = max

@@ -23,7 +23,7 @@ import java.util.*
 
 class ActionBarFragment : Fragment() {
     // 类变量
-    private lateinit var backListener: OnActionFragmentBackListener
+    private var backListener: OnActionFragmentBackListener?=null
     private lateinit var dataContext: DataContext
     override fun onCreate(savedInstanceState: Bundle?) {
         // 初始化类变量和值变量
@@ -39,8 +39,7 @@ class ActionBarFragment : Fragment() {
 
         //
         imageView_back.setOnClickListener {
-            if (backListener != null)
-                backListener.onBackListener()
+                backListener?.onBackListener()
         }
         if (backListener == null) {
             imageView_back.visibility = View.INVISIBLE

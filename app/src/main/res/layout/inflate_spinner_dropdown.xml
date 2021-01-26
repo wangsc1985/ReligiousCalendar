@@ -10,5 +10,5 @@
     android:paddingRight="10dp"
     android:singleLine="true"
     android:text="asdfsdf"
-    android:textColor="#FFFFFF"
+    android:textColor="@color/dot_light_color"
     android:textSize="12dp" />

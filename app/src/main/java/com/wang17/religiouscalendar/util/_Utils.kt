@@ -89,7 +89,9 @@ object _Utils {
                         错误信息：
                         ${e.message}
                         """.trimIndent()
-                    handler.post { AlertDialog.Builder(context).setTitle("运行错误").setMessage(msg).setPositiveButton("知道了", null).show() }
+//                    handler.post {
+//                        AlertDialog.Builder(context).setTitle("运行错误").setMessage(msg).setPositiveButton("知道了", null).show()
+//                    }
                     break
                 }
             }

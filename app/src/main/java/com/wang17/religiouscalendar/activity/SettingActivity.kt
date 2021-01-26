@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
 import com.wang17.religiouscalendar.R
+import com.wang17.religiouscalendar.e
 import com.wang17.religiouscalendar.emnu.MDrelation
 import com.wang17.religiouscalendar.emnu.MDtype
 import com.wang17.religiouscalendar.emnu.Zodiac
@@ -38,7 +39,6 @@ class SettingActivity : AppCompatActivity(), OnActionFragmentBackListener {
         Log.i("wangsc", "SettingActivity is loading ...")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_action, ActionBarFragment.newInstance()).commit()
         try {
             initializeFields()
             initializeEvents()
@@ -105,11 +105,12 @@ class SettingActivity : AppCompatActivity(), OnActionFragmentBackListener {
             initializeZodiac(spinner_zodiac2)
             val zodiac1 = dataContext.getSetting(Setting.KEYS.zodiac1)
             val zodiac2 = dataContext.getSetting(Setting.KEYS.zodiac2)
+
             if (zodiac1 != null) {
-                spinner_zodiac1.setSelection(zodiac1.getInt(), true)
+                spinner_zodiac1.setSelection(Zodiac.fromString(zodiac1.toString())?.toInt()?:0, true)
             }
             if (zodiac2 != null) {
-                spinner_zodiac2.setSelection(zodiac2.getInt(), true)
+                spinner_zodiac2.setSelection(Zodiac.fromString(zodiac2.toString())?.toInt()?:0, true)
             }
             /**
              * 纪念日
@@ -152,7 +153,8 @@ class SettingActivity : AppCompatActivity(), OnActionFragmentBackListener {
             if (settingBirthday != null) {
                 val birthday = settingBirthday.getDateTime()
                 button_birthday.text = birthday.toShortDateString()
-                button_customTarget.text = DateTime.toSpanString(_Utils.getTargetInMillis(birthday), 4, 3)
+                val aa = (_Utils.getTargetInMillis(birthday)/ 3600000).toInt()
+                button_customTarget.text = DateTime.toSpanString(aa)
             } else {
                 button_birthday.text = "设定生日"
             }

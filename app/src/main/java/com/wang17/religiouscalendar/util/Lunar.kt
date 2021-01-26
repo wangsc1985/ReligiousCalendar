@@ -18,8 +18,8 @@ class Lunar {
 
     constructor(currDateTime: DateTime){
 
-        e("++++++++++++++++++++++++++ lunar 构造器开始 +++++++++++++++++++++++++++")
-        e("阳历：${currDateTime.toShortDateString()}")
+//        e("++++++++++++++++++++++++++ lunar 构造器开始 +++++++++++++++++++++++++++")
+//        e("阳历：${currDateTime.toShortDateString()}")
         val yearCyl: Int
         var monCyl: Int
         val dayCyl: Int
@@ -92,8 +92,8 @@ class Lunar {
         month = iMonth
         day = offset + 1
 
-        e("农历：${month}月${day}日")
-        e("--------------------- lunar 构造器结束 ----------------------")
+//        e("农历：${month}月${day}日")
+//        e("--------------------- lunar 构造器结束 ----------------------")
     }
 
     //====== 传回农历 y年的生肖
@@ -146,7 +146,7 @@ class Lunar {
 
         //====== 传回农历 y年闰月的天数
         private fun leapDays(y: Int): Int {
-            e("***************** leap days year = $y ")
+//            e("***************** leap days year = $y ")
             return if (leapMonth(y) != 0) {
                 if (lunarInfo[y - 1900] and 0x10000 != 0L)  30  else  29
             } else{

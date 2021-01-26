@@ -264,7 +264,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         var day = startDate
         while (day.compareTo(endDate) <= 0) {
             val ganzhi = GanZhi(day, solarTermTreeMap)
-            e(day.toLongDateString())
+//            e(day.toLongDateString())
             val lunar = Lunar(day)
             val chineseMonth = lunar.month
             val chineseDay = lunar.day
@@ -273,7 +273,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             var maxDay = lunar.day
             var tempDay = day.addDays(1)
             var tmpLunar = Lunar(tempDay)
-            e("计算当前农历月的天数")
+//            e("计算当前农历月的天数")
             while (tmpLunar.month == lunar.month) {
                 maxDay = tmpLunar.day
                 tempDay = tempDay.addDays(1)

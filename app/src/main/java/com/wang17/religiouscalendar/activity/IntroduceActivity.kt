@@ -16,7 +16,6 @@ class IntroduceActivity : AppCompatActivity(), OnActionFragmentBackListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_introduce)
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_action, ActionBarFragment.newInstance()).commit()
         val mgr = assets //得到AssetManager
         fontHWZS = Typeface.createFromAsset(mgr, "fonts/STZHONGS.TTF")
         fontGF = Typeface.createFromAsset(mgr, "fonts/GONGFANG.ttf")

@@ -13,7 +13,7 @@ class Setting {
     }
 
     fun getBoolean(): Boolean {
-        return java.lang.Boolean.parseBoolean(value)
+        return value.toBoolean()
     }
 
     fun getInt(): Int {
@@ -28,7 +28,11 @@ class Setting {
         return DateTime(getLong())
     }
 
+    override fun toString(): String {
+        return value.toString()
+    }
+
     enum class KEYS {
-        banner, welcome, welcome_duration, zodiac1, zodiac2, szr, lzr, gyz, latestVersionCode, recordIsOpened, targetAuto, birthday, is_weekend_first, targetInHour
+        banner, welcome, welcome_duration, zodiac1, zodiac2, szr, lzr, gyz, latestVersionCode, recordIsOpened, targetAuto, birthday, is_weekend_first, targetInHour,privacy_version
     }
 }

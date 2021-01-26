@@ -106,6 +106,31 @@
             <include layout="@layout/include_separation"></include>
 
             <LinearLayout
+                android:id="@+id/layout_jyw"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="left|center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="20dp">
+
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/lens" />
+                <TextView
+                    android:id="@+id/textView_jyw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="文昌帝君戒淫文"
+                    android:textColor="@color/background_floating_material_dark"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <include layout="@layout/include_separation"></include>
+
+            <LinearLayout
                 android:id="@+id/layout_ygx"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
@@ -125,31 +150,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="印光大师序"
-                    android:textColor="@color/background_floating_material_dark"
-                    android:textSize="18sp" />
-            </LinearLayout>
-
-            <include layout="@layout/include_separation"></include>
-
-            <LinearLayout
-                android:id="@+id/layout_jyw"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="left|center_vertical"
-                android:orientation="horizontal"
-                android:paddingLeft="20dp">
-
-                <ImageView
-                    android:id="@+id/imageView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
-                    android:src="@drawable/lens" />
-                <TextView
-                    android:id="@+id/textView_jyw"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="文昌帝君戒淫文"
                     android:textColor="@color/background_floating_material_dark"
                     android:textSize="18sp" />
             </LinearLayout>
@@ -177,12 +177,44 @@
                     android:id="@+id/textView_jinji"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="天地人忌介绍"
+                    android:text="天地人忌"
                     android:textColor="@color/background_floating_material_dark"
                     android:textSize="18sp" />
             </LinearLayout>
 
-            <include layout="@layout/include_separation"></include>
+            <include
+                layout="@layout/include_separation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></include>
+
+            <LinearLayout
+                android:id="@+id/layout_about"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="left|center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="20dp">
+
+                <ImageView
+                    android:id="@+id/imageView12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/lens" />
+                <TextView
+                    android:id="@+id/textView_about"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="关于"
+                    android:textColor="@color/background_floating_material_dark"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <include
+                layout="@layout/include_separation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></include>
+<!--            <include layout="@layout/include_separation"></include>-->
 
             <!--            <include layout="@layout/include_separation"></include>-->
 

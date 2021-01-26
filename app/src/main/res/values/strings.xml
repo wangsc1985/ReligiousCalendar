@@ -6,7 +6,13 @@
     <string name="action_settings">设置</string>
     <string name="title_activity_welcome">欢迎界面</string>
     <string name="title_activity_setting">设置</string>
-
+    <string name="pravacy_intro">请你务必审慎阅读、充分理解“隐私政策”条款，其中包含本软件所需的权限及个人信息获取。你可在“设置”中查看、变更你的授权。你可阅读《隐私政策》了解详细信息。如你同意，请点击“同意”开始使用当前软件。</string>
+    <string name="load_url_introduce">百度网盘下载链接：
+        \n\nhttps://pan.baidu.com/s/1jGJh_slWcCpM7pDqPXcJAQ
+        \n\n提取码：0000 </string>
+    <string name="load_url">https://pan.baidu.com/s/1jGJh_slWcCpM7pDqPXcJAQ</string>
+    <string name="home_url">https://sahacloudmanager.azurewebsites.net</string>
+    <string name="contact">微信(QQ)：645708679</string>
     <string name="title_activity_guide">引导界面</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>

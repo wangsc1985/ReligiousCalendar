@@ -1,22 +1,33 @@
 package com.wang17.religiouscalendar.activity
 
+import android.Manifest
 import android.animation.AnimatorInflater
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Resources.NotFoundException
 import android.graphics.Color
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.support.design.widget.NavigationView
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.text.Spannable
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
@@ -34,14 +45,18 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.include_main_banner.*
 import kotlinx.android.synthetic.main.include_main_info.*
 import kotlinx.android.synthetic.main.include_main_menu.*
+import kotlinx.android.synthetic.main.inflate_dialog_privacy.*
 import java.io.*
 import java.nio.ByteBuffer
 import java.util.*
 import kotlin.experimental.and
 
+
 class MainActivity : AppCompatActivity(), View.OnClickListener {
+
     // 视图变量
     private lateinit var headerView: View
+    private lateinit var layoutAbout: View
     private lateinit var tvChijie1: TextView
     private lateinit var tvChijie2: TextView
     private lateinit var calendarAdapter: CalenderGridAdapter
@@ -55,7 +70,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var progressBar_loading: ProgressBar
 
     // 类变量
-    private lateinit var dataContext: DataContext
+    private lateinit var dc: DataContext
     private lateinit var fontHWZS: Typeface
     private lateinit var fontGF: Typeface
     private lateinit var selectedDate: DateTime
@@ -77,7 +92,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var calendarItemViewsMap: MutableMap<DateTime, View>
     private lateinit var religiousDayMap: HashMap<DateTime, String>
     private lateinit var remarkMap: HashMap<DateTime, String>
-    private var uiHandler: Handler = Handler()
+    private var uiHandler = Handler()
     private lateinit var calenderHeaderGridAdapter: CalenderHeaderGridAdapter
     private var isWeekendFirst = false
     private var welcomeDurationIndex = 0
@@ -85,53 +100,150 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return super.onSupportNavigateUp()
     }
 
+    //region 动态权限申请
+    var permissions = arrayOf(
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.INTERNET
+    )
+    var mNoPassedPermissionList: MutableList<String> = ArrayList()
+
+    /**
+     * 申请权限
+     */
+    private val MY_PERMISSIONS_REQUEST: Int = 100
+    fun requestPermission(): Boolean {
+        mNoPassedPermissionList.clear()
+        for (i in permissions.indices) {
+            if (ContextCompat.checkSelfPermission(this@MainActivity, permissions.get(i)) != PackageManager.PERMISSION_GRANTED) {
+                e("权限名称 : ${permissions[i]} , 返回结果 : 未授权")
+                mNoPassedPermissionList.add(permissions.get(i))
+            }
+        }
+        if (mNoPassedPermissionList.isEmpty()) {
+            return true
+        } else {
+            //请求权限方法
+            val permissions = mNoPassedPermissionList.toTypedArray()
+            ActivityCompat.requestPermissions(this@MainActivity, permissions, MY_PERMISSIONS_REQUEST)
+            return false
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        if (requestCode == MY_PERMISSIONS_REQUEST) {
+            for (i in grantResults.indices) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    // 判断 是否仍然继续可以申请权限
+                    AlertDialog.Builder(this).setMessage("授权失败").setNegativeButton("知道了", DialogInterface.OnClickListener { dialog, which ->
+                        this.finish()
+                    }).show()
+                    return
+                }
+            }
+            initOnCreate()
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+    //endregion
+
+    internal class MyClickText(private val context: Context) : ClickableSpan() {
+        override fun updateDrawState(ds: TextPaint) {
+            super.updateDrawState(ds)
+            //设置文本的颜色
+            ds.color = context.resources.getColor(R.color.colorPrimary)
+            //超链接形式的下划线，false 表示不显示下划线，true表示显示下划线
+            ds.isUnderlineText = false
+        }
+
+        override fun onClick(widget: View) {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(context.resources.getString(R.string.home_url))))
+//            context.startActivity(Intent(context,WebActivity::class.java))
+        }
+
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         try {
             super.onCreate(savedInstanceState)
             setContentView(R.layout.activity_main)
-            val dc = DataContext(this)
-            isWeekendFirst = dc.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean()
-            val pics = ArrayList<Int>()
-            xxxTimeMillis = System.currentTimeMillis()
-            dataContext = DataContext(this@MainActivity)
-            isFirstTime = true
-            val toggle = ActionBarDrawerToggle(
-                    this, drawer_layout, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-            drawer_layout.setDrawerListener(toggle)
-            toggle.syncState()
-            val nav_view = findViewById(R.id.nav_view) as NavigationView
-            headerView = nav_view.getHeaderView(0)
-            nav_view.setNavigationItemSelectedListener { item ->
-                menuItemSelected(item)
-                drawer_layout.closeDrawer(GravityCompat.START)
-                true
-            }
+            dc = DataContext(this)
 
-            //region 启动界面
-            welcomeDurationIndex = dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getInt()
-            if (welcomeDurationIndex == 0) {
-                imageView_welcome.visibility = View.INVISIBLE
+            val curPrivacyVersion = 1
+            val dbPrivacyVersion = dc.getSetting(Setting.KEYS.privacy_version, 0).getInt()
+
+            if (dbPrivacyVersion >= curPrivacyVersion) {
+//                if (requestPermission()) {
+                    initOnCreate()
+//                }
             } else {
-                imageView_welcome.visibility = View.VISIBLE
-                var itemPosition = dataContext.getSetting(Setting.KEYS.welcome, 0).getInt()
-                if (itemPosition >= _Session.welcomes.size) {
-                    itemPosition = 0
-                    dataContext.editSetting(Setting.KEYS.welcome, itemPosition.toString() + "")
+                var s = resources.getString(R.string.pravacy_intro)
+                val spannable = Spannable.Factory.getInstance().newSpannable(s)//将字符串包装成可操作的文本格式
+                val click = MyClickText(this)
+                spannable.setSpan(click, 64, 70, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                val view = View.inflate(this, R.layout.inflate_dialog_privacy, null)
+                val tv_content = view.findViewById<TextView>(R.id.tv_content)
+                tv_content.text = spannable
+                tv_content.setMovementMethod(LinkMovementMethod.getInstance())
+                val btn_no = view.findViewById<Button>(R.id.btn_no)
+                val btn_ok = view.findViewById<Button>(R.id.btn_ok)
+
+                val dialog = AlertDialog.Builder(this).setView(view).setCancelable(false).show()
+                btn_no.setOnClickListener {
+                    finish()
                 }
-                imageView_welcome.setImageResource(_Session.welcomes[itemPosition].getResId())
+                btn_ok.setOnClickListener {
+                    dialog.dismiss()
+//                    if (requestPermission()) {
+                        initOnCreate()
+//                    }
+                    dc.editSetting(Setting.KEYS.privacy_version, curPrivacyVersion)
+                }
             }
-
-            //endregion
-
-
-            //
-            solarTermMap = loadJavaSolarTerms(R.raw.solar_java_50)
-
-            //
-            initViews()
         } catch (ex: Exception) {
             _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
         }
+    }
+
+    private fun initOnCreate() {
+        isWeekendFirst = dc.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean()
+        val pics = ArrayList<Int>()
+        xxxTimeMillis = System.currentTimeMillis()
+        isFirstTime = true
+        val toggle = ActionBarDrawerToggle(
+                this, drawer_layout, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer_layout.setDrawerListener(toggle)
+        toggle.syncState()
+        val nav_view = findViewById(R.id.nav_view) as NavigationView
+        headerView = nav_view.getHeaderView(0)
+        nav_view.setNavigationItemSelectedListener { item ->
+            menuItemSelected(item)
+            drawer_layout.closeDrawer(GravityCompat.START)
+            true
+        }
+
+        //region 启动界面
+        welcomeDurationIndex = dc.getSetting(Setting.KEYS.welcome_duration, 1).getInt()
+        if (welcomeDurationIndex == 0) {
+            imageView_welcome.visibility = View.INVISIBLE
+        } else {
+            imageView_welcome.visibility = View.VISIBLE
+            var itemPosition = dc.getSetting(Setting.KEYS.welcome, 0).getInt()
+            if (itemPosition >= _Session.welcomes.size) {
+                itemPosition = 0
+                dc.editSetting(Setting.KEYS.welcome, itemPosition.toString() + "")
+            }
+            imageView_welcome.setImageResource(_Session.welcomes[itemPosition].getResId())
+        }
+
+        //endregion
+
+
+        //
+        solarTermMap = loadJavaSolarTerms(R.raw.solar_java_50)
+
+        //
+        initViews()
     }
 
     //region 事件
@@ -218,27 +330,39 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 intent.putExtra(IntroduceActivity.Companion.PARAM_NAME, ItemName.文昌帝君戒淫文.toString())
                 startActivity(intent)
             })
+            layoutAbout = headerView.findViewById(R.id.layout_about)
+            layoutAbout.setOnClickListener {
+                val intent = Intent(this, AboutActivity::class.java)
+//                intent.putExtra("url","https://sahacloudmanager.azurewebsites.net")
+                startActivity(intent)
+            }
             //endregion
 
             progressBar_loading = findViewById(R.id.progressBar_loading) as ProgressBar
 
             //
             var itemPosition = 0
-            itemPosition = dataContext.getSetting(Setting.KEYS.banner, itemPosition).getInt()
+            itemPosition = dc.getSetting(Setting.KEYS.banner, itemPosition).getInt()
             if (itemPosition >= _Session.banners.size) {
                 itemPosition = 0
-                dataContext.editSetting(Setting.KEYS.banner, itemPosition)
+                dc.editSetting(Setting.KEYS.banner, itemPosition)
             }
 
             // 加载include_main_banner
             imageView_banner.setImageResource(_Session.banners[itemPosition].getResId())
             imageView_banner.setOnClickListener { showPopupWindow() }
             rorateWan()
+
+
+
+
             ibSettting = headerView.findViewById(R.id.imageButton_setting)
             ib_leftMenu.setOnClickListener(leftMenuClick)
             ib_leftMenu.setOnLongClickListener(leftMenuLongClick)
             ibSettting.setOnClickListener(settingClick)
             ibSettting.setOnLongClickListener(OnLongClickListener { true })
+
+
             val mgr = assets //得到AssetManager
             fontHWZS = Typeface.createFromAsset(mgr, "fonts/STZHONGS.TTF")
             fontGF = Typeface.createFromAsset(mgr, "fonts/GONGFANG.ttf")
@@ -364,7 +488,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             layoutRecord.setOnClickListener { showAddSexualDayDialog() }
             layoutRecord.setOnLongClickListener {
                 try {
-                    if (dataContext.getLastSexualDay() != null) {
+                    if (dc.getLastSexualDay() != null) {
                         startActivityForResult(Intent(this@MainActivity, SexualDayRecordActivity::class.java), TO_SEXUAL_RECORD_ACTIVITY)
                     } else {
                         AlertDialog.Builder(this@MainActivity).setMessage("当前没有记录！").show()
@@ -374,20 +498,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 true
             }
-            if (dataContext.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == false) {
-                dataContext.editSetting(Setting.KEYS.recordIsOpened, false)
-                dataContext.editSetting(Setting.KEYS.targetAuto, true)
-                dataContext.deleteSetting(Setting.KEYS.targetInHour)
+            if (dc.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == false) {
+                dc.editSetting(Setting.KEYS.recordIsOpened, false)
+                dc.editSetting(Setting.KEYS.targetAuto, true)
+                dc.deleteSetting(Setting.KEYS.targetInHour)
                 //                new AlertDialog.Builder(this).setMessage("系统移除了自定义行房周期功能，请到设置界面设置出生日期，再使用此功能。").setNegativeButton("知道了", null).show();
 //                return;
             }
-            isShowRecords = java.lang.Boolean.parseBoolean(dataContext.getSetting(Setting.KEYS.recordIsOpened, false).value)
+            isShowRecords = java.lang.Boolean.parseBoolean(dc.getSetting(Setting.KEYS.recordIsOpened, false).value)
             if (isShowRecords) {
                 layoutRecord.visibility = View.VISIBLE
-                val lastSexualDay = dataContext.getLastSexualDay()
+                val lastSexualDay = dc.getLastSexualDay()
                 var targetInHour = 0
                 if (lastSexualDay != null) {
-                    val set = dataContext.getSetting(Setting.KEYS.birthday)
+                    val set = dc.getSetting(Setting.KEYS.birthday)
                     if (set != null) {
                         targetInHour = _Utils.getTargetInHour(set.getDateTime())
                         val haveInHour = ((System.currentTimeMillis() - lastSexualDay.dateTime.timeInMillis) / 3600000).toInt()
@@ -440,23 +564,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         try {
             when (id) {
                 R.id.item00 -> {
-                    dataContext.editSetting(Setting.KEYS.banner, 0)
+                    dc.editSetting(Setting.KEYS.banner, 0)
                     imageView_banner.setImageResource(_Session.banners[0].getResId())
                 }
                 R.id.item01 -> {
-                    dataContext.editSetting(Setting.KEYS.banner, 1)
+                    dc.editSetting(Setting.KEYS.banner, 1)
                     imageView_banner.setImageResource(_Session.banners[1].getResId())
                 }
                 R.id.item02 -> {
-                    dataContext.editSetting(Setting.KEYS.banner, 2)
+                    dc.editSetting(Setting.KEYS.banner, 2)
                     imageView_banner.setImageResource(_Session.banners[2].getResId())
                 }
                 R.id.item03 -> {
-                    dataContext.editSetting(Setting.KEYS.banner, 3)
+                    dc.editSetting(Setting.KEYS.banner, 3)
                     imageView_banner.setImageResource(_Session.banners[3].getResId())
                 }
                 R.id.item04 -> {
-                    dataContext.editSetting(Setting.KEYS.banner, 4)
+                    dc.editSetting(Setting.KEYS.banner, 4)
                     imageView_banner.setImageResource(_Session.banners[4].getResId())
                 }
             }
@@ -855,7 +979,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
             if (isFirstTime && welcomeDurationIndex != 0) {
-                val duration = _Session.duration[dataContext.getSetting(Setting.KEYS.welcome_duration, 1).getInt()]
+                val duration = _Session.duration[dc.getSetting(Setting.KEYS.welcome_duration, 1).getInt()]
                 Log.i("wangsc", "duration: $duration")
                 val span = duration - (System.currentTimeMillis() - xxxTimeMillis)
                 if (span > 0) {
@@ -1004,7 +1128,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         }
 
                         // 非戒期日
-                        if (calendarItem.religious == null||calendarItem.religious.length==0) {
+                        if (calendarItem.religious == null || calendarItem.religious.length == 0) {
                             imageIsUnReligious.visibility = View.VISIBLE
                         } else if (findReligiousKeyWord(calendarItem.religious) == 1) {
                             textViewNongLi.setTextColor(resources.getColor(R.color.month_text_color))
@@ -1393,16 +1517,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return true
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         try {
             when (requestCode) {
                 TO_SETTING_ACTIVITY -> {
-                    if (SettingActivity.Companion.isCalenderChanged) {
+                    if (SettingActivity.isCalenderChanged) {
 //                        refreshCalendarWithDialog("配置已更改，正在重新加载...");
-                        isWeekendFirst = dataContext.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean()
+                        isWeekendFirst = dc.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean()
                         refreshCalendar()
                     }
-                    if (SettingActivity.Companion.isRecordSetChanged) {
+                    if (SettingActivity.isRecordSetChanged) {
                         initRecordPart()
                     }
                 }
@@ -1483,7 +1607,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val hour = npHour.value
                 val selectedDateTime = DateTime(year, month, day, hour, 0, 0)
                 val sexualDay = SexualDay(selectedDateTime, "", "")
-                dataContext.addSexualDay(sexualDay)
+                dc.addSexualDay(sexualDay)
                 initRecordPart()
                 dialog.dismiss()
             } catch (e: Exception) {
@@ -1504,6 +1628,5 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         private const val INFO_TEXT_SIZE = 14
         private const val TO_SEXUAL_RECORD_ACTIVITY = 298
         const val TO_SETTING_ACTIVITY = 1
-        private const val _TAG = "wangsc"
     }
 }
