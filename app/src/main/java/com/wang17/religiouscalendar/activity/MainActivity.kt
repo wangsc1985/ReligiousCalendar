@@ -486,18 +486,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun initRecordPart() {
         try {
             layoutRecord.setOnClickListener { showAddSexualDayDialog() }
-            layoutRecord.setOnLongClickListener {
-                try {
-                    if (dc.getLastSexualDay() != null) {
-                        startActivityForResult(Intent(this@MainActivity, SexualDayRecordActivity::class.java), TO_SEXUAL_RECORD_ACTIVITY)
-                    } else {
-                        AlertDialog.Builder(this@MainActivity).setMessage("当前没有记录！").show()
-                    }
-                } catch (e: Exception) {
-                    _Utils.printException(this@MainActivity, e)
-                }
-                true
-            }
+
             if (dc.getSetting(Setting.KEYS.targetAuto, true).getBoolean() == false) {
                 dc.editSetting(Setting.KEYS.recordIsOpened, false)
                 dc.editSetting(Setting.KEYS.targetAuto, true)
@@ -1538,16 +1527,43 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    fun check(npYear:NumberPicker,npMonth:NumberPicker,npDay:NumberPicker,npHour:NumberPicker){
+
+        val now = DateTime()
+        if(npYear.value==now.getYear()){
+            npMonth.maxValue = now.getMonth()+1
+        }else{
+            npMonth.maxValue = 12
+        }
+        if(npYear.value==now.getYear()&&npMonth.value == now.getMonth()+1){
+            npDay.maxValue = now.getDay()
+        }else{
+            val selected = DateTime(npYear.value, npMonth.value - 1, 1)
+            val max = selected.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val day = npDay.value
+            npDay.maxValue = max
+            if (day > max) {
+                npDay.value = 1
+            } else {
+                npDay.value = day
+            }
+        }
+        if(npYear.value==now.getYear()&&npMonth.value == now.getMonth()+1&&npDay.value==now.getDay()){
+            npHour.maxValue = now.getHour()
+        }else{
+            npHour.maxValue = 23
+        }
+    }
     fun showAddSexualDayDialog() {
         val view = View.inflate(this@MainActivity, R.layout.inflate_dialog_date_picker, null)
         val dialog = AlertDialog.Builder(this@MainActivity).setView(view).create()
-        dialog.setTitle("最后一次行房日期")
-        val dateTime = DateTime()
-        val year = dateTime.getYear()
-        val month = dateTime.getMonth()
+        dialog.setTitle("上一次行房日期")
+        val now = DateTime()
+        val year = now.getYear()
+        val month = now.getMonth()
         //        int maxDay = dateTime.getActualMaximum(Calendar.DAY_OF_MONTH);
-        val day = dateTime.getDay()
-        val hour = dateTime.getHour()
+        val day = now.getDay()
+        val hour = now.getHour()
         val yearNumbers = arrayOfNulls<String>(3)
         for (i in year - 2..year) {
             yearNumbers[i - year + 2] = "${i}年"
@@ -1573,31 +1589,51 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         npYear.value = year
         npYear.displayedValues = yearNumbers
         npYear.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+//        npYear.wrapSelectorWheel=false
         npMonth.minValue = 1
         npMonth.maxValue = 12
         npMonth.displayedValues = monthNumbers
         npMonth.value = month + 1
         npMonth.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+//        npMonth.wrapSelectorWheel=false
         npDay.minValue = 1
         npDay.maxValue = 31
         npDay.displayedValues = dayNumbers
         npDay.value = day
         npDay.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+//        npDay.wrapSelectorWheel=false
         npHour.minValue = 0
         npHour.maxValue = 23
         npHour.displayedValues = hourNumbers
         npHour.value = hour
         npHour.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS // 禁止对话框打开后数字选择框被选中
+//        npHour.wrapSelectorWheel=false
+
+
+        npMonth.maxValue = now.getMonth()+1
+        npDay.maxValue = now.getDay()
+        npHour.maxValue = now.getHour()
+
+        npYear.setOnValueChangedListener { picker, oldVal, newVal ->
+            check(npYear,npMonth,npDay,npHour)
+//            if(npYear.value==now.getYear()){
+//                npMonth.maxValue = now.getMonth()+1
+//            }else{
+//                npMonth.maxValue = 12
+//            }
+        }
         npMonth.setOnValueChangedListener { picker, oldVal, newVal ->
-            val selected = DateTime(npYear.value, npMonth.value - 1, 1)
-            val max = selected.getActualMaximum(Calendar.DAY_OF_MONTH)
-            val day = npDay.value
-            npDay.maxValue = max
-            if (day > max) {
-                npDay.value = 1
-            } else {
-                npDay.value = day
-            }
+            check(npYear,npMonth,npDay,npHour)
+//            if(npYear.value==now.getYear()&&npMonth.value == now.getMonth()+1){
+//                npDay.maxValue = now.getDay()
+//            }
+        }
+        npDay.setOnValueChangedListener { picker, oldVal, newVal ->
+
+            check(npYear,npMonth,npDay,npHour)
+//            if(npYear.value==now.getYear()&&npMonth.value == now.getMonth()+1&&npDay.value==now.getDay()){
+//                npHour.maxValue = now.getHour()
+//            }
         }
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定") { dialog, which ->
             try {
@@ -1617,6 +1653,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "取消") { dialog, which ->
             try {
                 dialog.dismiss()
+            } catch (e: Exception) {
+                _Utils.printException(this@MainActivity, e)
+            }
+        }
+        dialog.setButton(DialogInterface.BUTTON_NEUTRAL,"记录页面"){ dialog, which->
+            try {
+                if (dc.getLastSexualDay() != null) {
+                    startActivityForResult(Intent(this@MainActivity, SexualDayRecordActivity::class.java), TO_SEXUAL_RECORD_ACTIVITY)
+                } else {
+                    AlertDialog.Builder(this@MainActivity).setMessage("当前没有记录！").show()
+                }
             } catch (e: Exception) {
                 _Utils.printException(this@MainActivity, e)
             }
