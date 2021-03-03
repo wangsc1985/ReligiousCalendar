@@ -68,7 +68,7 @@ class SettingActivity : AppCompatActivity(), OnActionFragmentBackListener {
             button_recordStatus.setOnClickListener {
                 if (dataContext.getSetting(Setting.KEYS.recordIsOpened, false).getBoolean() == false) {
                     if (dataContext.getSetting(Setting.KEYS.birthday) == null) {
-                        showBirthdayDialog(this@SettingActivity, "请先设定生日", object : CallBack {
+                        showBirthdayDialog(this@SettingActivity, "设定生日", object : CallBack {
                             override fun execute() {
                                 button_recordStatus.setImageResource(R.mipmap.on)
                                 dataContext.editSetting(Setting.KEYS.recordIsOpened, true)

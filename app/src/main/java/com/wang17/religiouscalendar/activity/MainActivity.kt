@@ -283,8 +283,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         var text1 = text1
         var text2 = text2
         if (!text2.isEmpty()) {
-            text1 = "已持戒：$text1"
-            text2 = text2 + "后，元气恢复。"
+            text1 = "禁欲：$text1"
+            text2 = if(text2.contains("+")) "元气已经恢复：${text2}" else "${text2}后，元气方可复原。"
         }
         tvChijie1.text = text1
         tvChijie2.text = text2
@@ -1624,16 +1624,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
         npMonth.setOnValueChangedListener { picker, oldVal, newVal ->
             check(npYear,npMonth,npDay,npHour)
-//            if(npYear.value==now.getYear()&&npMonth.value == now.getMonth()+1){
-//                npDay.maxValue = now.getDay()
-//            }
         }
         npDay.setOnValueChangedListener { picker, oldVal, newVal ->
-
             check(npYear,npMonth,npDay,npHour)
-//            if(npYear.value==now.getYear()&&npMonth.value == now.getMonth()+1&&npDay.value==now.getDay()){
-//                npHour.maxValue = now.getHour()
-//            }
         }
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定") { dialog, which ->
             try {

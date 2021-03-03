@@ -94,6 +94,16 @@ class SexualDayRecordActivity : AppCompatActivity(), OnActionFragmentBackListene
      * 久而不泄，至生痈疽。
      * 若年过六十，而有数旬不得交接，意中平平者，可闭精勿泄也。
      */
+    private fun setTextForRecord(text1: String, text2: String) {
+        var text1 = text1
+        var text2 = text2
+        if (!text2.isEmpty()) {
+            text1 = "禁欲：$text1"
+            text2 = if(text2.contains("+")) "元气已经恢复：${text2}" else "${text2}后，元气方可复原。"
+        }
+        textView_time1.text = text1
+        textView_time2.text = text2
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         try {
             super.onCreate(savedInstanceState)
@@ -142,12 +152,10 @@ class SexualDayRecordActivity : AppCompatActivity(), OnActionFragmentBackListene
             val haveInHour = ((System.currentTimeMillis() - lastSexualDay.dateTime.timeInMillis) / 3600000).toInt()
             var leaveInHour = targetInHour - haveInHour
             if (leaveInHour > 0) {
-                textView_time1.text = DateTime.toSpanString(haveInHour)
-                textView_time2.text = DateTime.toSpanString(leaveInHour)
+                setTextForRecord(DateTime.toSpanString(haveInHour),DateTime.toSpanString(leaveInHour))
             } else {
                 leaveInHour *= -1
-                textView_time1.text = DateTime.toSpanString(haveInHour)
-                textView_time2.text = "+" + DateTime.toSpanString(leaveInHour)
+                setTextForRecord(DateTime.toSpanString(haveInHour),"+" +DateTime.toSpanString(leaveInHour))
             }
         }
     }

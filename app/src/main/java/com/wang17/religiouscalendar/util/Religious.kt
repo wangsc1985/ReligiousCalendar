@@ -359,8 +359,24 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             /// 五月丙午日 六月丁巳日 七月甲辰日 八月乙卯日
             /// 九月甲寅日 十月癸丑日 十一月壬子日 十二月癸亥日
             /// 此阴不足之日。俱宜戒。
-            if (chineseMonth == 1 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "戌" || chineseMonth == 2 && ganzhi.tianGanDay == "辛" && ganzhi.diZhiDay == "酉" || chineseMonth == 3 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "申" || chineseMonth == 4 && ganzhi.tianGanDay == "丁" && ganzhi.diZhiDay == "未" || chineseMonth == 5 && ganzhi.tianGanDay == "丙" && ganzhi.diZhiDay == "午" || chineseMonth == 6 && ganzhi.tianGanDay == "丁" && ganzhi.diZhiDay == "巳" || chineseMonth == 7 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "辰" || chineseMonth == 8 && ganzhi.tianGanDay == "乙" && ganzhi.diZhiDay == "卯" || chineseMonth == 9 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "寅" || chineseMonth == 10 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "丑" || chineseMonth == 11 && ganzhi.tianGanDay == "壬" && ganzhi.diZhiDay == "子" || chineseMonth == 12 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "亥") {
+            if (chineseMonth == 1 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "戌" || chineseMonth == 2 && ganzhi.tianGanDay == "辛" && ganzhi.diZhiDay == "酉"
+                    || chineseMonth == 3 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "申" || chineseMonth == 4 && ganzhi.tianGanDay == "丁" && ganzhi.diZhiDay == "未"
+                    || chineseMonth == 5 && ganzhi.tianGanDay == "丙" && ganzhi.diZhiDay == "午" || chineseMonth == 6 && ganzhi.tianGanDay == "丁" && ganzhi.diZhiDay == "巳"
+                    || chineseMonth == 7 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "辰" || chineseMonth == 8 && ganzhi.tianGanDay == "乙" && ganzhi.diZhiDay == "卯"
+                    || chineseMonth == 9 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "寅" || chineseMonth == 10 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "丑"
+                    || chineseMonth == 11 && ganzhi.tianGanDay == "壬" && ganzhi.diZhiDay == "子" || chineseMonth == 12 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "亥") {
                 AddReligiousDay(day, "阴错日。此阴不足之日。俱宜戒。")
+            }
+            /**
+             * 阳错日
+             */
+            if (chineseMonth == 1 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "寅" || chineseMonth == 2 && ganzhi.tianGanDay == "乙" && ganzhi.diZhiDay == "卯"
+                    || chineseMonth == 3 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "辰" || chineseMonth == 4 && ganzhi.tianGanDay == "丁" && ganzhi.diZhiDay == "巳"
+                    || chineseMonth == 5 && ganzhi.tianGanDay == "丙" && ganzhi.diZhiDay == "午" || chineseMonth == 6 && ganzhi.tianGanDay == "丁" && ganzhi.diZhiDay == "未"
+                    || chineseMonth == 7 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "申" || chineseMonth == 8 && ganzhi.tianGanDay == "辛" && ganzhi.diZhiDay == "酉"
+                    || chineseMonth == 9 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "戌" || chineseMonth == 10 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "亥"
+                    || chineseMonth == 11 && ganzhi.tianGanDay == "壬" && ganzhi.diZhiDay == "子" || chineseMonth == 12 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "丑") {
+                AddReligiousDay(day, "阳错日。此阳不足之日。俱宜戒。")
             }
 
             // 五毒月
