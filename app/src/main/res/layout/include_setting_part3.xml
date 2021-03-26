@@ -43,6 +43,15 @@
             android:textSize="14dp"
             android:typeface="monospace" />
 
+        <CheckBox
+            android:id="@+id/checkBox_fj"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="佛教节日"
+            android:textSize="14dp"
+            android:typeface="monospace" />
+
     </LinearLayout>
 
 </LinearLayout>

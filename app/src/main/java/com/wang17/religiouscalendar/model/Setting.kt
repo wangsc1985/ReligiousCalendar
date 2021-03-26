@@ -33,6 +33,6 @@ class Setting {
     }
 
     enum class KEYS {
-        banner, welcome, welcome_duration, zodiac1, zodiac2, szr, lzr, gyz, latestVersionCode, recordIsOpened, targetAuto, birthday, is_weekend_first, targetInHour,privacy_version
+        banner, welcome, welcome_duration, zodiac1, zodiac2, szr, lzr, gyz,fj, latestVersionCode, recordIsOpened, targetAuto, birthday, is_weekend_first, targetInHour,privacy_version
     }
 }

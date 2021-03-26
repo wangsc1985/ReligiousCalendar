@@ -310,6 +310,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
             //endregion
 
+            iv_left.setOnClickListener {
+                val selectedDay = selectedDate.getDay()
+                var datetime = selectedDate.addMonths(-1)
+                val maxDayOfMonth = datetime.getActualMaximum(Calendar.DAY_OF_MONTH)
+                setSelectedDate(datetime.getYear(), datetime.getMonth(), if (maxDayOfMonth < selectedDay) maxDayOfMonth else selectedDay)
+            }
+            iv_right.setOnClickListener {
+                val selectedDay = selectedDate.getDay()
+                var datetime = selectedDate.addMonths(1)
+                val maxDayOfMonth = datetime.getActualMaximum(Calendar.DAY_OF_MONTH)
+                setSelectedDate(datetime.getYear(), datetime.getMonth(), if (maxDayOfMonth < selectedDay) maxDayOfMonth else selectedDay)
+            }
 
             //region 左侧菜单操作
             layout_ygx = headerView.findViewById(R.id.layout_ygx)

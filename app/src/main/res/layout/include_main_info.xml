@@ -25,7 +25,17 @@
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="5dp">
+                android:paddingTop="10dp">
+
+                <ImageView
+                    android:id="@+id/iv_left"
+                    android:layout_width="80dp"
+                    android:layout_height="0dp"
+                    android:contentDescription="上一月"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/tvfo"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:src="@drawable/left" />
 
                 <TextView
                     android:id="@+id/tvfo"
@@ -33,7 +43,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
                     android:layout_marginRight="8dp"
                     android:gravity="center_horizontal"
                     android:text="南无阿弥陀佛"
@@ -44,6 +53,16 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/iv_right"
+                    android:layout_width="80dp"
+                    android:layout_height="0dp"
+                    android:contentDescription="下一月"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tvfo"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:src="@drawable/right" />
 
             </android.support.constraint.ConstraintLayout>
 

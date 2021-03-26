@@ -97,6 +97,10 @@ class SettingActivity : AppCompatActivity(), OnActionFragmentBackListener {
             checkBox_lzr.isChecked = lzr.getBoolean()
             val gyz = dataContext.getSetting(Setting.KEYS.gyz, false)
             checkBox_gyz.isChecked = gyz.getBoolean()
+            val fj = dataContext.getSetting(Setting.KEYS.fj,false)
+            checkBox_fj.isChecked = fj.getBoolean()
+
+
             checkBox_weekend_first.isChecked = dataContext.getSetting(Setting.KEYS.is_weekend_first, true).getBoolean()
             /**
              * 太岁日
@@ -244,6 +248,15 @@ class SettingActivity : AppCompatActivity(), OnActionFragmentBackListener {
                 snackbarSaved()
             }
         }
+        checkBox_fj.setOnCheckedChangeListener { buttonView, isChecked ->
+            if(buttonView.isPressed){
+                dataContext.editSetting(Setting.KEYS.fj,isChecked)
+                isCalenderChanged=true
+                snackbarSaved()
+            }
+        }
+
+
         button_addMD.setOnClickListener {
             try {
                 val relation = spinner_mdrelation.selectedItem.toString()

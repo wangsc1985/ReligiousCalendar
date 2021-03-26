@@ -27,6 +27,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
     private var swith_szr = false
     private var swith_lzr = false
     private var swith_gyz = false
+    private var swith_fj = false
     private val memorialDays: List<MemorialDay>
     private fun find(startDate: DateTime, endDate: DateTime, solarTerm: SolarTerm): Map.Entry<DateTime, SolarTerm>? {
         var solar: Map.Entry<DateTime, SolarTerm>? = null
@@ -482,6 +483,119 @@ class Religious(context: Context, private val year: Int, private val month: Int,
                 }
             }
 
+
+            if (swith_fj) {
+                when (chineseMonth) {
+                    1 -> when (chineseDay) {
+                        1 -> AddReligiousDay(day, "弥勒菩萨圣诞日")
+                        6 -> AddReligiousDay(day, "定光佛圣诞日 华严宗五祖圭峰宗密大师圆寂日")
+                        9 -> AddReligiousDay(day, "帝释天尊（玉皇大帝）圣诞日")
+                        11 -> AddReligiousDay(day, "真谛三藏法师圆寂日")
+                        12 -> AddReligiousDay(day, "净宗七祖省常法师圆寂日")
+                        17 -> AddReligiousDay(day, "百丈怀海禅师圆寂日")
+                        21 -> AddReligiousDay(day, "净宗九祖藕益法师圆寂日")
+                    }
+                    2 -> when (chineseDay) {
+                        1 -> AddReligiousDay(day, "马祖道一禅师圆寂日")
+                        2 -> AddReligiousDay(day, "太虚大师圆寂日")
+                        5 -> AddReligiousDay(day, "玄奘法师圆寂日 天台九祖荆溪湛然尊者圆寂日")
+                        8 -> AddReligiousDay(day, "释迦牟尼佛出家日 道安法师圆寂日")
+                        9 -> AddReligiousDay(day, "禅宗六祖慧能大师圣诞日")
+                        15 -> AddReligiousDay(day, "释迦牟尼佛涅槃日")
+                        19 -> AddReligiousDay(day, "观世音菩萨圣诞日")
+                        21 -> AddReligiousDay(day, "普贤菩萨圣诞日")
+                        26 -> AddReligiousDay(day, "净宗六祖永明法师圆寂日")
+                    }
+                    3 -> when (chineseDay) {
+                        3 -> AddReligiousDay(day, "布袋和尚坐化日")
+                        12 -> AddReligiousDay(day, "本焕长老圆寂纪念日")
+                        16 -> AddReligiousDay(day, "准提菩萨圣诞日 二祖慧可大师圆寂日")
+                    }
+                    4 -> when (chineseDay) {
+                        4 -> AddReligiousDay(day, "文殊菩萨圣诞日 慈航菩萨涅槃日")
+                        8 -> AddReligiousDay(day, "释迦牟尼佛圣诞日 道宣律师诞辰日")
+                        14 -> AddReligiousDay(day, "净宗十一祖省庵法师圆寂日")
+                        15 -> AddReligiousDay(day, "佛吉祥日——释迦牟尼佛诞生、成道、涅槃三期同一庆(即南传佛教国家的卫塞节)")
+                        28 -> AddReligiousDay(day, "药王菩萨圣诞日")
+                    }
+                    5 -> when (chineseDay) {
+                        6 -> AddReligiousDay(day, "鉴真法师圆寂日")
+                        8 -> AddReligiousDay(day, "善慧菩萨圣诞日")
+                        10 -> AddReligiousDay(day, "宣化上人圆寂纪念日")
+                        13 -> AddReligiousDay(day, "五爷圣诞日 伽蓝菩萨圣诞日 禅宗七祖神会禅师圆寂日")
+                    }
+                    6 -> when (chineseDay) {
+                        3 -> AddReligiousDay(day, "韦驮菩萨圣诞日")
+                        10 -> AddReligiousDay(day, "金栗如来圣诞日")
+                        14 -> AddReligiousDay(day, "明旸大和尚圆寂日")
+                        15 -> AddReligiousDay(day, "不空三藏圆寂日")
+                        19 -> AddReligiousDay(day, "观世音菩萨成道日")
+                        21 -> AddReligiousDay(day, "唐代法相宗三祖智周大师圆寂日")
+                        22 -> AddReligiousDay(day, "天台宗二祖慧思尊者圆寂日")
+                    }
+                    7 -> when (chineseDay) {
+                        2 -> AddReligiousDay(day, "净宗八祖莲池法师圆寂日")
+                        9 -> AddReligiousDay(day, "净宗十祖截流法师圆寂日")
+                        13 -> AddReligiousDay(day, "大势至菩萨圣诞日")
+                        15 -> AddReligiousDay(day, "佛欢喜日 盂兰盆节 僧自恣日")
+                        19 -> AddReligiousDay(day, "净宗三祖承远法师圆寂日")
+                        21 -> AddReligiousDay(day, "普庵祖师圣诞日")
+                        22 -> AddReligiousDay(day, "唐代高僧圆测大师圆寂日 增福财神圣诞")
+                        24 -> AddReligiousDay(day, "龙树菩萨圣诞日 隋唐高僧法琳大师圆寂日")
+                        29-> if(maxDay==29)  AddReligiousDay(day, "地藏王菩萨圣诞日 虚云和尚诞辰日（当月无三十，按照惯例三十的节日提前一天到二十九）")
+                        30 -> AddReligiousDay(day, "地藏王菩萨圣诞日 虚云和尚诞辰日")
+                    }
+                    8 -> when (chineseDay) {
+                        3 -> AddReligiousDay(day, "禅宗六祖慧能大师圆寂日")
+                        6 -> AddReligiousDay(day, "净宗初祖慧远法师圆寂日")
+                        12 -> AddReligiousDay(day, "圆瑛大师圆寂纪念日")
+                        15 -> AddReligiousDay(day, "月光菩萨圣诞日 中秋节")
+                        16 -> AddReligiousDay(day, "金刚智三藏纪念日")
+                        20 -> AddReligiousDay(day, "鸠摩罗什圆寂日")
+                        22 -> AddReligiousDay(day, "燃灯佛圣诞日")
+                    }
+                    9 -> when (chineseDay) {
+                        4 -> AddReligiousDay(day, "弘一法师圆寂日 禅宗四祖道信大师圆寂日")
+                        9 -> AddReligiousDay(day, "摩利支天菩萨圣诞日 重阳节")
+                        12 -> AddReligiousDay(day, "虚云和尚往生日")
+                        19 -> AddReligiousDay(day, "观世音菩萨出家日")
+                        20 -> AddReligiousDay(day, "弘一法师诞辰日")
+                        29-> if(maxDay==29)  AddReligiousDay(day, "药师琉璃光佛圣诞日（当月无三十，按照惯例三十的节日提前一天到二十九）")
+                        30 -> AddReligiousDay(day, "药师琉璃光佛圣诞日")
+                    }
+                    10 -> when (chineseDay) {
+                        3 -> AddReligiousDay(day, "道宣律师往生 净宗五祖少康法师圆寂日")
+                        5 -> AddReligiousDay(day, "达摩祖师诞辰日")
+                        7 -> AddReligiousDay(day, "善无畏三藏纪念日")
+                        11 -> AddReligiousDay(day, "憨山德清大师圆寂日")
+                        12 -> AddReligiousDay(day, "实叉难陀三藏圆寂日")
+                        15 -> AddReligiousDay(day, "禅宗三祖僧璨大师圆寂日")
+                        18 -> AddReligiousDay(day, "阿底峡尊者圆寂日")
+                        20 -> AddReligiousDay(day, "文殊菩萨出家日")
+                        23 -> AddReligiousDay(day, "禅宗五祖弘忍大师圆寂日")
+                        25 -> AddReligiousDay(day, "悟道大和尚圆寂日")
+                    }
+                    11 -> when (chineseDay) {
+                        4 -> AddReligiousDay(day, "净宗十三祖印光法师圆寂日")
+                        11 -> AddReligiousDay(day, "悟道大和尚诞辰日")
+                        13 -> AddReligiousDay(day, "唐代高僧慈恩大师（窥基法师）圆寂纪念日")
+                        17 -> AddReligiousDay(day, "阿弥陀佛圣诞日 净宗二祖善导大师圆寂日")
+                        19 -> AddReligiousDay(day, "日光菩萨圣诞日")
+                        24 -> AddReligiousDay(day, "天台祖师智者大师圆寂日")
+                    }
+                    12 -> when (chineseDay) {
+                        1 -> AddReligiousDay(day, "净宗四祖法照法师圆寂日")
+                        8 -> AddReligiousDay(day, "释迦牟尼佛成道日 佛图澄圆寂日")
+                        17 -> AddReligiousDay(day, "净宗十二祖彻悟法师圆寂日")
+                        18 -> AddReligiousDay(day, "太虚大师诞辰日")
+                        22 -> AddReligiousDay(day, "文殊菩萨成道日")
+                        23 -> AddReligiousDay(day, "监斋菩萨圣诞日")
+                        26 -> AddReligiousDay(day, "永明延寿大师圆寂日、施护三藏圆寂日")
+                        29 -> AddReligiousDay(day, "华严菩萨圣诞日")
+                    }
+                }
+            }
+
             //endregion
 
             //
@@ -760,12 +874,14 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         zodiac1 = setting?.value
         setting = dataContext.getSetting(KEYS.zodiac2)
         zodiac2 = setting?.value
-        setting = dataContext.getSetting(KEYS.szr, swith_szr)
+        setting = dataContext.getSetting(KEYS.szr, false)
         swith_szr = Boolean.parseBoolean(setting.value)
-        setting = dataContext.getSetting(KEYS.lzr, swith_lzr)
+        setting = dataContext.getSetting(KEYS.lzr, false)
         swith_lzr = Boolean.parseBoolean(setting.value)
-        setting = dataContext.getSetting(KEYS.gyz, swith_gyz)
+        setting = dataContext.getSetting(KEYS.gyz, false)
         swith_gyz = Boolean.parseBoolean(setting.value)
+        setting = dataContext.getSetting(KEYS.fj, false)
+        swith_fj = Boolean.parseBoolean(setting.value)
         callBack.execute()
         memorialDays = dataContext.getMemorialDays()
         callBack.execute()
