@@ -16,6 +16,7 @@ import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.support.design.widget.NavigationView
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -49,6 +50,7 @@ import kotlinx.android.synthetic.main.inflate_dialog_privacy.*
 import java.io.*
 import java.nio.ByteBuffer
 import java.util.*
+import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 import kotlin.experimental.and
 
@@ -169,13 +171,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             setContentView(R.layout.activity_main)
             dc = DataContext(this)
 
-            val curPrivacyVersion = 1
+            /**
+             * 每次权限有更改，只需增加下面数字就可以。
+             */
+            val curPrivacyVersion = 2
             val dbPrivacyVersion = dc.getSetting(Setting.KEYS.privacy_version, 0).getInt()
 
             if (dbPrivacyVersion >= curPrivacyVersion) {
-//                if (requestPermission()) {
-                    initOnCreate()
-//                }
+                if (requestPermission()) {
+                initOnCreate()
+                }
             } else {
                 var s = resources.getString(R.string.pravacy_intro)
                 val spannable = Spannable.Factory.getInstance().newSpannable(s)//将字符串包装成可操作的文本格式
@@ -194,9 +199,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 btn_ok.setOnClickListener {
                     dialog.dismiss()
-//                    if (requestPermission()) {
-                        initOnCreate()
-//                    }
+                    if (requestPermission()) {
+                    initOnCreate()
+                    }
                     dc.editSetting(Setting.KEYS.privacy_version, curPrivacyVersion)
                 }
             }
@@ -244,6 +249,33 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         //
         initViews()
+
+        checkVersion()
+    }
+
+    private fun checkVersion() {
+        _OkHttpUtil.getRequest("https://www.lofter.com/blog/weizhao1985", HttpCallback { html ->
+            try {
+                var html = html.replace("\r", "").replace("\n", "")
+                var matcher = Pattern.compile("(?<=寿康宝鉴日历版本号)[0-9]*(?=</p>)").matcher(html)
+                matcher.find()
+                val version = matcher.group().trim().toInt()
+                val checkedVersionCode = dc.getSetting(Setting.KEYS.checked_version_code, _Utils.getVersionCode(this)).getInt()
+
+                if (version != checkedVersionCode) {
+                    uiHandler.post {
+                        AlertDialog.Builder(this).setMessage("当前版本号：${_Utils.getVersionCode(this)}，最新版本号：${version}。\n请到百度网盘下载，邀请码：0000。")
+                                .setPositiveButton("前往下载") { dialog, which ->
+                                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(resources.getString(R.string.load_url))))
+                                }
+                                .setNegativeButton("忽略") { dialog, which ->
+                                    dc.editSetting(Setting.KEYS.checked_version_code, version)
+                                }.show()
+                    }
+                }
+            } catch (e: Exception) {
+            }
+        })
     }
 
     //region 事件
@@ -284,7 +316,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         var text2 = text2
         if (!text2.isEmpty()) {
             text1 = "禁欲：$text1"
-            text2 = if(text2.contains("+")) "元气已经恢复：${text2}" else "${text2}后，元气方可复原。"
+            text2 = if (text2.contains("+")) "元气已经恢复：${text2}" else "${text2}后，元气方可复原。"
         }
         tvChijie1.text = text1
         tvChijie2.text = text2
@@ -737,32 +769,32 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun findReligiousKeyWord(religious: String): Boolean {
-            if (religious.contains("俱亡")
-                    || religious.contains("奇祸")
-                    || religious.contains("大祸")
-                    || religious.contains("促寿")
-                    || religious.contains("恶疾")
-                    || religious.contains("大凶")
-                    || religious.contains("绝嗣")
-                    || religious.contains("男死")
-                    || religious.contains("女死")
-                    || religious.contains("血死")
-                    || religious.contains("一年内死")
-                    || religious.contains("危疾")
-                    || religious.contains("水厄")
-                    || religious.contains("贫夭")
-                    || religious.contains("暴亡")
-                    || religious.contains("失瘏夭胎")
-                    || religious.contains("损寿子带疾")
-                    || religious.contains("阴错日")
-                    || religious.contains("十恶大败日")
-                    || religious.contains("一年内亡")
-                    || religious.contains("必得急疾")
-                    || religious.contains("生子五官四肢不全。父母有灾")
-                    || religious.contains("减寿五年")
-                    || religious.contains("恶胎")
-                    || religious.contains("夺纪"))
-                return true
+        if (religious.contains("俱亡")
+                || religious.contains("奇祸")
+                || religious.contains("大祸")
+                || religious.contains("促寿")
+                || religious.contains("恶疾")
+                || religious.contains("大凶")
+                || religious.contains("绝嗣")
+                || religious.contains("男死")
+                || religious.contains("女死")
+                || religious.contains("血死")
+                || religious.contains("一年内死")
+                || religious.contains("危疾")
+                || religious.contains("水厄")
+                || religious.contains("贫夭")
+                || religious.contains("暴亡")
+                || religious.contains("失瘏夭胎")
+                || religious.contains("损寿子带疾")
+                || religious.contains("阴错日")
+                || religious.contains("十恶大败日")
+                || religious.contains("一年内亡")
+                || religious.contains("必得急疾")
+                || religious.contains("生子五官四肢不全。父母有灾")
+                || religious.contains("减寿五年")
+                || religious.contains("恶胎")
+                || religious.contains("夺纪"))
+            return true
         return false
     }
 
@@ -814,24 +846,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
             linearReligious.removeAllViews()
 
-                calendarItem.religious.forEach {
-                    val view = View.inflate(this@MainActivity, R.layout.inflate_targ_religious, null)
-                    val tv = view.findViewById<TextView>(R.id.textView_religious)
-                    val iv = view.findViewById<ImageView>(R.id.iv_targ)
-                    when(it.type){
-                        1-> iv.setImageResource(R.drawable.targ_round_red)
-                        2-> iv.setImageResource(R.drawable.targ_round_green)
-                        3-> iv.setImageResource(R.drawable.targ_square)
-                    }
-                    tv.text = it.religious
-                    tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, INFO_TEXT_SIZE.toFloat())
-                    tv.paint.isFakeBoldText = true
-                    tv.typeface = fontHWZS
-                    if (findReligiousKeyWord(it.religious)) {
-                        tv.setTextColor(resources.getColor(R.color.month_text_color))
-                    }
-                    linearReligious.addView(view)
+            calendarItem.religious.forEach {
+                val view = View.inflate(this@MainActivity, R.layout.inflate_targ_religious, null)
+                val tv = view.findViewById<TextView>(R.id.textView_religious)
+                val iv = view.findViewById<ImageView>(R.id.iv_targ)
+                when (it.type) {
+                    1 -> iv.setImageResource(R.drawable.targ_round_red)
+                    2 -> iv.setImageResource(R.drawable.targ_round_green)
+                    3 -> iv.setImageResource(R.drawable.targ_square)
                 }
+                tv.text = it.religious
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, INFO_TEXT_SIZE.toFloat())
+                tv.paint.isFakeBoldText = true
+                tv.typeface = fontHWZS
+                if (findReligiousKeyWord(it.religious)) {
+                    tv.setTextColor(resources.getColor(R.color.month_text_color))
+                }
+                linearReligious.addView(view)
+            }
 
         } catch (e: Exception) {
             _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
@@ -1551,17 +1583,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    fun check(npYear:NumberPicker,npMonth:NumberPicker,npDay:NumberPicker,npHour:NumberPicker){
+    fun check(npYear: NumberPicker, npMonth: NumberPicker, npDay: NumberPicker, npHour: NumberPicker) {
 
         val now = DateTime()
-        if(npYear.value==now.getYear()){
-            npMonth.maxValue = now.getMonth()+1
-        }else{
+        if (npYear.value == now.getYear()) {
+            npMonth.maxValue = now.getMonth() + 1
+        } else {
             npMonth.maxValue = 12
         }
-        if(npYear.value==now.getYear()&&npMonth.value == now.getMonth()+1){
+        if (npYear.value == now.getYear() && npMonth.value == now.getMonth() + 1) {
             npDay.maxValue = now.getDay()
-        }else{
+        } else {
             val selected = DateTime(npYear.value, npMonth.value - 1, 1)
             val max = selected.getActualMaximum(Calendar.DAY_OF_MONTH)
             val day = npDay.value
@@ -1572,12 +1604,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 npDay.value = day
             }
         }
-        if(npYear.value==now.getYear()&&npMonth.value == now.getMonth()+1&&npDay.value==now.getDay()){
+        if (npYear.value == now.getYear() && npMonth.value == now.getMonth() + 1 && npDay.value == now.getDay()) {
             npHour.maxValue = now.getHour()
-        }else{
+        } else {
             npHour.maxValue = 23
         }
     }
+
     fun showAddSexualDayDialog() {
         val view = View.inflate(this@MainActivity, R.layout.inflate_dialog_date_picker, null)
         val dialog = AlertDialog.Builder(this@MainActivity).setView(view).create()
@@ -1634,12 +1667,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //        npHour.wrapSelectorWheel=false
 
 
-        npMonth.maxValue = now.getMonth()+1
+        npMonth.maxValue = now.getMonth() + 1
         npDay.maxValue = now.getDay()
         npHour.maxValue = now.getHour()
 
         npYear.setOnValueChangedListener { picker, oldVal, newVal ->
-            check(npYear,npMonth,npDay,npHour)
+            check(npYear, npMonth, npDay, npHour)
 //            if(npYear.value==now.getYear()){
 //                npMonth.maxValue = now.getMonth()+1
 //            }else{
@@ -1647,10 +1680,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 //            }
         }
         npMonth.setOnValueChangedListener { picker, oldVal, newVal ->
-            check(npYear,npMonth,npDay,npHour)
+            check(npYear, npMonth, npDay, npHour)
         }
         npDay.setOnValueChangedListener { picker, oldVal, newVal ->
-            check(npYear,npMonth,npDay,npHour)
+            check(npYear, npMonth, npDay, npHour)
         }
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定") { dialog, which ->
             try {
@@ -1674,7 +1707,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 _Utils.printException(this@MainActivity, e)
             }
         }
-        dialog.setButton(DialogInterface.BUTTON_NEUTRAL,"记录页面"){ dialog, which->
+        dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "记录页面") { dialog, which ->
             try {
                 if (dc.getLastSexualDay() != null) {
                     startActivityForResult(Intent(this@MainActivity, SexualDayRecordActivity::class.java), TO_SEXUAL_RECORD_ACTIVITY)

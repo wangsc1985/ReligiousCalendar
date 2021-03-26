@@ -1,6 +1,7 @@
 package com.wang17.religiouscalendar.util
 
 import android.content.Context
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Handler
@@ -8,11 +9,18 @@ import android.support.v7.app.AlertDialog
 import com.wang17.religiouscalendar.model.DataContext
 import com.wang17.religiouscalendar.model.DateTime
 import com.wang17.religiouscalendar.model.RunLog
+import kotlinx.android.synthetic.main.activity_about.*
 
 /**
  * Created by 阿弥陀佛 on 2016/10/2.
  */
 object _Utils {
+    fun getVersionName(context: Context):String{
+        return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName
+    }
+    fun getVersionCode(context: Context):Int{
+        return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode
+    }
     /**
      * 行房节欲期
      *
