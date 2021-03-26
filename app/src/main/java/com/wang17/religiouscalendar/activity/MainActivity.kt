@@ -49,6 +49,7 @@ import kotlinx.android.synthetic.main.inflate_dialog_privacy.*
 import java.io.*
 import java.nio.ByteBuffer
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.experimental.and
 
 
@@ -90,8 +91,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var solarTermMap: TreeMap<DateTime, SolarTerm>
     private lateinit var currentMonthSolarTermMap: MutableMap<DateTime, SolarTerm>
     private lateinit var calendarItemViewsMap: MutableMap<DateTime, View>
-    private lateinit var religiousDayMap: HashMap<DateTime, String>
-    private lateinit var remarkMap: HashMap<DateTime, String>
+    private lateinit var religiousDayMap: HashMap<DateTime, MutableList<ReligiousInfo>>
     private var uiHandler = Handler()
     private lateinit var calenderHeaderGridAdapter: CalenderHeaderGridAdapter
     private var isWeekendFirst = false
@@ -298,7 +298,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             calendarItemViewsMap = HashMap()
             currentMonthSolarTermMap = HashMap()
             religiousDayMap = HashMap()
-            remarkMap = HashMap()
             refreshCalendarTask = RefreshCalendarTask()
 
             //region 持戒记录功能设置
@@ -705,34 +704,66 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun findReligiousKeyWord(religious: String): Int {
-        return if (religious.contains("俱亡")
-                || religious.contains("奇祸")
-                || religious.contains("大祸")
-                || religious.contains("促寿")
-                || religious.contains("恶疾")
-                || religious.contains("大凶")
-                || religious.contains("绝嗣")
-                || religious.contains("男死")
-                || religious.contains("女死")
-                || religious.contains("血死")
-                || religious.contains("一年内死")
-                || religious.contains("危疾")
-                || religious.contains("水厄")
-                || religious.contains("贫夭")
-                || religious.contains("暴亡")
-                || religious.contains("失瘏夭胎")
-                || religious.contains("损寿子带疾")
-                || religious.contains("阴错日")
-                || religious.contains("十恶大败日")
-                || religious.contains("一年内亡")
-                || religious.contains("必得急疾")
-                || religious.contains("生子五官四肢不全。父母有灾")
-                || religious.contains("减寿五年")
-                || religious.contains("恶胎")
-                || religious.contains("夺纪")) {
-            1
-        } else 0
+    private fun findReligiousKeyWord(religiousList: List<ReligiousInfo>): Boolean {
+        religiousList.forEach {
+            if (it.religious.contains("俱亡")
+                    || it.religious.contains("奇祸")
+                    || it.religious.contains("大祸")
+                    || it.religious.contains("促寿")
+                    || it.religious.contains("恶疾")
+                    || it.religious.contains("大凶")
+                    || it.religious.contains("绝嗣")
+                    || it.religious.contains("男死")
+                    || it.religious.contains("女死")
+                    || it.religious.contains("血死")
+                    || it.religious.contains("一年内死")
+                    || it.religious.contains("危疾")
+                    || it.religious.contains("水厄")
+                    || it.religious.contains("贫夭")
+                    || it.religious.contains("暴亡")
+                    || it.religious.contains("失瘏夭胎")
+                    || it.religious.contains("损寿子带疾")
+                    || it.religious.contains("阴错日")
+                    || it.religious.contains("十恶大败日")
+                    || it.religious.contains("一年内亡")
+                    || it.religious.contains("必得急疾")
+                    || it.religious.contains("生子五官四肢不全。父母有灾")
+                    || it.religious.contains("减寿五年")
+                    || it.religious.contains("恶胎")
+                    || it.religious.contains("夺纪"))
+                return true
+        }
+        return false
+    }
+
+    private fun findReligiousKeyWord(religious: String): Boolean {
+            if (religious.contains("俱亡")
+                    || religious.contains("奇祸")
+                    || religious.contains("大祸")
+                    || religious.contains("促寿")
+                    || religious.contains("恶疾")
+                    || religious.contains("大凶")
+                    || religious.contains("绝嗣")
+                    || religious.contains("男死")
+                    || religious.contains("女死")
+                    || religious.contains("血死")
+                    || religious.contains("一年内死")
+                    || religious.contains("危疾")
+                    || religious.contains("水厄")
+                    || religious.contains("贫夭")
+                    || religious.contains("暴亡")
+                    || religious.contains("失瘏夭胎")
+                    || religious.contains("损寿子带疾")
+                    || religious.contains("阴错日")
+                    || religious.contains("十恶大败日")
+                    || religious.contains("一年内亡")
+                    || religious.contains("必得急疾")
+                    || religious.contains("生子五官四肢不全。父母有灾")
+                    || religious.contains("减寿五年")
+                    || religious.contains("恶胎")
+                    || religious.contains("夺纪"))
+                return true
+        return false
     }
 
     /**
@@ -783,38 +814,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
             linearReligious.removeAllViews()
 
-            val haveReligious = calendarItem.religious != null && calendarItem.religious.length > 0
-            val haveRemarks = calendarItem.remarks != null && calendarItem.remarks.length > 0
-
-            if (haveReligious) {
-                val religious = calendarItem.religious.split("\n").toTypedArray()
-                val i = 1
-                for (str in religious) {
+                calendarItem.religious.forEach {
                     val view = View.inflate(this@MainActivity, R.layout.inflate_targ_religious, null)
-                    val tv = view.findViewById<View>(R.id.textView_religious) as TextView
-                    tv.text = str
+                    val tv = view.findViewById<TextView>(R.id.textView_religious)
+                    val iv = view.findViewById<ImageView>(R.id.iv_targ)
+                    when(it.type){
+                        1-> iv.setImageResource(R.drawable.targ_round_red)
+                        2-> iv.setImageResource(R.drawable.targ_round_green)
+                        3-> iv.setImageResource(R.drawable.targ_square)
+                    }
+                    tv.text = it.religious
                     tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, INFO_TEXT_SIZE.toFloat())
                     tv.paint.isFakeBoldText = true
                     tv.typeface = fontHWZS
-                    if (findReligiousKeyWord(str) == 1) {
+                    if (findReligiousKeyWord(it.religious)) {
                         tv.setTextColor(resources.getColor(R.color.month_text_color))
                     }
                     linearReligious.addView(view)
                 }
-            }
-            if (haveRemarks) {
-                val remarks = calendarItem.remarks.split("\n").toTypedArray()
-                val i = 1
-                for (str in remarks) {
-                    val view = View.inflate(this@MainActivity, R.layout.inflate_targ_note, null)
-                    val tv = view.findViewById<View>(R.id.textView_note) as TextView
-                    tv.text = str
-                    tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, INFO_TEXT_SIZE.toFloat())
-                    tv.paint.isFakeBoldText = true
-                    tv.typeface = fontHWZS
-                    linearReligious.addView(view)
-                }
-            }
+
         } catch (e: Exception) {
             _Utils.printExceptionSycn(this@MainActivity, uiHandler, e)
         }
@@ -885,7 +903,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             calendarItemViewsMap.clear()
             currentMonthSolarTermMap.clear()
             religiousDayMap.clear()
-            remarkMap.clear()
             var maxDayInMonth = 0
             val tmpToday = DateTime(currentYear, currentMonth, 1)
             maxDayInMonth = tmpToday.getActualMaximum(Calendar.DAY_OF_MONTH)
@@ -1053,11 +1070,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                     religiousDayMap = religious.religiousDays
                     publishProgress(progres++)
-                    remarkMap = religious.remarks
                 } catch (e: InterruptedException) {
                 } catch (ex: Exception) {
                     religiousDayMap = HashMap()
-                    remarkMap = HashMap()
                     _Utils.printExceptionSycn(this@MainActivity, uiHandler, ex)
                 }
                 publishProgress(progres++)
@@ -1122,16 +1137,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         //
                         val currentDate = key.getDate()
                         if (religiousDayMap.containsKey(currentDate)) {
-                            calendarItem.religious = religiousDayMap[currentDate] ?: ""
-                        }
-                        if (remarkMap.containsKey(currentDate)) {
-                            calendarItem.remarks = remarkMap[currentDate] ?: ""
+                            calendarItem.religious = religiousDayMap[currentDate] ?: ArrayList()
                         }
 
                         // 非戒期日
-                        if (calendarItem.religious == null || calendarItem.religious.length == 0) {
+                        if (calendarItem.religious.size == 0) {
                             imageIsUnReligious.visibility = View.VISIBLE
-                        } else if (findReligiousKeyWord(calendarItem.religious) == 1) {
+                        } else if (findReligiousKeyWord(calendarItem.religious)) {
                             textViewNongLi.setTextColor(resources.getColor(R.color.month_text_color))
                         }
                         refreshInfoLayout(selectedDate)

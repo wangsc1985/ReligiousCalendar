@@ -7,8 +7,8 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView_targ_religious"
-        android:src="@drawable/targ_round"
+        android:id="@+id/iv_targ"
+        android:src="@drawable/targ_round_red"
         android:layout_gravity="center"
         android:layout_margin="10dp" />
 

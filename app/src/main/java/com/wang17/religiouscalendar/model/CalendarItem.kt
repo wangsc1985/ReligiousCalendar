@@ -8,7 +8,7 @@ import com.wang17.religiouscalendar.util.Lunar
 class CalendarItem{
     var yangLi:DateTime
     var nongLi: LunarDateTime
-    var religious: String = ""
+    var religious: MutableList<ReligiousInfo> = ArrayList()
     var remarks: String = ""
 
     constructor(yangLi: DateTime) {

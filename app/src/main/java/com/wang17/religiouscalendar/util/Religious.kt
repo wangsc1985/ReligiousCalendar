@@ -11,15 +11,13 @@ import java.util.*
 import kotlin.Int
 import kotlin.String
 import kotlin.Throws
-import kotlin.toString
+import kotlin.collections.ArrayList
 
 /**
  * Created by 阿弥陀佛 on 2015/6/24.
  */
 class Religious(context: Context, private val year: Int, private val month: Int, private val solarTermTreeMap: TreeMap<DateTime, SolarTerm>, callBack: ReligiousCallBack) {
-    var religiousDays: HashMap<DateTime, String> = HashMap()
-    var remarks: HashMap<DateTime, String> = HashMap()
-
+    var religiousDays: HashMap<DateTime, MutableList<ReligiousInfo>> = HashMap()
     private var lunarReligiousDays: HashMap<LunarDate, String> = HashMap()
     private val dataContext: DataContext
     private val zodiac1: String?
@@ -77,23 +75,25 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         var solar = find(startDate.addDays(-3), endDate.addDays(3), SolarTerm.春分)
         callBack.execute()
         if (solar != null) {
-            AddReligiousDay(solar.key.addDays(-3).getDate(), "春分前三日。犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(-2).getDate(), "春分前二日。犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(-1).getDate(), "春分前一日。犯之必得危疾。尤宜切戒。\n四离日（春分前一日）。犯之减寿五年。")
-            AddReligiousDay(solar.key.getDate(), "春分日（二分日）。1、雷将发声。犯者生子五官四肢不全。父母有灾。2、犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(1).getDate(), "春分后一日。犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(2).getDate(), "春分后二日。犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(3).getDate(), "春分后三日。犯之必得危疾。尤宜切戒。")
+            addReligiousDay(solar.key.addDays(-3).getDate(), ReligiousInfo("春分前三日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-2).getDate(), ReligiousInfo("春分前二日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("春分前一日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("四离日（春分前一日）。犯之减寿五年。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("春分日（二分日）。1、雷将发声。犯者生子五官四肢不全。父母有灾。2、犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(1).getDate(), ReligiousInfo("春分后一日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(2).getDate(), ReligiousInfo("春分后二日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(3).getDate(), ReligiousInfo("春分后三日。犯之必得危疾。尤宜切戒。",1))
         }
         solar = find(startDate.addDays(-3), endDate.addDays(3), SolarTerm.秋分)
         if (solar != null) {
-            AddReligiousDay(solar.key.addDays(-3).getDate(), "秋分前三日。犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(-2).getDate(), "秋分前二日。犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(-1).getDate(), "秋分前一日。犯之必得危疾。尤宜切戒。\n四离日（秋分前一日）。犯之减寿五年。")
-            AddReligiousDay(solar.key.getDate(), "秋分日（二分日）。1、杀气浸盛。阳气日衰。2、犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(1).getDate(), "秋分后一日。犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(2).getDate(), "秋分后二日。犯之必得危疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(3).getDate(), "秋分后三日。犯之必得危疾。尤宜切戒。")
+            addReligiousDay(solar.key.addDays(-3).getDate(), ReligiousInfo("秋分前三日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-2).getDate(), ReligiousInfo("秋分前二日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("秋分前一日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("四离日（秋分前一日）。犯之减寿五年。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("秋分日（二分日）。1、杀气浸盛。阳气日衰。2、犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(1).getDate(), ReligiousInfo("秋分后一日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(2).getDate(), ReligiousInfo("秋分后二日。犯之必得危疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(3).getDate(), ReligiousInfo("秋分后三日。犯之必得危疾。尤宜切戒。",1))
         }
         var dt2 = DateTime().timeInMillis
         e(_String.concat("获取二分日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
@@ -106,26 +106,29 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         /// 此二至节之前三后三共七日。犯之必得急疾。尤宜切戒。
         solar = find(startDate.addDays(-3), endDate.addDays(3), SolarTerm.夏至)
         if (solar != null) {
-            AddReligiousDay(solar.key.addDays(-3).getDate(), "夏至前三日。犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(-2).getDate(), "夏至前二日。犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(-1).getDate(), "夏至前一日。犯之必得急疾。尤宜切戒。\n四离日（夏至前一日）。犯之减寿五年。")
-            AddReligiousDay(solar.key.getDate(), "夏至日（二至日）。1、阴阳相争。死生分判之时。2、此日乃阴阳绝续之交。最宜禁忌。3、犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(1).getDate(), "夏至后一日。犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(2).getDate(), "夏至后二日。犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(3).getDate(), "夏至后三日。犯之必得急疾。尤宜切戒。")
+            addReligiousDay(solar.key.addDays(-3).getDate(), ReligiousInfo("夏至前三日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-2).getDate(), ReligiousInfo("夏至前二日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("夏至前一日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("四离日（夏至前一日）。犯之减寿五年。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("夏至日（二至日）。1、阴阳相争。死生分判之时。2、此日乃阴阳绝续之交。最宜禁忌。3、犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(1).getDate(), ReligiousInfo("夏至后一日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(2).getDate(), ReligiousInfo("夏至后二日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(3).getDate(), ReligiousInfo("夏至后三日。犯之必得急疾。尤宜切戒。",1))
         }
         dt2 = DateTime().timeInMillis
         callBack.execute()
         dt1 = DateTime().timeInMillis
         solar = find(startDate.addDays(-48), endDate.addDays(3), SolarTerm.冬至)
         if (solar != null) {
-            AddReligiousDay(solar.key.addDays(-3).getDate(), "冬至前三日。犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(-2).getDate(), "冬至前二日。犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(-1).getDate(), "冬至前一日。犯之必得急疾。尤宜切戒。\n四离日（冬至前一日）。犯之减寿五年。")
-            AddReligiousDay(solar.key.getDate(), "冬至日（二至日）。1、阴阳相争。死生分判之时。2、此日乃阴阳绝续之交。最宜禁忌。3、犯之必得急疾。尤宜切戒。\n冬至半夜子时。犯之主在一年内亡。")
-            AddReligiousDay(solar.key.addDays(1).getDate(), "冬至后一日。犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(2).getDate(), "冬至后二日。犯之必得急疾。尤宜切戒。")
-            AddReligiousDay(solar.key.addDays(3).getDate(), "冬至后三日。犯之必得急疾。尤宜切戒。")
+            addReligiousDay(solar.key.addDays(-3).getDate(), ReligiousInfo("冬至前三日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-2).getDate(), ReligiousInfo("冬至前二日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("冬至前一日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("四离日（冬至前一日）。犯之减寿五年。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("冬至日（二至日）。1、阴阳相争。死生分判之时。2、此日乃阴阳绝续之交。最宜禁忌。3、犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("冬至半夜子时。犯之主在一年内亡。",1))
+            addReligiousDay(solar.key.addDays(1).getDate(), ReligiousInfo("冬至后一日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(2).getDate(), ReligiousInfo("冬至后二日。犯之必得急疾。尤宜切戒。",1))
+            addReligiousDay(solar.key.addDays(3).getDate(), ReligiousInfo("冬至后三日。犯之必得急疾。尤宜切戒。",1))
 
             /// 冬至半夜子时，后庚辛日。第三戌日。犯之皆主在一年内亡。
             var start = solar.key.getDate()
@@ -137,16 +140,16 @@ class Religious(context: Context, private val year: Int, private val month: Int,
                 start = start.addDays(1)
                 val ganzhi = GanZhi(start, this.solarTermTreeMap)
                 if (!touch庚 && ganzhi.tianGanDay == "庚") {
-                    this.AddReligiousDay(start, "冬至后庚日。犯之主在一年内亡。")
+                    this.addReligiousDay(start, ReligiousInfo("冬至后庚日。犯之主在一年内亡。",1))
                     touch庚 = true
                 }
                 if (!touch辛 && ganzhi.tianGanDay == "辛") {
-                    this.AddReligiousDay(start, "冬至后辛日。犯之主在一年内亡。")
+                    this.addReligiousDay(start, ReligiousInfo("冬至后辛日。犯之主在一年内亡。",1))
                     touch辛 = true
                 }
                 if (!touch戌3 && ganzhi.diZhiDay == "戌") {
                     if (count == 3) {
-                        this.AddReligiousDay(start, "冬至后第三戌日。犯之主在一年内亡。")
+                        this.addReligiousDay(start, ReligiousInfo("冬至后第三戌日。犯之主在一年内亡。",1))
                         touch戌3 = true
                     }
                     count++
@@ -160,8 +163,8 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         /// 四立日，四绝日 犯之减寿五年。
         solar = find(startDate.addDays(-60), endDate.addDays(1), SolarTerm.立春)
         if (solar != null) {
-            AddReligiousDay(solar.key.addDays(-1).getDate(), "立春日前一日（四绝日）。犯之减寿五年。")
-            AddReligiousDay(solar.key.getDate(), "立春日(四立日)。犯之减寿五年。")
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("立春日前一日（四绝日）。犯之减寿五年。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("立春日(四立日)。犯之减寿五年。",1))
 
             /// 立春后的第五个戊日为春社日。犯之减寿五年。社日受胎者。毛发皆白。
             var start = solar.key.getDate()
@@ -171,7 +174,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
                 val ganzhi = GanZhi(start, this.solarTermTreeMap)
                 if (ganzhi.tianGanDay == "戊") {
                     if (count == 5) {
-                        this.AddReligiousDay(start, "春社日（立春后第五戊日）。犯之减寿五年。社日受胎者。毛发皆白。")
+                        this.addReligiousDay(start, ReligiousInfo("春社日（立春后第五戊日）。犯之减寿五年。社日受胎者。毛发皆白。",1))
                         break
                     }
                     count++
@@ -181,14 +184,14 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         callBack.execute()
         solar = find(startDate, endDate.addDays(1), SolarTerm.立夏)
         if (solar != null) {
-            AddReligiousDay(solar.key.addDays(-1).getDate(), "立夏日前一日（四绝日）。犯之减寿五年。")
-            AddReligiousDay(solar.key.getDate(), "立夏日(四立日)。犯之减寿五年。")
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("立夏日前一日（四绝日）。犯之减寿五年。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("立夏日(四立日)。犯之减寿五年。",1))
         }
         callBack.execute()
         solar = find(startDate.addDays(-60), endDate.addDays(1), SolarTerm.立秋)
         if (solar != null) {
-            AddReligiousDay(solar.key.addDays(-1).getDate(), "立秋日前一日（四绝日）。犯之减寿五年。")
-            AddReligiousDay(solar.key.getDate(), "立秋日(四立日)。犯之减寿五年。")
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("立秋日前一日（四绝日）。犯之减寿五年。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("立秋日(四立日)。犯之减寿五年。",1))
 
             /// 立秋后的第五个戊日为秋社日。犯之减寿五年。社日受胎者。毛发皆白。
             var start = solar.key.getDate()
@@ -198,7 +201,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
                 val ganzhi = GanZhi(start, this.solarTermTreeMap)
                 if (ganzhi.tianGanDay == "戊") {
                     if (count == 5) {
-                        this.AddReligiousDay(start, "秋社日（立秋后第五戊日）。犯之减寿五年。社日受胎者。毛发皆白。")
+                        this.addReligiousDay(start, ReligiousInfo("秋社日（立秋后第五戊日）。犯之减寿五年。社日受胎者。毛发皆白。",1))
                         break
                     }
                     count++
@@ -208,8 +211,8 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         callBack.execute()
         solar = find(startDate, endDate.addDays(1), SolarTerm.立冬)
         if (solar != null) {
-            AddReligiousDay(solar.key.addDays(-1).getDate(), "立冬日前一日（四绝日）。犯之减寿五年。")
-            AddReligiousDay(solar.key.getDate(), "立冬日(四立日)。犯之减寿五年。")
+            addReligiousDay(solar.key.addDays(-1).getDate(), ReligiousInfo("立冬日前一日（四绝日）。犯之减寿五年。",1))
+            addReligiousDay(solar.key.getDate(), ReligiousInfo("立冬日(四立日)。犯之减寿五年。",1))
         }
         dt2 = DateTime().timeInMillis
         e(_String.concat("获取四立日，用时：", (dt2 - dt1).toDouble() / 1000, "秒"))
@@ -284,20 +287,20 @@ class Religious(context: Context, private val year: Int, private val month: Int,
 
             /// 犯之减寿五年。（农历正月十五、七月十五、十月十五，为上中下三元）
             if (chineseDay == 15 && chineseMonth == 1) {
-                AddReligiousDay(day, "农历正月十五（三元日）。犯之减寿五年。")
+                addReligiousDay(day, ReligiousInfo("农历正月十五（三元日）。犯之减寿五年。",1))
             } else if (chineseDay == 15 && chineseMonth == 7) {
-                AddReligiousDay(day, "农历七月十五（三元日）。犯之减寿五年。")
+                addReligiousDay(day, ReligiousInfo("农历七月十五（三元日）。犯之减寿五年。",1))
             } else if (chineseDay == 15 && chineseMonth == 10) {
-                AddReligiousDay(day, "农历十月十五（三元日）。犯之减寿五年。")
+                addReligiousDay(day, ReligiousInfo("农历十月十五（三元日）。犯之减寿五年。",1))
             }
 
             /// 三伏日
             if (day.compareTo(chufuEndDate.getDate()) <= 0 && day.compareTo(chufuStartDate.getDate()) >= 0) {
-                AddReligiousDay(day, "初伏。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("初伏。犯之减寿一年。",1))
             } else if (day.compareTo(zhongfuEndDate.getDate()) <= 0 && day.compareTo(zhongfuStartDate.getDate()) >= 0) {
-                AddReligiousDay(day, "中伏。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("中伏。犯之减寿一年。",1))
             } else if (day.compareTo(mofuEndDate.getDate()) <= 0 && day.compareTo(mofuStartDate.getDate()) >= 0) {
-                AddReligiousDay(day, "末伏。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("末伏。犯之减寿一年。",1))
             }
 
 
@@ -306,34 +309,34 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             if (tChineseDay == 17 || tChineseDay == 18) {
                 if (maxDay == 30) {
                     if (tChineseDay == 18) {
-                        AddReligiousDay(day, "毁败日。犯之得病。")
+                        addReligiousDay(day, ReligiousInfo("毁败日。犯之得病。",1))
                     }
                 } else {
                     if (tChineseDay == 17) {
-                        AddReligiousDay(day, "毁败日。犯之得病。")
+                        addReligiousDay(day, ReligiousInfo("毁败日。犯之得病。",1))
                     }
                 }
             }
 
             /// 上弦为初七初八，下弦为二十二二十三。犯之减寿一年。
             if (chineseDay == 7 || chineseDay == 8) {
-                AddReligiousDay(day, "上弦日。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("上弦日。犯之减寿一年。",1))
             } else if (chineseDay == 22 || chineseDay == 23) {
-                AddReligiousDay(day, "下弦日。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("下弦日。犯之减寿一年。",1))
             }
             if (Lunar(day.addDays(1)).day == 1) {
-                AddReligiousDay(day, "本月最后一天（晦日）。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("本月最后一天（晦日）。犯之减寿一年。",1))
             }
 
             /// 每月三辛日，犯之减寿一年。
             if (ganzhi.tianGanDay == "辛") {
-                AddReligiousDay(day, "每月三辛日。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("每月三辛日。犯之减寿一年。",1))
             } else if (ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "子") {
-                AddReligiousDay(day, "甲子日。犯之皆减寿一年。")
+                addReligiousDay(day, ReligiousInfo("甲子日。犯之皆减寿一年。",1))
             } else if (ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "申") {
-                AddReligiousDay(day, "庚申日。犯之皆减寿一年。")
+                addReligiousDay(day, ReligiousInfo("庚申日。犯之皆减寿一年。",1))
             } else if (ganzhi.tianGanDay == "丙" || ganzhi.tianGanDay == "丁") {
-                AddReligiousDay(day, "丙丁日。天地仓开日。犯之皆得病。")
+                addReligiousDay(day, ReligiousInfo("丙丁日。天地仓开日。犯之皆得病。",1))
             }
 
 
@@ -352,7 +355,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
                             && (chineseMonth == 3 && ganzhi.tianGanDay == "辛" && ganzhi.diZhiDay == "巳" || chineseMonth == 9 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "辰" || chineseMonth == 10 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "辰")) ||
                     ((ganzhi.tianGanYear == "戊" || ganzhi.tianGanYear == "癸")
                             && chineseMonth == 6 && ganzhi.tianGanDay == "己" && ganzhi.diZhiDay == "丑")) {
-                AddReligiousDay(day, "十恶大败日。此皆大不吉之日。宜戒")
+                addReligiousDay(day, ReligiousInfo("十恶大败日。此皆大不吉之日。宜戒",1))
             }
 
             /// 阴错日
@@ -366,7 +369,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
                     || chineseMonth == 7 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "辰" || chineseMonth == 8 && ganzhi.tianGanDay == "乙" && ganzhi.diZhiDay == "卯"
                     || chineseMonth == 9 && ganzhi.tianGanDay == "甲" && ganzhi.diZhiDay == "寅" || chineseMonth == 10 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "丑"
                     || chineseMonth == 11 && ganzhi.tianGanDay == "壬" && ganzhi.diZhiDay == "子" || chineseMonth == 12 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "亥") {
-                AddReligiousDay(day, "阴错日。此阴不足之日。俱宜戒。")
+                addReligiousDay(day, ReligiousInfo("阴错日。此阴不足之日。俱宜戒。",1))
             }
             /**
              * 阳错日
@@ -377,17 +380,18 @@ class Religious(context: Context, private val year: Int, private val month: Int,
                     || chineseMonth == 7 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "申" || chineseMonth == 8 && ganzhi.tianGanDay == "辛" && ganzhi.diZhiDay == "酉"
                     || chineseMonth == 9 && ganzhi.tianGanDay == "庚" && ganzhi.diZhiDay == "戌" || chineseMonth == 10 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "亥"
                     || chineseMonth == 11 && ganzhi.tianGanDay == "壬" && ganzhi.diZhiDay == "子" || chineseMonth == 12 && ganzhi.tianGanDay == "癸" && ganzhi.diZhiDay == "丑") {
-                AddReligiousDay(day, "阳错日。此阳不足之日。俱宜戒。")
-            }
-
-            // 五毒月
-            if (chineseMonth == 5) {
-                AddRemark(day, "注：农历五月俗称五毒月，按此月宜全戒为是。")
+                addReligiousDay(day, ReligiousInfo("阳错日。此阳不足之日。俱宜戒。",1))
             }
 
             // 农历戒期
             if (lunarReligiousDays.containsKey(LunarDate(chineseMonth, chineseDay))) {
-                AddReligiousDay(day, lunarReligiousDays[LunarDate(chineseMonth, chineseDay)] ?: "")
+                var str = lunarReligiousDays[LunarDate(chineseMonth, chineseDay)]
+                str?.let {
+                    val ss = str.split("\n")
+                    ss.forEach { rs->
+                        addReligiousDay(day, ReligiousInfo( rs,1))
+                    }
+                }
             }
 
             //region 个人相关斋戒日
@@ -395,16 +399,16 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             /// 祖先亡忌日。父母诞日、忌日。犯之皆减寿一年。
             for (memorialDay in memorialDays) {
                 if (chineseMonth == memorialDay.lunarDate.month && chineseDay == memorialDay.lunarDate.day) {
-                    AddReligiousDay(day, memorialDay.relation.toString() + memorialDay.type + "。犯之减寿一年。")
+                    addReligiousDay(day, ReligiousInfo(memorialDay.relation.toString() + memorialDay.type + "。犯之减寿一年。",1))
                 }
             }
             // 太岁日。犯之皆减寿一年。
             if (!_String.IsNullOrEmpty(zodiac1) && ZodiacToDizhi(zodiac1) == ganzhi.diZhiDay) {
-                AddReligiousDay(day, "本人太岁日。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("本人太岁日。犯之减寿一年。",1))
             }
             /// 己身夫妇本命诞日。犯之皆减寿。
             if (!_String.IsNullOrEmpty(zodiac2) && ZodiacToDizhi(zodiac2) == ganzhi.diZhiDay) {
-                AddReligiousDay(day, "配偶太岁日。犯之减寿一年。")
+                addReligiousDay(day, ReligiousInfo("配偶太岁日。犯之减寿一年。",1))
             }
 
             //endregion
@@ -415,11 +419,11 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             if (swith_lzr) {
                 if (maxDay == 30) {
                     if (chineseDay == 8 || chineseDay == 14 || chineseDay == 15 || chineseDay == 23 || chineseDay == 29 || chineseDay == 30) {
-                        AddReligiousDay(day, "六斋日")
+                        addReligiousDay(day, ReligiousInfo("六斋日",2))
                     }
                 } else {
                     if (chineseDay == 8 || chineseDay == 14 || chineseDay == 15 || chineseDay == 23 || chineseDay == 28 || chineseDay == 29) {
-                        AddReligiousDay(day, "六斋日")
+                        addReligiousDay(day, ReligiousInfo("六斋日",2))
                     }
                 }
             }
@@ -428,11 +432,11 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             if (swith_szr) {
                 if (maxDay == 30) {
                     if (chineseDay == 1 || chineseDay == 8 || chineseDay == 14 || chineseDay == 15 || chineseDay == 18 || chineseDay == 23 || chineseDay == 24 || chineseDay == 28 || chineseDay == 29 || chineseDay == 30) {
-                        AddReligiousDay(day, "十斋日")
+                        addReligiousDay(day, ReligiousInfo("十斋日",2))
                     }
                 } else {
                     if (chineseDay == 1 || chineseDay == 8 || chineseDay == 14 || chineseDay == 15 || chineseDay == 18 || chineseDay == 23 || chineseDay == 24 || chineseDay == 27 || chineseDay == 28 || chineseDay == 29) {
-                        AddReligiousDay(day, "十斋日")
+                        addReligiousDay(day, ReligiousInfo("十斋日",2))
                     }
                 }
             }
@@ -479,7 +483,7 @@ class Religious(context: Context, private val year: Int, private val month: Int,
                     12 -> if (chineseDay == 25) ggg = true
                 }
                 if (ggg) {
-                    AddReligiousDay(day, "观音斋")
+                    addReligiousDay(day, ReligiousInfo("观音斋",2))
                 }
             }
 
@@ -487,113 +491,118 @@ class Religious(context: Context, private val year: Int, private val month: Int,
             if (swith_fj) {
                 when (chineseMonth) {
                     1 -> when (chineseDay) {
-                        1 -> AddReligiousDay(day, "弥勒菩萨圣诞日")
-                        6 -> AddReligiousDay(day, "定光佛圣诞日 华严宗五祖圭峰宗密大师圆寂日")
-                        9 -> AddReligiousDay(day, "帝释天尊（玉皇大帝）圣诞日")
-                        11 -> AddReligiousDay(day, "真谛三藏法师圆寂日")
-                        12 -> AddReligiousDay(day, "净宗七祖省常法师圆寂日")
-                        17 -> AddReligiousDay(day, "百丈怀海禅师圆寂日")
-                        21 -> AddReligiousDay(day, "净宗九祖藕益法师圆寂日")
+                        1 -> addReligiousDay(day, ReligiousInfo("弥勒菩萨圣诞日",2))
+                        6 -> addReligiousDay(day, ReligiousInfo("定光佛圣诞日 华严宗五祖圭峰宗密大师圆寂日",2))
+                        9 -> addReligiousDay(day, ReligiousInfo("帝释天尊（玉皇大帝）圣诞日",2))
+                        11 -> addReligiousDay(day, ReligiousInfo("真谛三藏法师圆寂日",2))
+                        12 -> addReligiousDay(day, ReligiousInfo("净宗七祖省常法师圆寂日",2))
+                        17 -> addReligiousDay(day, ReligiousInfo("百丈怀海禅师圆寂日",2))
+                        21 -> addReligiousDay(day, ReligiousInfo("净宗九祖藕益法师圆寂日",2))
                     }
                     2 -> when (chineseDay) {
-                        1 -> AddReligiousDay(day, "马祖道一禅师圆寂日")
-                        2 -> AddReligiousDay(day, "太虚大师圆寂日")
-                        5 -> AddReligiousDay(day, "玄奘法师圆寂日 天台九祖荆溪湛然尊者圆寂日")
-                        8 -> AddReligiousDay(day, "释迦牟尼佛出家日 道安法师圆寂日")
-                        9 -> AddReligiousDay(day, "禅宗六祖慧能大师圣诞日")
-                        15 -> AddReligiousDay(day, "释迦牟尼佛涅槃日")
-                        19 -> AddReligiousDay(day, "观世音菩萨圣诞日")
-                        21 -> AddReligiousDay(day, "普贤菩萨圣诞日")
-                        26 -> AddReligiousDay(day, "净宗六祖永明法师圆寂日")
+                        1 -> addReligiousDay(day, ReligiousInfo("马祖道一禅师圆寂日",2))
+                        2 -> addReligiousDay(day, ReligiousInfo("太虚大师圆寂日",2))
+                        5 -> addReligiousDay(day, ReligiousInfo("玄奘法师圆寂日 天台九祖荆溪湛然尊者圆寂日",2))
+                        8 -> addReligiousDay(day, ReligiousInfo("释迦牟尼佛出家日 道安法师圆寂日",2))
+                        9 -> addReligiousDay(day, ReligiousInfo("禅宗六祖慧能大师圣诞日",2))
+                        15 -> addReligiousDay(day, ReligiousInfo("释迦牟尼佛涅槃日",2))
+                        19 -> addReligiousDay(day, ReligiousInfo("观世音菩萨圣诞日",2))
+                        21 -> addReligiousDay(day, ReligiousInfo("普贤菩萨圣诞日",2))
+                        26 -> addReligiousDay(day, ReligiousInfo("净宗六祖永明法师圆寂日",2))
                     }
                     3 -> when (chineseDay) {
-                        3 -> AddReligiousDay(day, "布袋和尚坐化日")
-                        12 -> AddReligiousDay(day, "本焕长老圆寂纪念日")
-                        16 -> AddReligiousDay(day, "准提菩萨圣诞日 二祖慧可大师圆寂日")
+                        3 -> addReligiousDay(day, ReligiousInfo("布袋和尚坐化日",2))
+                        12 -> addReligiousDay(day, ReligiousInfo("本焕长老圆寂纪念日",2))
+                        16 -> addReligiousDay(day, ReligiousInfo("准提菩萨圣诞日 二祖慧可大师圆寂日",2))
                     }
                     4 -> when (chineseDay) {
-                        4 -> AddReligiousDay(day, "文殊菩萨圣诞日 慈航菩萨涅槃日")
-                        8 -> AddReligiousDay(day, "释迦牟尼佛圣诞日 道宣律师诞辰日")
-                        14 -> AddReligiousDay(day, "净宗十一祖省庵法师圆寂日")
-                        15 -> AddReligiousDay(day, "佛吉祥日——释迦牟尼佛诞生、成道、涅槃三期同一庆(即南传佛教国家的卫塞节)")
-                        28 -> AddReligiousDay(day, "药王菩萨圣诞日")
+                        4 -> addReligiousDay(day, ReligiousInfo("文殊菩萨圣诞日 慈航菩萨涅槃日",2))
+                        8 -> addReligiousDay(day, ReligiousInfo("释迦牟尼佛圣诞日 道宣律师诞辰日",2))
+                        14 -> addReligiousDay(day, ReligiousInfo("净宗十一祖省庵法师圆寂日",2))
+                        15 -> addReligiousDay(day, ReligiousInfo("佛吉祥日——释迦牟尼佛诞生、成道、涅槃三期同一庆(即南传佛教国家的卫塞节)",2))
+                        28 -> addReligiousDay(day, ReligiousInfo("药王菩萨圣诞日",2))
                     }
                     5 -> when (chineseDay) {
-                        6 -> AddReligiousDay(day, "鉴真法师圆寂日")
-                        8 -> AddReligiousDay(day, "善慧菩萨圣诞日")
-                        10 -> AddReligiousDay(day, "宣化上人圆寂纪念日")
-                        13 -> AddReligiousDay(day, "五爷圣诞日 伽蓝菩萨圣诞日 禅宗七祖神会禅师圆寂日")
+                        6 -> addReligiousDay(day, ReligiousInfo("鉴真法师圆寂日",2))
+                        8 -> addReligiousDay(day, ReligiousInfo("善慧菩萨圣诞日",2))
+                        10 -> addReligiousDay(day, ReligiousInfo("宣化上人圆寂纪念日",2))
+                        13 -> addReligiousDay(day, ReligiousInfo("五爷圣诞日 伽蓝菩萨圣诞日 禅宗七祖神会禅师圆寂日",2))
                     }
                     6 -> when (chineseDay) {
-                        3 -> AddReligiousDay(day, "韦驮菩萨圣诞日")
-                        10 -> AddReligiousDay(day, "金栗如来圣诞日")
-                        14 -> AddReligiousDay(day, "明旸大和尚圆寂日")
-                        15 -> AddReligiousDay(day, "不空三藏圆寂日")
-                        19 -> AddReligiousDay(day, "观世音菩萨成道日")
-                        21 -> AddReligiousDay(day, "唐代法相宗三祖智周大师圆寂日")
-                        22 -> AddReligiousDay(day, "天台宗二祖慧思尊者圆寂日")
+                        3 -> addReligiousDay(day, ReligiousInfo("韦驮菩萨圣诞日",2))
+                        10 -> addReligiousDay(day, ReligiousInfo("金栗如来圣诞日",2))
+                        14 -> addReligiousDay(day, ReligiousInfo("明旸大和尚圆寂日",2))
+                        15 -> addReligiousDay(day, ReligiousInfo("不空三藏圆寂日",2))
+                        19 -> addReligiousDay(day, ReligiousInfo("观世音菩萨成道日",2))
+                        21 -> addReligiousDay(day, ReligiousInfo("唐代法相宗三祖智周大师圆寂日",2))
+                        22 -> addReligiousDay(day, ReligiousInfo("天台宗二祖慧思尊者圆寂日",2))
                     }
                     7 -> when (chineseDay) {
-                        2 -> AddReligiousDay(day, "净宗八祖莲池法师圆寂日")
-                        9 -> AddReligiousDay(day, "净宗十祖截流法师圆寂日")
-                        13 -> AddReligiousDay(day, "大势至菩萨圣诞日")
-                        15 -> AddReligiousDay(day, "佛欢喜日 盂兰盆节 僧自恣日")
-                        19 -> AddReligiousDay(day, "净宗三祖承远法师圆寂日")
-                        21 -> AddReligiousDay(day, "普庵祖师圣诞日")
-                        22 -> AddReligiousDay(day, "唐代高僧圆测大师圆寂日 增福财神圣诞")
-                        24 -> AddReligiousDay(day, "龙树菩萨圣诞日 隋唐高僧法琳大师圆寂日")
-                        29-> if(maxDay==29)  AddReligiousDay(day, "地藏王菩萨圣诞日 虚云和尚诞辰日（当月无三十，按照惯例三十的节日提前一天到二十九）")
-                        30 -> AddReligiousDay(day, "地藏王菩萨圣诞日 虚云和尚诞辰日")
+                        2 -> addReligiousDay(day, ReligiousInfo("净宗八祖莲池法师圆寂日",2))
+                        9 -> addReligiousDay(day, ReligiousInfo("净宗十祖截流法师圆寂日",2))
+                        13 -> addReligiousDay(day, ReligiousInfo("大势至菩萨圣诞日",2))
+                        15 -> addReligiousDay(day, ReligiousInfo("佛欢喜日 盂兰盆节 僧自恣日",2))
+                        19 -> addReligiousDay(day, ReligiousInfo("净宗三祖承远法师圆寂日",2))
+                        21 -> addReligiousDay(day, ReligiousInfo("普庵祖师圣诞日",2))
+                        22 -> addReligiousDay(day, ReligiousInfo("唐代高僧圆测大师圆寂日 增福财神圣诞",2))
+                        24 -> addReligiousDay(day, ReligiousInfo("龙树菩萨圣诞日 隋唐高僧法琳大师圆寂日",2))
+                        29-> if(maxDay==29)  addReligiousDay(day, ReligiousInfo("地藏王菩萨圣诞日 虚云和尚诞辰日（当月无三十，按惯例三十的节日提前一天到二十九）",2))
+                        30 -> addReligiousDay(day, ReligiousInfo("地藏王菩萨圣诞日 虚云和尚诞辰日",2))
                     }
                     8 -> when (chineseDay) {
-                        3 -> AddReligiousDay(day, "禅宗六祖慧能大师圆寂日")
-                        6 -> AddReligiousDay(day, "净宗初祖慧远法师圆寂日")
-                        12 -> AddReligiousDay(day, "圆瑛大师圆寂纪念日")
-                        15 -> AddReligiousDay(day, "月光菩萨圣诞日 中秋节")
-                        16 -> AddReligiousDay(day, "金刚智三藏纪念日")
-                        20 -> AddReligiousDay(day, "鸠摩罗什圆寂日")
-                        22 -> AddReligiousDay(day, "燃灯佛圣诞日")
+                        3 -> addReligiousDay(day, ReligiousInfo("禅宗六祖慧能大师圆寂日",2))
+                        6 -> addReligiousDay(day, ReligiousInfo("净宗初祖慧远法师圆寂日",2))
+                        12 -> addReligiousDay(day, ReligiousInfo("圆瑛大师圆寂纪念日",2))
+                        15 -> addReligiousDay(day, ReligiousInfo("月光菩萨圣诞日 中秋节",2))
+                        16 -> addReligiousDay(day, ReligiousInfo("金刚智三藏纪念日",2))
+                        20 -> addReligiousDay(day, ReligiousInfo("鸠摩罗什圆寂日",2))
+                        22 -> addReligiousDay(day, ReligiousInfo("燃灯佛圣诞日",2))
                     }
                     9 -> when (chineseDay) {
-                        4 -> AddReligiousDay(day, "弘一法师圆寂日 禅宗四祖道信大师圆寂日")
-                        9 -> AddReligiousDay(day, "摩利支天菩萨圣诞日 重阳节")
-                        12 -> AddReligiousDay(day, "虚云和尚往生日")
-                        19 -> AddReligiousDay(day, "观世音菩萨出家日")
-                        20 -> AddReligiousDay(day, "弘一法师诞辰日")
-                        29-> if(maxDay==29)  AddReligiousDay(day, "药师琉璃光佛圣诞日（当月无三十，按照惯例三十的节日提前一天到二十九）")
-                        30 -> AddReligiousDay(day, "药师琉璃光佛圣诞日")
+                        4 -> addReligiousDay(day, ReligiousInfo("弘一法师圆寂日 禅宗四祖道信大师圆寂日",2))
+                        9 -> addReligiousDay(day, ReligiousInfo("摩利支天菩萨圣诞日 重阳节",2))
+                        12 -> addReligiousDay(day, ReligiousInfo("虚云和尚往生日",2))
+                        19 -> addReligiousDay(day, ReligiousInfo("观世音菩萨出家日",2))
+                        20 -> addReligiousDay(day, ReligiousInfo("弘一法师诞辰日",2))
+                        29-> if(maxDay==29)  addReligiousDay(day, ReligiousInfo("药师琉璃光佛圣诞日（当月无三十，按惯例三十的节日提前一天到二十九）",2))
+                        30 -> addReligiousDay(day, ReligiousInfo("药师琉璃光佛圣诞日",2))
                     }
                     10 -> when (chineseDay) {
-                        3 -> AddReligiousDay(day, "道宣律师往生 净宗五祖少康法师圆寂日")
-                        5 -> AddReligiousDay(day, "达摩祖师诞辰日")
-                        7 -> AddReligiousDay(day, "善无畏三藏纪念日")
-                        11 -> AddReligiousDay(day, "憨山德清大师圆寂日")
-                        12 -> AddReligiousDay(day, "实叉难陀三藏圆寂日")
-                        15 -> AddReligiousDay(day, "禅宗三祖僧璨大师圆寂日")
-                        18 -> AddReligiousDay(day, "阿底峡尊者圆寂日")
-                        20 -> AddReligiousDay(day, "文殊菩萨出家日")
-                        23 -> AddReligiousDay(day, "禅宗五祖弘忍大师圆寂日")
-                        25 -> AddReligiousDay(day, "悟道大和尚圆寂日")
+                        3 -> addReligiousDay(day, ReligiousInfo("道宣律师往生 净宗五祖少康法师圆寂日",2))
+                        5 -> addReligiousDay(day, ReligiousInfo("达摩祖师诞辰日",2))
+                        7 -> addReligiousDay(day, ReligiousInfo("善无畏三藏纪念日",2))
+                        11 -> addReligiousDay(day, ReligiousInfo("憨山德清大师圆寂日",2))
+                        12 -> addReligiousDay(day, ReligiousInfo("实叉难陀三藏圆寂日",2))
+                        15 -> addReligiousDay(day, ReligiousInfo("禅宗三祖僧璨大师圆寂日",2))
+                        18 -> addReligiousDay(day, ReligiousInfo("阿底峡尊者圆寂日",2))
+                        20 -> addReligiousDay(day, ReligiousInfo("文殊菩萨出家日",2))
+                        23 -> addReligiousDay(day, ReligiousInfo("禅宗五祖弘忍大师圆寂日",2))
+                        25 -> addReligiousDay(day, ReligiousInfo("悟道大和尚圆寂日",2))
                     }
                     11 -> when (chineseDay) {
-                        4 -> AddReligiousDay(day, "净宗十三祖印光法师圆寂日")
-                        11 -> AddReligiousDay(day, "悟道大和尚诞辰日")
-                        13 -> AddReligiousDay(day, "唐代高僧慈恩大师（窥基法师）圆寂纪念日")
-                        17 -> AddReligiousDay(day, "阿弥陀佛圣诞日 净宗二祖善导大师圆寂日")
-                        19 -> AddReligiousDay(day, "日光菩萨圣诞日")
-                        24 -> AddReligiousDay(day, "天台祖师智者大师圆寂日")
+                        4 -> addReligiousDay(day, ReligiousInfo("净宗十三祖印光法师圆寂日",2))
+                        11 -> addReligiousDay(day, ReligiousInfo("悟道大和尚诞辰日",2))
+                        13 -> addReligiousDay(day, ReligiousInfo("唐代高僧慈恩大师（窥基法师）圆寂纪念日",2))
+                        17 -> addReligiousDay(day, ReligiousInfo("阿弥陀佛圣诞日 净宗二祖善导大师圆寂日",2))
+                        19 -> addReligiousDay(day, ReligiousInfo("日光菩萨圣诞日",2))
+                        24 -> addReligiousDay(day, ReligiousInfo("天台祖师智者大师圆寂日",2))
                     }
                     12 -> when (chineseDay) {
-                        1 -> AddReligiousDay(day, "净宗四祖法照法师圆寂日")
-                        8 -> AddReligiousDay(day, "释迦牟尼佛成道日 佛图澄圆寂日")
-                        17 -> AddReligiousDay(day, "净宗十二祖彻悟法师圆寂日")
-                        18 -> AddReligiousDay(day, "太虚大师诞辰日")
-                        22 -> AddReligiousDay(day, "文殊菩萨成道日")
-                        23 -> AddReligiousDay(day, "监斋菩萨圣诞日")
-                        26 -> AddReligiousDay(day, "永明延寿大师圆寂日、施护三藏圆寂日")
-                        29 -> AddReligiousDay(day, "华严菩萨圣诞日")
+                        1 -> addReligiousDay(day, ReligiousInfo("净宗四祖法照法师圆寂日",2))
+                        8 -> addReligiousDay(day, ReligiousInfo("释迦牟尼佛成道日 佛图澄圆寂日",2))
+                        17 -> addReligiousDay(day, ReligiousInfo("净宗十二祖彻悟法师圆寂日",2))
+                        18 -> addReligiousDay(day, ReligiousInfo("太虚大师诞辰日",2))
+                        22 -> addReligiousDay(day, ReligiousInfo("文殊菩萨成道日",2))
+                        23 -> addReligiousDay(day, ReligiousInfo("监斋菩萨圣诞日",2))
+                        26 -> addReligiousDay(day, ReligiousInfo("永明延寿大师圆寂日、施护三藏圆寂日",2))
+                        29 -> addReligiousDay(day, ReligiousInfo("华严菩萨圣诞日",2))
                     }
                 }
+            }
+
+            // 五毒月
+            if (chineseMonth == 5) {
+                addReligiousDay(day, ReligiousInfo("注：农历五月俗称五毒月，按此月宜全戒为是。",3))
             }
 
             //endregion
@@ -852,20 +861,11 @@ class Religious(context: Context, private val year: Int, private val month: Int,
         lunarReligiousDays[LunarDate(12, 30)] = "诸神下降，察访善恶。犯之男女俱亡。"
     }
 
-    private fun AddReligiousDay(key: DateTime, value: String) {
+    private fun addReligiousDay(key: DateTime, value: ReligiousInfo) {
         if (!religiousDays.containsKey(key)) {
-            religiousDays[key] = value
-        } else {
-            religiousDays[key] = religiousDays[key].toString() + _String.concat("\n", value)
+            religiousDays[key]=ArrayList()
         }
-    }
-
-    private fun AddRemark(key: DateTime, value: String) {
-        if (!remarks.containsKey(key)) {
-            remarks[key] = value
-        } else {
-            remarks[key] = remarks[key].toString() + _String.concat("\n", value)
-        }
+        religiousDays[key]?.add(value)
     }
 
     init {
