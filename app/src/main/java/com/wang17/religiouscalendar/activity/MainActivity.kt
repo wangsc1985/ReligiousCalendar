@@ -254,13 +254,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun checkVersion() {
-        _OkHttpUtil.getRequest("https://www.lofter.com/blog/weizhao1985", HttpCallback { html ->
+        _OkHttpUtil.getRequest(resources.getString(R.string.version_url), HttpCallback { html ->
             try {
                 var html = html.replace("\r", "").replace("\n", "")
                 var matcher = Pattern.compile("(?<=寿康宝鉴日历版本号)[0-9]*(?=</p>)").matcher(html)
                 matcher.find()
                 val version = matcher.group().trim().toInt()
                 val checkedVersionCode = dc.getSetting(Setting.KEYS.checked_version_code, _Utils.getVersionCode(this)).getInt()
+                e("最新版本号：${version}")
 
                 if (version != checkedVersionCode) {
                     uiHandler.post {
