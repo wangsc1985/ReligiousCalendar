@@ -12,6 +12,7 @@ object _Session : AppCompatActivity() {
     var welcomes: MutableList<PicNameRes>
     var banners: MutableList<PicNameRes>
     var duration = intArrayOf(0, 3000, 4000, 5000, 6000, 7000)
+    var app_url = "https://7969-yipinshangdu-4wk7z-1301432092.tcb.qcloud.la/rc.apk?sign=918e5ea1851eebfd545295ae4762ddc1&t=1618279177"
 
     //    public static AppInfo newVersionAppInfo;
     init {
