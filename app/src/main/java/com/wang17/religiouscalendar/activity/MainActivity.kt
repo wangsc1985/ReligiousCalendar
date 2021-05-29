@@ -265,9 +265,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 if (version != checkedVersionCode) {
                     uiHandler.post {
-                        AlertDialog.Builder(this).setMessage("当前版本号：${_Utils.getVersionCode(this)}，最新版本号：${version}。请下载新版本，并自行安装。\n")
-                                .setPositiveButton("下载") { dialog, which ->
-                                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(_Session.app_url)))
+                        AlertDialog.Builder(this).setMessage("当前版本号：${_Utils.getVersionCode(this)}，最新版本号：${version}。\n请到百度网盘下载，邀请码：0000。")
+                                .setPositiveButton("前往下载") { dialog, which ->
+                                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(resources.getString(R.string.load_url))))
                                 }
                                 .setNegativeButton("忽略") { dialog, which ->
                                     dc.editSetting(Setting.KEYS.checked_version_code, version)
