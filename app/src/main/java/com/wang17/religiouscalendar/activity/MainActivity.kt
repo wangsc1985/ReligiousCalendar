@@ -263,7 +263,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val checkedVersionCode = dc.getSetting(Setting.KEYS.checked_version_code, _Utils.getVersionCode(this)).getInt()
                 e("最新版本号：${version}")
 
-                if (version != checkedVersionCode) {
+                if (version > checkedVersionCode) {
                     uiHandler.post {
                         AlertDialog.Builder(this).setMessage("当前版本号：${_Utils.getVersionCode(this)}，最新版本号：${version}。\n请到百度网盘下载，邀请码：0000。")
                                 .setPositiveButton("前往下载") { dialog, which ->

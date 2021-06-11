@@ -68,7 +68,7 @@
         <TextView
             android:id="@+id/textView123"
             style="@style/MyTextViewTitle2Style"
-            android:text="生日：" />
+            android:text="阳历生日：" />
 
         <Button
             android:id="@+id/button_birthday"

@@ -27,7 +27,7 @@ class AboutActivity : AppCompatActivity() {
         tv_about.text="Copyright @ 2012-${DateTime.getToday().getYear()} 王世超. "
         // 下载
         tv_loadUrl.setOnClickListener {
-            AlertDialog.Builder(this).setCancelable(false).setMessage(resources.getString(R.string.load_url_introduce)).setPositiveButton("前往", DialogInterface.OnClickListener { dialog, which ->
+            AlertDialog.Builder(this).setMessage(resources.getString(R.string.load_url_introduce)).setPositiveButton("前往", DialogInterface.OnClickListener { dialog, which ->
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(resources.getString(R.string.load_url))))
             }).show()
 //            AlertDialog.Builder(this).setCancelable(false).setMessage("点击下载rc.apk文件，并安装。").setPositiveButton("下载", DialogInterface.OnClickListener { dialog, which ->
